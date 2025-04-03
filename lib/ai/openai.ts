@@ -1,8 +1,32 @@
-import OpenAI from "openai";
-
 // The newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
 // Do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Helper function to call our API route
+async function callOpenAIAPI(prompt: string, maxTokens?: number, responseFormat?: string) {
+  try {
+    const response = await fetch('/api/openai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        maxTokens,
+        responseFormat,
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API error: ${errorData.error || response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error: any) {
+    console.error('Error calling OpenAI API route:', error);
+    throw error;
+  }
+}
 
 // Function to analyze a menu and provide recommendations based on health goals
 export async function analyzeMenu(
@@ -43,12 +67,7 @@ export async function analyzeMenu(
     }
     `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-    });
-
+    const response = await callOpenAIAPI(prompt, 1500, "json_object");
     const content = response.choices[0].message.content || '{"menuItems":[]}';
     const result = JSON.parse(content);
     return result;
@@ -71,11 +90,7 @@ export async function cleanMenuText(rawText: string): Promise<string> {
     Return only the cleaned text, no additional commentary.
     `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-    });
-
+    const response = await callOpenAIAPI(prompt, 1000);
     return response.choices[0].message.content || rawText;
   } catch (error: any) {
     console.error("Error cleaning menu text:", error);

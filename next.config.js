@@ -17,6 +17,11 @@ const nextConfig = {
   swcMinify: false,
   // Allow Next.js to run on Replit
   output: 'standalone',
+  // Expose environment variables to the browser
+  env: {
+    NEXT_PUBLIC_OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    NEXT_PUBLIC_ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+  },
 };
 
 module.exports = withPWA(nextConfig);

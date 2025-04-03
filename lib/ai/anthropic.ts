@@ -1,9 +1,31 @@
-import Anthropic from '@anthropic-ai/sdk';
-
 // The newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+
+// Helper function to call our API route
+async function callAnthropicAPI(prompt: string, maxTokens?: number, systemPrompt?: string) {
+  try {
+    const response = await fetch('/api/anthropic', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        maxTokens,
+        systemPrompt,
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API error: ${errorData.error || response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error: any) {
+    console.error('Error calling Anthropic API route:', error);
+    throw error;
+  }
+}
 
 // Function to analyze a menu and provide recommendations based on health goals using Claude
 export async function analyzeMenuWithClaude(
@@ -44,14 +66,8 @@ export async function analyzeMenuWithClaude(
     }
     `;
 
-    const message = await anthropic.messages.create({
-      model: "claude-3-7-sonnet-20250219",
-      max_tokens: 1500,
-      system: "You are a nutrition expert that analyzes restaurant menus and provides health insights. Always respond in JSON format.",
-      messages: [
-        { role: 'user', content: prompt }
-      ],
-    });
+    const systemPrompt = "You are a nutrition expert that analyzes restaurant menus and provides health insights. Always respond in JSON format.";
+    const message = await callAnthropicAPI(prompt, 1500, systemPrompt);
 
     // Parse the response content into JSON
     const result = JSON.parse(message.content[0].text);
@@ -75,14 +91,8 @@ export async function cleanMenuTextWithClaude(rawText: string): Promise<string> 
     Return only the cleaned text, no additional commentary.
     `;
 
-    const message = await anthropic.messages.create({
-      model: "claude-3-7-sonnet-20250219",
-      max_tokens: 1000,
-      system: "You are an OCR text correction specialist. Clean up text from scanned menus to make it more readable.",
-      messages: [
-        { role: 'user', content: prompt }
-      ],
-    });
+    const systemPrompt = "You are an OCR text correction specialist. Clean up text from scanned menus to make it more readable.";
+    const message = await callAnthropicAPI(prompt, 1000, systemPrompt);
 
     return message.content[0].text;
   } catch (error: any) {
