@@ -49,20 +49,20 @@ export default function Home() {
         </div>
         
         {/* Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 h-24 bg-white rounded-t-3xl flex items-center justify-around z-20 overflow-visible">
+        <nav className="fixed bottom-0 left-0 right-0 h-20 bg-white flex items-center justify-around z-20 overflow-visible shadow-md">
           {/* Custom SVG Notch */}
-          <div className="absolute -top-[1px] left-0 right-0 w-full overflow-hidden z-10">
+          <div className="absolute -top-[29px] left-0 right-0 w-full overflow-visible z-10">
             <svg 
               width="100%" 
-              height="30" 
-              viewBox="0 0 390 30" 
-              preserveAspectRatio="xMidYMax meet" 
+              height="60" 
+              viewBox="0 0 390 60" 
+              preserveAspectRatio="none" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
               className="block"
             >
               <path 
-                d="M195 0C174.5 0 174.5 20 155 20C135.5 20 126 0 105 0H0V30H390V0H285C264 0 254.5 20 235 20C215.5 20 215.5 0 195 0Z" 
+                d="M0,0 L142,0 C175,0 170,60 195,60 C220,60 215,0 248,0 L390,0 L390,60 L0,60 L0,0 Z" 
                 fill="white" 
               />
             </svg>
@@ -77,16 +77,15 @@ export default function Home() {
             <span className="text-xs text-gray-400 mt-1">Stats</span>
           </div>
           
-          <div className="relative -top-6 z-30">
+          <div className="relative -top-8 z-30">
             <button
               onClick={() => cameraRef.current?.captureFrame()}
-              className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/40"
+              className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center shadow-md"
               aria-label="Capture Menu"
+              style={{ backgroundColor: '#4CAF50' }}
             >
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="18" />
-                <path d="M3 3 L21 3 L21 21 L21 21" />
-                <line x1="3" y1="15" x2="21" y2="15" />
+              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="9" y="9" width="6" height="6" stroke="none" fill="white" />
               </svg>
             </button>
           </div>
