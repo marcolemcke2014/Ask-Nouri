@@ -48,168 +48,90 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Navigation Bar - Responsive with max width and centered */}
-        <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md h-24 bg-transparent z-20 overflow-visible">
-          {/* Conditionally loaded SVG notches based on screen width */}
-          
-          {/* 315px and below */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none block 375:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_315.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
+        {/* Navigation Bar Container - Fixed positioning and max width */}
+        <div className="fixed bottom-0 left-0 right-0 z-20">
+          <div className="mx-auto w-full max-w-md relative">
+            {/* Navigation Bar - With SVG notch */}
+            <nav className="relative h-24 overflow-visible">
+              {/* 315px width SVG - Used as default for smaller screens */}
+              <div className="absolute inset-x-0 bottom-0 z-10 block 415:hidden">
+                <img 
+                  src="/images/nav-notches/NavNotch_315.svg" 
+                  className="w-full h-auto" 
+                  alt="Navigation bar" 
+                />
+              </div>
+              
+              {/* 415px width SVG */}
+              <div className="absolute inset-x-0 bottom-0 z-10 hidden 415:block 535:hidden">
+                <img 
+                  src="/images/nav-notches/NavNotch_415.svg" 
+                  className="w-full h-auto" 
+                  alt="Navigation bar" 
+                />
+              </div>
+              
+              {/* 535px width SVG */}
+              <div className="absolute inset-x-0 bottom-0 z-10 hidden 535:block 615:hidden">
+                <img 
+                  src="/images/nav-notches/NavNotch_535.svg" 
+                  className="w-full h-auto" 
+                  alt="Navigation bar" 
+                />
+              </div>
+              
+              {/* 615px and up - Use this as the default for wider screens */}
+              <div className="absolute inset-x-0 bottom-0 z-10 hidden 615:block">
+                <img 
+                  src="/images/nav-notches/NavNotch_615.svg" 
+                  className="w-full h-auto" 
+                  alt="Navigation bar" 
+                />
+              </div>
+              
+              {/* Navigation Content - Positioned above the SVG */}
+              <div className="relative z-20 h-full flex items-center justify-around pt-3">
+                {/* Stats */}
+                <div className="w-20 flex flex-col items-center">
+                  <svg className="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="4" height="7.5" />
+                    <rect x="10" y="1.5" width="4" height="21" />
+                    <rect x="17" y="10.5" width="4" height="12" />
+                  </svg>
+                  <span className="text-xs text-gray-400 mt-1">Stats</span>
+                </div>
+                
+                {/* Center Spacer */}
+                <div className="invisible w-20">
+                  {/* Empty space to maintain flex spacing */}
+                </div>
+                
+                {/* Profile */}
+                <div className="w-20 flex flex-col items-center">
+                  <svg className="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="12" cy="7" r="4" />
+                    <path d="M3 21v-2c0-3.3 2.7-6 6-6h6c3.3 0 6 2.7 6 6v2" />
+                  </svg>
+                  <span className="text-xs text-gray-400 mt-1">Profile</span>
+                </div>
+              </div>
+              
+              {/* Scan Button - Positioned to sit in the notch with higher z-index */}
+              <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 z-30">
+                <button
+                  onClick={() => cameraRef.current?.captureFrame()}
+                  className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg focus:outline-none"
+                  aria-label="Capture Menu"
+                  style={{ backgroundColor: '#4CAF50' }}
+                >
+                  <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="9" y="9" width="6" height="6" stroke="none" fill="white" />
+                  </svg>
+                </button>
+              </div>
+            </nav>
           </div>
-          
-          {/* 375px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 375:block 415:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_315.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 415px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 415:block 535:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_415.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 535px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 535:block 615:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_535.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 615px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 615:block 775:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_615.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 775px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 775:block 855:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_775.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 855px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 855:block 1035:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_855.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 1035px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 1035:block 1255:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_1035.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 1255px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 1255:block 1375:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_1255.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 1375px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 1375:block 1475:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_1375.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 1475px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 1475:block 1775:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_1475.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 1775px */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 1775:block 1955:hidden">
-            <img 
-              src="/images/nav-notches/NavNotch_1775.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* 1955px and above */}
-          <div className="absolute inset-0 bottom-0 z-10 pointer-events-none hidden 1955:block">
-            <img 
-              src="/images/nav-notches/NavNotch_1955.svg" 
-              className="absolute inset-x-0 bottom-0 w-full" 
-              alt="" 
-            />
-          </div>
-          
-          {/* Navigation Content - Positioned above the SVG */}
-          <div className="relative z-20 h-full flex items-center justify-around pt-3">
-            {/* Stats */}
-            <div className="w-20 flex flex-col items-center">
-              <svg className="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="4" height="7.5" />
-                <rect x="10" y="1.5" width="4" height="21" />
-                <rect x="17" y="10.5" width="4" height="12" />
-              </svg>
-              <span className="text-xs text-gray-400 mt-1">Stats</span>
-            </div>
-            
-            {/* Center Spacer */}
-            <div className="invisible w-20">
-              {/* Empty space to maintain flex spacing */}
-            </div>
-            
-            {/* Profile */}
-            <div className="w-20 flex flex-col items-center">
-              <svg className="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="12" cy="7" r="4" />
-                <path d="M3 21v-2c0-3.3 2.7-6 6-6h6c3.3 0 6 2.7 6 6v2" />
-              </svg>
-              <span className="text-xs text-gray-400 mt-1">Profile</span>
-            </div>
-          </div>
-          
-          {/* Scan Button - Positioned to sit in the notch with higher z-index */}
-          <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 z-30">
-            <button
-              onClick={() => cameraRef.current?.captureFrame()}
-              className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg focus:outline-none"
-              aria-label="Capture Menu"
-              style={{ backgroundColor: '#4CAF50' }}
-            >
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="9" y="9" width="6" height="6" stroke="none" fill="white" />
-              </svg>
-            </button>
-          </div>
-        </nav>
+        </div>
         
         {/* Home indicator */}
         <div className="fixed bottom-3 left-0 right-0 flex justify-center z-30">
