@@ -51,21 +51,12 @@ export default function Home() {
         {/* Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 h-20 bg-white flex items-center justify-around z-20 overflow-visible shadow-md">
           {/* Custom SVG Notch */}
-          <div className="absolute -top-[29px] left-0 right-0 w-full overflow-visible z-10">
-            <svg 
-              width="100%" 
-              height="60" 
-              viewBox="0 0 390 60" 
-              preserveAspectRatio="none" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-              className="block"
-            >
-              <path 
-                d="M0,0 L142,0 C175,0 170,60 195,60 C220,60 215,0 248,0 L390,0 L390,60 L0,60 L0,0 Z" 
-                fill="white" 
-              />
-            </svg>
+          <div className="absolute -top-[43px] left-0 right-0 w-full overflow-visible z-10">
+            <img 
+              src="/images/nav-notch.svg" 
+              alt="Nav notch" 
+              className="w-full h-auto" 
+            />
           </div>
           
           <div className="w-20 flex flex-col items-center">
@@ -77,7 +68,7 @@ export default function Home() {
             <span className="text-xs text-gray-400 mt-1">Stats</span>
           </div>
           
-          <div className="relative -top-8 z-30">
+          <div className="relative -top-10 z-30">
             <button
               onClick={() => cameraRef.current?.captureFrame()}
               className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center shadow-md"
