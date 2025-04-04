@@ -49,10 +49,7 @@ export default function Home() {
         </div>
         
         {/* Navigation Bar - Responsive with max width and centered */}
-        <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md h-24 bg-white z-20 overflow-visible">
-          {/* Fallback white background for bottom area */}
-          <div className="absolute inset-0 bg-white z-5"></div>
-          
+        <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md h-24 bg-transparent z-20 overflow-visible">
           {/* Conditionally loaded SVG notches based on screen width */}
           
           {/* 315px and below */}
