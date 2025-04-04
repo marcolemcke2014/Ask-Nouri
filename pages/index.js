@@ -48,18 +48,16 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Navigation Bar */}
-        <nav className="fixed bottom-0 left-0 right-0 h-24 bg-transparent z-20 overflow-hidden">
+        {/* Navigation Bar - Responsive with max width and centered */}
+        <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md h-24 bg-transparent z-20 overflow-hidden">
           {/* SVG Notch as the sole background */}
-          <div className="absolute inset-0 w-full h-full z-10 pointer-events-none">
+          <div className="absolute inset-0 z-10 pointer-events-none">
             <svg 
-              width="100%" 
-              height="100%" 
-              viewBox="0 0 375 83" 
-              preserveAspectRatio="xMidYMax slice" 
+              viewBox="0 0 375 80" 
+              preserveAspectRatio="xMidYMid meet" 
+              className="w-full h-full"
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
-              style={{ display: 'block' }}
             >
               <path 
                 d="M0 8.00024C0 3.58197 3.58172 0.000244141 8 0.000244141H93.75H132C140.837 0.000244141 148.02 7.33404 151.067 15.6286C155.189 26.8493 164.851 40.0002 187.5 40.0002C210.734 40.0002 220.639 26.8357 224.862 15.6112C227.973 7.34058 235.163 0.000244141 244 0.000244141H279H367C371.418 0.000244141 375 3.58197 375 8.00024V83.0002H0V8.00024Z" 
@@ -69,7 +67,7 @@ export default function Home() {
           </div>
           
           {/* Navigation Content - Positioned above the SVG */}
-          <div className="relative z-20 h-full flex items-center justify-around pt-3 pointer-events-auto">
+          <div className="relative z-20 h-full flex items-center justify-around pt-3">
             {/* Stats */}
             <div className="w-20 flex flex-col items-center">
               <svg className="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -96,10 +94,10 @@ export default function Home() {
           </div>
           
           {/* Scan Button - Positioned to sit in the notch with higher z-index */}
-          <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 z-30">
+          <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 z-20">
             <button
               onClick={() => cameraRef.current?.captureFrame()}
-              className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-lg focus:outline-none"
+              className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg focus:outline-none"
               aria-label="Capture Menu"
               style={{ backgroundColor: '#4CAF50' }}
             >
