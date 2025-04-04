@@ -59,27 +59,27 @@ export default function Home() {
           
           {/* 375px */}
           <div className="absolute inset-0 z-10 pointer-events-none hidden 375:block 415:hidden">
-            <img src="/images/nav-notches/NavNotch_375.svg" className="w-full h-full" alt="" />
+            <img src="/images/nav-notches/NavNotch_375.png" className="w-full h-full" alt="" />
           </div>
           
           {/* 415px */}
           <div className="absolute inset-0 z-10 pointer-events-none hidden 415:block 535:hidden">
-            <img src="/images/nav-notches/NavNotch_415.svg" className="w-full h-full" alt="" />
+            <img src="/images/nav-notches/NavNotch_415.png" className="w-full h-full" alt="" />
           </div>
           
           {/* 535px */}
           <div className="absolute inset-0 z-10 pointer-events-none hidden 535:block 615:hidden">
-            <img src="/images/nav-notches/NavNotch_535.svg" className="w-full h-full" alt="" />
+            <img src="/images/nav-notches/NavNotch_535.png" className="w-full h-full" alt="" />
           </div>
           
           {/* 615px */}
           <div className="absolute inset-0 z-10 pointer-events-none hidden 615:block 775:hidden">
-            <img src="/images/nav-notches/NavNotch_615.svg" className="w-full h-full" alt="" />
+            <img src="/images/nav-notches/NavNotch_615.png" className="w-full h-full" alt="" />
           </div>
           
           {/* 775px */}
           <div className="absolute inset-0 z-10 pointer-events-none hidden 775:block 855:hidden">
-            <img src="/images/nav-notches/NavNotch_775.svg" className="w-full h-full" alt="" />
+            <img src="/images/nav-notches/NavNotch_775.png" className="w-full h-full" alt="" />
           </div>
           
           {/* 855px */}
