@@ -40,7 +40,7 @@ export default function Home() {
 
         {/* Welcome Message - adjusted with more bottom padding and responsive width */}
         <div className="px-6 pb-32">
-          <div className="bg-white p-4 rounded-2xl max-w-[95%] mx-auto">
+          <div className="bg-white p-4 rounded-2xl max-w-[99%] mx-auto">
             <p className="text-gray-400 mb-1">Good Evening, Marco!</p>
             <p className="text-figma-green font-medium text-lg">
               Late-night cravings? We'll help you find something healthier.
@@ -49,7 +49,25 @@ export default function Home() {
         </div>
         
         {/* Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 h-24 bg-white rounded-t-xl flex items-center justify-around z-20">
+        <nav className="fixed bottom-0 left-0 right-0 h-24 bg-white rounded-t-3xl flex items-center justify-around z-20 overflow-visible">
+          {/* Custom SVG Notch */}
+          <div className="absolute -top-[1px] left-0 right-0 w-full overflow-hidden z-10">
+            <svg 
+              width="100%" 
+              height="30" 
+              viewBox="0 0 390 30" 
+              preserveAspectRatio="xMidYMax meet" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+              className="block"
+            >
+              <path 
+                d="M195 0C174.5 0 174.5 20 155 20C135.5 20 126 0 105 0H0V30H390V0H285C264 0 254.5 20 235 20C215.5 20 215.5 0 195 0Z" 
+                fill="white" 
+              />
+            </svg>
+          </div>
+          
           <div className="w-20 flex flex-col items-center">
             <svg className="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="3" width="4" height="7.5" />
@@ -59,7 +77,7 @@ export default function Home() {
             <span className="text-xs text-gray-400 mt-1">Stats</span>
           </div>
           
-          <div className="relative -top-5">
+          <div className="relative -top-6 z-30">
             <button
               onClick={() => cameraRef.current?.captureFrame()}
               className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/40"
