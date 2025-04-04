@@ -49,16 +49,17 @@ export default function Home() {
         </div>
         
         {/* Navigation Bar */}
-        <nav className="fixed bottom-0 left-0 right-0 h-24 bg-transparent z-20">
+        <nav className="fixed bottom-0 left-0 right-0 h-24 bg-transparent z-20 overflow-hidden">
           {/* SVG Notch as the sole background */}
-          <div className="absolute inset-0 z-10 pointer-events-none">
+          <div className="absolute inset-0 w-full h-full z-10 pointer-events-none">
             <svg 
               width="100%" 
-              height="83" 
+              height="100%" 
               viewBox="0 0 375 83" 
-              preserveAspectRatio="none" 
+              preserveAspectRatio="xMidYMax slice" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
+              style={{ display: 'block' }}
             >
               <path 
                 d="M0 8.00024C0 3.58197 3.58172 0.000244141 8 0.000244141H93.75H132C140.837 0.000244141 148.02 7.33404 151.067 15.6286C155.189 26.8493 164.851 40.0002 187.5 40.0002C210.734 40.0002 220.639 26.8357 224.862 15.6112C227.973 7.34058 235.163 0.000244141 244 0.000244141H279H367C371.418 0.000244141 375 3.58197 375 8.00024V83.0002H0V8.00024Z" 
@@ -67,8 +68,8 @@ export default function Home() {
             </svg>
           </div>
           
-          {/* Navigation Content */}
-          <div className="relative h-full flex items-center justify-around pt-3 pointer-events-auto">
+          {/* Navigation Content - Positioned above the SVG */}
+          <div className="relative z-20 h-full flex items-center justify-around pt-3 pointer-events-auto">
             {/* Stats */}
             <div className="w-20 flex flex-col items-center">
               <svg className="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -94,7 +95,7 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Scan Button - Positioned to sit in the notch */}
+          {/* Scan Button - Positioned to sit in the notch with higher z-index */}
           <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 z-30">
             <button
               onClick={() => cameraRef.current?.captureFrame()}
