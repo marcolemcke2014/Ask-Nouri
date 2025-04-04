@@ -50,20 +50,71 @@ export default function Home() {
         
         {/* Navigation Bar - Responsive with max width and centered */}
         <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md h-24 bg-transparent z-20 overflow-hidden">
-          {/* SVG Notch as the sole background */}
-          <div className="absolute inset-0 z-10 pointer-events-none">
-            <svg 
-              viewBox="0 0 375 80" 
-              preserveAspectRatio="xMidYMid meet" 
-              className="w-full h-full"
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path 
-                d="M0 8.00024C0 3.58197 3.58172 0.000244141 8 0.000244141H93.75H132C140.837 0.000244141 148.02 7.33404 151.067 15.6286C155.189 26.8493 164.851 40.0002 187.5 40.0002C210.734 40.0002 220.639 26.8357 224.862 15.6112C227.973 7.34058 235.163 0.000244141 244 0.000244141H279H367C371.418 0.000244141 375 3.58197 375 8.00024V83.0002H0V8.00024Z" 
-                fill="white"
-              />
-            </svg>
+          {/* Conditionally loaded SVG notches based on screen width */}
+          
+          {/* 315px and below */}
+          <div className="absolute inset-0 z-10 pointer-events-none block 375:hidden">
+            <img src="/images/nav-notches/NavNotch_315.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 375px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 375:block 415:hidden">
+            <img src="/images/nav-notches/NavNotch_375.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 415px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 415:block 535:hidden">
+            <img src="/images/nav-notches/NavNotch_415.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 535px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 535:block 615:hidden">
+            <img src="/images/nav-notches/NavNotch_535.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 615px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 615:block 775:hidden">
+            <img src="/images/nav-notches/NavNotch_615.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 775px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 775:block 855:hidden">
+            <img src="/images/nav-notches/NavNotch_775.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 855px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 855:block 1035:hidden">
+            <img src="/images/nav-notches/NavNotch_855.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 1035px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 1035:block 1255:hidden">
+            <img src="/images/nav-notches/NavNotch_1035.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 1255px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 1255:block 1375:hidden">
+            <img src="/images/nav-notches/NavNotch_1255.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 1375px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 1375:block 1475:hidden">
+            <img src="/images/nav-notches/NavNotch_1375.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 1475px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 1475:block 1775:hidden">
+            <img src="/images/nav-notches/NavNotch_1475.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 1775px */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 1775:block 1955:hidden">
+            <img src="/images/nav-notches/NavNotch_1775.svg" className="w-full h-full" alt="" />
+          </div>
+          
+          {/* 1955px and above */}
+          <div className="absolute inset-0 z-10 pointer-events-none hidden 1955:block">
+            <img src="/images/nav-notches/NavNotch_1955.svg" className="w-full h-full" alt="" />
           </div>
           
           {/* Navigation Content - Positioned above the SVG */}

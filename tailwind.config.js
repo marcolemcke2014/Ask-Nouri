@@ -12,6 +12,29 @@ module.exports = {
         "2xl": "1400px",
       },
     },
+    screens: {
+      // Default breakpoints
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+      
+      // Custom breakpoints for nav notches
+      '315': '315px',
+      '375': '375px',
+      '415': '415px',
+      '535': '535px',
+      '615': '615px',
+      '775': '775px',
+      '855': '855px',
+      '1035': '1035px',
+      '1255': '1255px',
+      '1375': '1375px',
+      '1475': '1475px',
+      '1775': '1775px',
+      '1955': '1955px',
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
