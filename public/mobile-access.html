@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutriFlow - Mobile Access</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(to bottom, #1e40af, #1e3a8a);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .qrcode {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px auto;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qrcode img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .ip-address {
+      font-family: monospace;
+      background: rgba(0,0,0,0.2);
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin: 10px 0;
+      display: inline-block;
+    }
+    .directions {
+      margin: 20px 0;
+      line-height: 1.6;
+    }
+    .warning {
+      background: rgba(220, 38, 38, 0.2);
+      border-left: 4px solid rgb(220, 38, 38);
+      padding: 10px 15px;
+      text-align: left;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    button {
+      background: white;
+      color: #1e40af;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #f9fafb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>NutriFlow Mobile Camera Access</h1>
+    
+    <div class="directions">
+      <p>To test the camera functionality, you need to access this app from your mobile device.</p>
+      <p>Use one of the following methods:</p>
+    </div>
+    
+    <div class="qrcode">
+      <!-- QR code will be generated via JavaScript -->
+      <div id="qrcode"></div>
+    </div>
+    
+    <p>Or enter this address in your mobile browser:</p>
+    <div class="ip-address" id="ip-address">Loading...</div>
+    
+    <div class="warning">
+      <p><strong>Important notes:</strong></p>
+      <ul>
+        <li>Make sure your phone and computer are on the same WiFi network</li>
+        <li>Camera access requires HTTPS in most browsers, which may need additional setup</li>
+        <li>iOS Safari requires a user gesture to start video playback</li>
+      </ul>
+    </div>
+    
+    <button id="refresh-button">Refresh IP Address</button>
+  </div>
+
+  <script>
+    // Get the local IP address and generate QR code
+    function updateAddressInfo() {
+      // For development purposes, just use localhost and port 3000
+      const port = 3000;
+      const ipDisplay = document.getElementById('ip-address');
+      
+      // This is a simplified way to get the IP address - not guaranteed to work in all setups
+      fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => {
+          // Local app will likely be on a local network IP, not public IP
+          // But we'll show something as an example
+          const appUrl = `http://${window.location.hostname}:${port}`;
+          ipDisplay.textContent = appUrl;
+          
+          // Generate QR code - we'll use a free service
+          const qrCodeElement = document.getElementById('qrcode');
+          qrCodeElement.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(appUrl)}" alt="QR Code">`;
+        })
+        .catch(error => {
+          ipDisplay.textContent = `http://${window.location.hostname}:${port}`;
+          console.error('Error getting IP:', error);
+        });
+    }
+    
+    // Call immediately and set up refresh button
+    updateAddressInfo();
+    document.getElementById('refresh-button').addEventListener('click', updateAddressInfo);
+  </script>
+</body>
+</html> 
