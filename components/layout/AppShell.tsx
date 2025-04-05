@@ -1,5 +1,7 @@
 import React from 'react';
 import Header from './Header';
+import MobileDrawer from './MobileDrawer';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -29,6 +31,8 @@ export default function AppShell({
   headerClassName = '',
   contentClassName = '',
 }: AppShellProps) {
+  const { isMenuOpen, closeMenu } = useNavigation();
+  
   return (
     <div className={`flex flex-col w-full bg-gray-50 ${fullHeight ? 'h-full min-h-screen' : ''} ${className}`}>
       {!noHeader && (
@@ -44,6 +48,9 @@ export default function AppShell({
       <main className={`flex-1 w-full ${contentClassName}`}>
         {children}
       </main>
+      
+      {/* Mobile Drawer */}
+      <MobileDrawer isOpen={isMenuOpen} onClose={closeMenu} />
     </div>
   );
 } 

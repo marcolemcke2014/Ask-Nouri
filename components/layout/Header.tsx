@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 interface HeaderProps {
   title?: string;
@@ -18,6 +19,31 @@ export default function Header({
   transparent = false,
   className = '',
 }: HeaderProps) {
+  const { toggleMenu } = useNavigation();
+  
+  // Default hamburger menu button
+  const defaultLeftElement = (
+    <button 
+      onClick={toggleMenu}
+      className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
+      aria-label="Open menu"
+    >
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      >
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  );
+
   return (
     <header 
       className={`
@@ -30,7 +56,7 @@ export default function Header({
       `}
     >
       <div className="flex-1 flex items-center">
-        {leftElement}
+        {leftElement || defaultLeftElement}
       </div>
       
       <div className="flex-1 text-center">

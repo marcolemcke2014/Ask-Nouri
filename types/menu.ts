@@ -6,11 +6,9 @@
  * A parsed menu item from OCR text
  */
 export interface ParsedMenuItem {
-  name: string;
+  title: string;
   description?: string;
   price?: string;
-  section?: string;
-  ingredients?: string[];
 }
 
 /**

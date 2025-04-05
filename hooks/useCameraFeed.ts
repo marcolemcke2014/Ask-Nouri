@@ -1,95 +1,149 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { startCamera, stopCamera, getOptimalDimensions } from '../lib/videoHelpers';
 
-interface CameraFeedState {
-  stream: MediaStream | null;
-  isLoading: boolean;
-  error: string | null;
+interface UseCameraFeedProps {
+  autoStart?: boolean;
+  facingMode?: 'environment' | 'user';
+}
+
+interface UseCameraFeedReturn {
   videoRef: React.RefObject<HTMLVideoElement>;
   containerRef: React.RefObject<HTMLDivElement>;
+  isLoading: boolean;
+  error: string | null;
+  startCameraFeed: () => Promise<void>;
+  stopCameraFeed: () => void;
   isCameraActive: boolean;
+  takePicture: () => string | null;
 }
 
 /**
- * Hook to manage camera stream lifecycle
- * @param autostart - Whether to automatically start the camera when component mounts
+ * Hook for managing camera feed in browser
+ * Handles starting/stopping the stream and taking pictures
  */
-export const useCameraFeed = (autostart = true): CameraFeedState & {
-  startCameraFeed: () => Promise<void>;
-  stopCameraFeed: () => void;
-  getVideoElement: () => HTMLVideoElement | null;
-} => {
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
-  
-  // Refs for the video element and container
+export function useCameraFeed({
+  autoStart = false,
+  facingMode = 'environment'
+}: UseCameraFeedProps = {}): UseCameraFeedReturn {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   
-  /**
-   * Start the camera feed
-   */
-  const startCameraFeed = async (): Promise<void> => {
-    setError(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  
+  // Start the camera feed
+  const startCameraFeed = useCallback(async () => {
+    if (streamRef.current) {
+      console.log('Camera already active, stopping first');
+      stopCameraFeed();
+    }
+    
     setIsLoading(true);
+    setError(null);
     
     try {
-      const cameraStream = await startCamera();
-      setStream(cameraStream);
-      setIsCameraActive(true);
+      // Check if browser supports getUserMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Your browser does not support camera access');
+      }
+      
+      // Request camera stream
+      const constraints = {
+        video: {
+          facingMode: facingMode,
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
+        audio: false
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      streamRef.current = stream;
       
       // Connect stream to video element
       if (videoRef.current) {
-        videoRef.current.srcObject = cameraStream;
+        videoRef.current.srcObject = stream;
         
-        // When video metadata is loaded, handle resizing
-        videoRef.current.onloadedmetadata = () => {
-          if (videoRef.current && containerRef.current) {
-            const { width, height } = getOptimalDimensions(
-              cameraStream,
-              containerRef.current.clientWidth,
-              containerRef.current.clientHeight
-            );
-            
-            videoRef.current.style.width = `${width}px`;
-            videoRef.current.style.height = `${height}px`;
+        // Wait for video to be ready
+        await new Promise((resolve) => {
+          if (videoRef.current) {
+            videoRef.current.onloadedmetadata = () => {
+              resolve(true);
+            };
+          } else {
+            resolve(false);
           }
-        };
+        });
+        
+        // Start playing
+        await videoRef.current.play();
+        setIsCameraActive(true);
+      } else {
+        throw new Error('Video element not found');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start camera');
-      console.error('Camera start error:', err);
+      console.error('Camera access error:', err);
+      setError(
+        err instanceof Error 
+          ? err.message 
+          : 'Failed to access camera. Please check permissions and try again.'
+      );
+      setIsCameraActive(false);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [facingMode]);
   
-  /**
-   * Stop the camera feed and clean up
-   */
-  const stopCameraFeed = (): void => {
-    stopCamera(stream);
-    setStream(null);
-    setIsCameraActive(false);
+  // Stop the camera feed
+  const stopCameraFeed = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
     
-    // Clear video element source
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-  };
+    
+    setIsCameraActive(false);
+  }, []);
   
-  /**
-   * Get the video element (useful for taking snapshots)
-   */
-  const getVideoElement = (): HTMLVideoElement | null => {
-    return videoRef.current;
-  };
+  // Take a picture from the current video feed
+  const takePicture = useCallback((): string | null => {
+    if (!videoRef.current || !isCameraActive) {
+      console.error('Cannot take picture: camera is not active');
+      return null;
+    }
+    
+    try {
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw the video frame to the canvas
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+      
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Get the image as data URL
+      return canvas.toDataURL('image/jpeg');
+    } catch (err) {
+      console.error('Error taking picture:', err);
+      return null;
+    }
+  }, [isCameraActive]);
   
-  // Auto-start camera if enabled
+  // Start camera automatically if autoStart is true
   useEffect(() => {
-    if (autostart) {
+    if (autoStart) {
       startCameraFeed();
     }
     
@@ -97,17 +151,16 @@ export const useCameraFeed = (autostart = true): CameraFeedState & {
     return () => {
       stopCameraFeed();
     };
-  }, []);
+  }, [autoStart, startCameraFeed, stopCameraFeed]);
   
   return {
-    stream,
-    isLoading,
-    error,
     videoRef,
     containerRef,
-    isCameraActive,
+    isLoading,
+    error,
     startCameraFeed,
     stopCameraFeed,
-    getVideoElement
+    isCameraActive,
+    takePicture
   };
-}; 
+} 

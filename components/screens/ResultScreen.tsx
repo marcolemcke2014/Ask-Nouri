@@ -4,17 +4,17 @@ import AppShell from '../layout/AppShell';
 import Button from '../ui/Button';
 import Tag from '../ui/Tag';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import { MenuItemAnalysis } from '@/types/ai';
+import { ParsedMenuItem } from '@/types/menu';
 import { FlagLevel } from '@/types/menu';
 
 interface ResultData {
   text: string;
-  analysis: MenuItemAnalysis[];
+  items: ParsedMenuItem[];
   timestamp: string;
 }
 
 /**
- * Screen showing AI-analyzed menu results
+ * Screen showing OCR-parsed menu results
  */
 export default function ResultScreen() {
   const router = useRouter();
@@ -31,11 +31,11 @@ export default function ResultScreen() {
         const parsedData = JSON.parse(router.query.data as string) as ResultData;
         setData(parsedData);
       } else {
-        setError('No analysis data found');
+        setError('No menu data found');
       }
     } catch (err) {
       console.error('Failed to parse result data:', err);
-      setError('Failed to load results');
+      setError('Failed to load menu results');
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +53,7 @@ export default function ResultScreen() {
         },
         body: JSON.stringify({
           rawText: data.text,
-          items: data.analysis,
+          items: data.items,
           timestamp: data.timestamp
         })
       });
@@ -63,7 +63,7 @@ export default function ResultScreen() {
       }
       
       // Show success message or redirect
-      alert('Scan saved successfully!');
+      alert('Menu scan saved successfully!');
       
     } catch (err) {
       console.error('Save error:', err);
@@ -104,81 +104,57 @@ export default function ResultScreen() {
     </Button>
   );
   
-  // Generate tag components for menu item
-  const renderTags = (item: MenuItemAnalysis) => {
-    return (
-      <div className="flex flex-wrap gap-2 mt-2">
-        {/* Score tag */}
-        <Tag
-          label={`Score: ${item.score}/10`}
-          icon="⭐"
-          color={item.score >= 7 ? '#4CAF50' : item.score >= 5 ? '#FF9800' : '#F44336'}
-        />
-        
-        {/* Feature tags */}
-        {item.tags.map((tag, i) => (
-          <Tag key={`tag-${i}`} label={tag} />
-        ))}
-        
-        {/* Warning flags */}
-        {item.flags.map((flag, i) => (
-          <Tag 
-            key={`flag-${i}`} 
-            label={flag} 
-            level={FlagLevel.WARNING}
-            icon="⚠️"
-          />
-        ))}
-      </div>
-    );
-  };
-  
   return (
     <AppShell
-      title="Results"
+      title="Menu Results"
       leftElement={backButton}
       fullHeight
     >
       {isLoading ? (
         <div className="flex items-center justify-center h-full">
-          <LoadingSpinner label="Loading results..." />
+          <LoadingSpinner label="Loading menu results..." />
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center h-full p-4 text-center">
           <p className="text-red-500 mb-4">{error}</p>
           <Button onClick={handleScanAgain}>Try Again</Button>
         </div>
-      ) : data && data.analysis.length > 0 ? (
+      ) : data && data.items.length > 0 ? (
         <div className="flex flex-col h-full">
           {/* Results list */}
           <div className="flex-1 overflow-y-auto p-4">
-            <h2 className="text-xl font-bold mb-4">Recommended Dishes</h2>
+            <h2 className="text-xl font-bold mb-4">Menu Items</h2>
             
             <div className="space-y-4">
-              {data.analysis.map((item, index) => (
+              {data.items.map((item, index) => (
                 <div
-                  key={`result-${index}`}
+                  key={`menu-item-${index}`}
                   className="bg-white rounded-lg shadow-md p-4"
                 >
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-semibold">{item.name}</h3>
-                    <span className="text-2xl">{item.score >= 8 ? '👍' : '😐'}</span>
+                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                    {item.price && (
+                      <span className="text-lg font-medium text-green-700">{item.price}</span>
+                    )}
                   </div>
                   
-                  {renderTags(item)}
-                  
-                  {item.improvements.length > 0 && (
-                    <div className="mt-3">
-                      <h4 className="text-sm font-medium text-gray-700">Suggested Improvements:</h4>
-                      <ul className="list-disc list-inside text-sm text-gray-600 ml-2 mt-1">
-                        {item.improvements.map((improvement, i) => (
-                          <li key={`imp-${i}`}>{improvement}</li>
-                        ))}
-                      </ul>
-                    </div>
+                  {item.description && (
+                    <p className="text-gray-600 mt-2 text-sm">{item.description}</p>
                   )}
                 </div>
               ))}
+            </div>
+            
+            {/* Original OCR text (hidden by default) */}
+            <div className="mt-8 border-t pt-4">
+              <details className="text-sm">
+                <summary className="font-medium text-gray-700 cursor-pointer">
+                  Show Original OCR Text
+                </summary>
+                <div className="mt-2 p-3 bg-gray-100 rounded whitespace-pre-wrap text-gray-700 text-xs">
+                  {data.text}
+                </div>
+              </details>
             </div>
           </div>
           
@@ -186,7 +162,7 @@ export default function ResultScreen() {
           <div className="p-4 border-t bg-white">
             <div className="flex gap-2">
               <Button onClick={handleSave} className="flex-1">
-                Save Results
+                Save Menu
               </Button>
               <Button onClick={handleScanAgain} variant="outline" className="flex-1">
                 Scan Another Menu
@@ -196,7 +172,7 @@ export default function ResultScreen() {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-          <p className="mb-4">No dishes were found in the menu.</p>
+          <p className="mb-4">No menu items were found. Please try scanning again.</p>
           <Button onClick={handleScanAgain}>Scan Again</Button>
         </div>
       )}

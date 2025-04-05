@@ -71,5 +71,6 @@ export interface OCRTextBlock {
 export enum OCRProvider {
   MEDIAPIPE = 'mediapipe',
   TESSERACT = 'tesseract',
+  GOOGLE_VISION = 'google-vision',
   EXTERNAL_API = 'external-api'
 } 
