@@ -54,7 +54,7 @@ export default function Results() {
           No Results Found
         </h1>
         <a 
-          href="/scan" 
+          href="/" 
           style={{
             display: 'inline-block',
             backgroundColor: '#3b82f6',
@@ -240,7 +240,7 @@ export default function Results() {
           justifyContent: 'center'
         }}>
           <a 
-            href="/scan" 
+            href="/" 
             style={{
               backgroundColor: '#3b82f6',
               color: 'white',

@@ -59,7 +59,7 @@ export default function HistoryPage() {
         ) : (
           <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
             <p className="text-gray-600 mb-4">You haven't scanned any menus yet.</p>
-            <Link href="/scan">
+            <Link href="/">
               <a className="inline-block bg-green-600 text-white py-2 px-4 rounded-lg font-medium">
                 Scan Your First Menu
               </a>
