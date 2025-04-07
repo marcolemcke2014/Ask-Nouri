@@ -73,7 +73,7 @@ export default function ResultScreen() {
   
   // Go back to scan screen
   const handleScanAgain = () => {
-    router.push('/scan');
+    router.push('/');
   };
   
   // Go back to home

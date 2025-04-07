@@ -1,0 +1,66 @@
+{
+  "averageMenuScore": 68,
+  "menuCategory": "⚖️ Balanced",
+  "topDishes": {
+    "healthiest": {
+      "title": "Roasted Salmon",
+      "price": "$28",
+      "category": "🥗 Healthiest",
+      "summary": "High in omega-3 fatty acids with anti-inflammatory benefits. Supports protein needs for muscle recovery.",
+      "macros": {
+        "calories": 450,
+        "protein": "High",
+        "carbs": "Low",
+        "fat": "Mid",
+        "sugar": "Low",
+        "confidence": 0.85
+      },
+      "health_prediction": {
+        "short_term": "Mental clarity and sustained energy without bloating.",
+        "long_term": "Improved muscle recovery and reduced inflammation."
+      },
+      "score": 88,
+      "confidence": 0.9
+    },
+    "balanced": {
+      "title": "Chicken Paillard",
+      "price": "$26",
+      "category": "⚖️ Balanced",
+      "summary": "Lean protein with a good balance of nutrients. Light preparation supports digestive comfort.",
+      "macros": {
+        "calories": 380,
+        "protein": "High",
+        "carbs": "Low",
+        "fat": "Low",
+        "sugar": "Low",
+        "confidence": 0.8
+      },
+      "health_prediction": {
+        "short_term": "Steady energy levels with good satiety.",
+        "long_term": "Consistent protein intake supports muscle maintenance."
+      },
+      "score": 75,
+      "confidence": 0.85
+    },
+    "indulgent": {
+      "title": "House Burger",
+      "price": "$25",
+      "category": "🍔 Indulgent",
+      "summary": "High protein option that satisfies cravings. Ask for sauce on the side to control sodium.",
+      "macros": {
+        "calories": 650,
+        "protein": "High",
+        "carbs": "High",
+        "fat": "High",
+        "sugar": "Mid",
+        "confidence": 0.8
+      },
+      "health_prediction": {
+        "short_term": "May cause some fullness but provides good post-workout recovery proteins.",
+        "long_term": "Occasional indulgence is fine when balanced with healthier choices."
+      },
+      "score": 55,
+      "confidence": 0.75
+    }
+  }
+}

@@ -1,5 +1,6 @@
 // pages/api/anthropic.js
 import Anthropic from '@anthropic-ai/sdk';
+import { ANTHROPIC_API_KEY } from "@/lib/env";
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -7,9 +8,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Initialize Anthropic with API key from environment variable
+    // Initialize Anthropic with API key from our environment module
     const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+      apiKey: ANTHROPIC_API_KEY,
     });
 
     const { prompt, maxTokens, systemPrompt } = req.body;
@@ -23,7 +24,7 @@ export default async function handler(req, res) {
     
     // Call the Anthropic API
     const message = await anthropic.messages.create({
-      model: "claude-3-7-sonnet-20250219", // The newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
+      model: "claude-3-opus-20240229", // Use the most capable Anthropic model available
       max_tokens: maxTokens || 1000,
       system: systemPrompt || undefined,
       messages: messages,

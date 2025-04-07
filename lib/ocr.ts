@@ -3,6 +3,7 @@
  */
 
 import { OCRProvider, OCRResult, OCROptions } from '@/types/ocr';
+import { GOOGLE_VISION_KEY } from '@/lib/env';
 
 // Use a mock implementation for now to get the app working
 let isInitialized = false;
@@ -125,7 +126,8 @@ export async function extractTextFromImage(
  */
 async function extractTextWithGoogleVision(imageBase64: string): Promise<OCRResult> {
   try {
-    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_VISION_API_KEY || 'AIzaSyA64h9Om3vU5-R64aTFWn3mFS37QiOyQb8';
+    // Use our environment variable module to access the Google Vision API key
+    const API_KEY = GOOGLE_VISION_KEY;
     const endpoint = `https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`;
     
     const requestData = {

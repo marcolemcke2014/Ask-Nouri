@@ -1,5 +1,6 @@
 // pages/api/openai.js
 import OpenAI from "openai";
+import { OPENAI_API_KEY } from "@/lib/env";
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -7,8 +8,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Initialize OpenAI with API key from environment variable
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    // Initialize OpenAI with API key from our environment module
+    const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
     const { prompt, maxTokens, responseFormat } = req.body;
 

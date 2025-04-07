@@ -10,7 +10,11 @@ export default function HomeScreen() {
   const router = useRouter();
   
   const handleScanMenu = () => {
-    router.push('/scan');
+    router.push('/');
+  };
+
+  const handleViewLastAnalysis = () => {
+    router.push('/scan?latest=true');
   };
   
   return (
@@ -33,15 +37,43 @@ export default function HomeScreen() {
         
         {/* Call to action */}
         <div className="w-full pb-8">
-          <Button
-            onClick={handleScanMenu}
-            variant="secondary"
-            size="lg"
-            fullWidth
-            className="bg-white text-primary hover:bg-white/90 mb-4"
-          >
-            Scan a Menu
-          </Button>
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              onClick={handleScanMenu}
+              variant="secondary"
+              size="lg"
+              className="flex-1 bg-white text-primary hover:bg-white/90"
+            >
+              Scan a Menu
+            </Button>
+            
+            <Button
+              onClick={handleViewLastAnalysis}
+              variant="secondary"
+              size="lg"
+              className="h-14 aspect-square rounded-full backdrop-blur-lg"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
+              }}
+              title="View Last Analysis"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </Button>
+          </div>
           
           <p className="text-center text-sm opacity-80">
             Start by scanning a restaurant menu. We'll analyze it with AI and show you the best options.
