@@ -31,6 +31,18 @@ nutriflow/
 │   ├── page.jsx              # Root page (App Router)
 │   └── layout.jsx            # Root layout (App Router)
 │
+├── config/                   # Configuration files
+│   ├── next.config.js        # Next.js configuration
+│   ├── postcss.config.js     # PostCSS configuration
+│   ├── tailwind.config.js    # Tailwind CSS configuration
+│   ├── tsconfig.json         # TypeScript configuration
+│   └── vercel.json           # Vercel deployment configuration
+│
+├── docs/                     # Documentation files
+│   ├── CONTRIBUTING.md       # Contribution guidelines
+│   ├── RULES_FOR_AI.md       # Rules for AI development
+│   └── VERCEL-DEPLOYMENT.md  # Vercel deployment guide
+│
 ├── pages/                    # Next.js Pages Router (legacy)
 │   ├── api/                  # API routes (legacy)
 │   ├── _app.js               # App component
@@ -72,7 +84,11 @@ nutriflow/
 │
 ├── types/                    # TypeScript type definitions
 │
-└── [Configuration Files]     # Various config files
+└── [Root Files]              # Essential files at root
+    ├── package.json          # Dependencies and scripts
+    ├── .env.local            # Environment variables (git-ignored)
+    ├── .env.example          # Example environment variables
+    └── README.md             # Project documentation
 ```
 
 ### Migration Plan
