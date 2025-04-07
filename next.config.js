@@ -22,6 +22,10 @@ const nextConfig = {
     NEXT_PUBLIC_OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     NEXT_PUBLIC_ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   },
+  // Enable the experimental App Router alongside Pages Router
+  experimental: {
+    appDir: true,
+  }
 };
 
 module.exports = withPWA(nextConfig);

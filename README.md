@@ -13,12 +13,98 @@ Scan a menu → OCR extracts text → AI analyzes it → Results are personalize
 - Supabase (Postgres, Auth, Edge)
 - Hosted on Vercel or Replit
 
-## Folder Philosophy
-Russian doll modular system — every function or feature lives in its own file.
+## Project Architecture
+NutriFlow follows a "Russian doll" architecture where each feature lives in its own modular unit. 
 If something breaks, only that piece should need fixing.
 
-## Structure
-See `RULES_FOR_AI.md` for deeper details.
+### Directory Structure
+```
+nutriflow/
+├── app/                      # Next.js App Router (new)
+│   ├── api/                  # API routes (App Router format)
+│   │   ├── analyze/          # Menu analysis endpoints
+│   │   ├── anthropic/        # Anthropic API integration
+│   │   ├── hello/            # Test API endpoint
+│   │   ├── openai/           # OpenAI API integration
+│   │   ├── save-scan/        # Scan history saving
+│   │   └── test-env/         # Environment variable testing
+│   ├── page.jsx              # Root page (App Router)
+│   └── layout.jsx            # Root layout (App Router)
+│
+├── pages/                    # Next.js Pages Router (legacy)
+│   ├── api/                  # API routes (legacy)
+│   ├── _app.js               # App component
+│   ├── index.js              # Home page
+│   ├── history.js            # Scan history page
+│   ├── profile.js            # User profile page
+│   ├── results.js            # Analysis results page
+│   ├── settings.js           # User settings page
+│   └── test-ocr.tsx          # OCR testing page
+│
+├── components/               # UI components
+│   ├── layout/               # Layout components
+│   ├── screens/              # Full page screen components
+│   ├── ui/                   # Reusable UI components
+│   └── CameraScanner.js      # Camera scanning component
+│
+├── contexts/                 # React contexts for state management
+│
+├── hooks/                    # Custom React hooks
+│
+├── lib/                      # Core logic and utilities
+│   ├── agents/               # AI agent system
+│   ├── ai/                   # AI-related logic
+│   ├── db/                   # Database operations
+│   ├── ocr/                  # OCR implementation
+│   ├── utils/                # Utility functions
+│   ├── ai.ts                 # AI integration
+│   ├── env.ts                # Environment configuration
+│   ├── ocr.ts                # OCR implementation
+│   ├── parseMenu.ts          # Menu parsing logic
+│   ├── prompts.ts            # AI prompt templates
+│   └── videoHelpers.ts       # Video/camera utilities
+│
+├── public/                   # Static assets and PWA files
+│
+├── scripts/                  # Utility scripts
+│
+├── styles/                   # Global styles
+│
+├── types/                    # TypeScript type definitions
+│
+└── [Configuration Files]     # Various config files
+```
+
+### Migration Plan
+We're gradually migrating from Pages Router to App Router:
+1. New APIs are being created in app/api/
+2. Existing pages are kept in pages/ for now
+3. App Router is enabled while maintaining Pages Router
+4. Eventually all pages will be migrated to the app/ directory
+
+## Rules for Contributions
+See `RULES_FOR_AI.md` for detailed contribution guidelines.
+
+### Key Rules
+- Each function/component has its own file
+- Logic → `/lib`
+- Types → `/types`
+- UI → `/components`
+- State logic → `/hooks` and `/contexts`
+- API endpoints → `/app/api/` (new) or `/pages/api/` (legacy)
+- TypeScript only — no `any`
+- Mobile-first design
+- API keys in environment variables only
+
+## Getting Started
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Create `.env.local` with required API keys
+4. Run the development server: `npm run dev`
+5. Open [http://localhost:3000](http://localhost:3000)
+
+## Deployment
+The application is deployed on Vercel with continuous integration from GitHub.
 
 # 🤖 RULES FOR AI CONTRIBUTORS
 
