@@ -55,6 +55,11 @@ export class AgentOrchestrator {
       console.log('🧠 Agent 1: Structuring menu items...');
       const menuItems = await this.menuStructurer.process(ocrResult, provider);
       
+      // Validate that we have menu items to work with
+      if (!menuItems || menuItems.length === 0) {
+        throw new Error('MENU_STRUCTURING_FAILED: No menu items identified in the OCR text');
+      }
+      
       // Step 2: Score dishes and get menu summary
       console.log('🧠 Agent 2: Scoring dishes...');
       const { scoredItems, menuSummary } = await this.dishScorer.process(menuItems, provider);
@@ -71,28 +76,38 @@ export class AgentOrchestrator {
       const balancedDish = menuItems.find(item => item.title === topDishes.balanced);
       const indulgentDish = menuItems.find(item => item.title === topDishes.indulgent);
       
-      // Create fallback dishes if any weren't found
-      const fallbackDishes = this.createFallbackDishes(menuItems);
+      // Validate that all top dishes were found
+      if (!healthiestDish) {
+        throw new Error(`DISH_NOT_FOUND: Healthiest dish "${topDishes.healthiest}" not found in menu items`);
+      }
+      
+      if (!balancedDish) {
+        throw new Error(`DISH_NOT_FOUND: Balanced dish "${topDishes.balanced}" not found in menu items`);
+      }
+      
+      if (!indulgentDish) {
+        throw new Error(`DISH_NOT_FOUND: Indulgent dish "${topDishes.indulgent}" not found in menu items`);
+      }
       
       // Process each selected dish with the remaining agents
       console.log('🧠 Processing top dishes with remaining agents...');
       
       const healthiestResult = await this.processDish(
-        healthiestDish || fallbackDishes.healthiest,
+        healthiestDish,
         userProfile,
         provider,
         topDishes.rationale.healthiest
       );
       
       const balancedResult = await this.processDish(
-        balancedDish || fallbackDishes.balanced,
+        balancedDish,
         userProfile,
         provider,
         topDishes.rationale.balanced
       );
       
       const indulgentResult = await this.processDish(
-        indulgentDish || fallbackDishes.indulgent,
+        indulgentDish,
         userProfile,
         provider,
         topDishes.rationale.indulgent
@@ -123,6 +138,11 @@ export class AgentOrchestrator {
     rationale?: string
   ): Promise<EnrichedDishResult> {
     try {
+      // Validate dish has required properties
+      if (!dish || !dish.title) {
+        throw new Error('INVALID_DISH: Dish is missing required title property');
+      }
+      
       // Step 4: Get macro profile
       console.log(`🧠 Agent 4: Profiling macros for ${dish.title}...`);
       const macros = await this.macroProfiler.process(dish, provider);
@@ -157,66 +177,10 @@ export class AgentOrchestrator {
         score: synthesis.score,
         confidence: synthesis.confidence
       };
-    } catch (error) {
-      console.error(`Error processing dish ${dish.title}:`, error);
-      
-      // Return a fallback result
-      return this.createFallbackDishResult(dish);
+    } catch (error: any) {
+      // Don't create fallback - propagate the error with detailed information
+      console.error(`Error processing dish ${dish?.title || 'unknown'}:`, error);
+      throw new Error(`DISH_PROCESSING_FAILED: Failed to process dish "${dish?.title || 'unknown'}". ${error.message}`);
     }
-  }
-  
-  /**
-   * Create fallback dishes when top dishes are not found
-   */
-  private createFallbackDishes(menuItems: StructuredMenuItem[]): {
-    healthiest: StructuredMenuItem;
-    balanced: StructuredMenuItem;
-    indulgent: StructuredMenuItem;
-  } {
-    // If menu has items, use the first, middle, and last as fallbacks
-    if (menuItems.length > 0) {
-      const first = menuItems[0];
-      const middle = menuItems[Math.floor(menuItems.length / 2)] || first;
-      const last = menuItems[menuItems.length - 1] || middle;
-      
-      return {
-        healthiest: first,
-        balanced: middle,
-        indulgent: last
-      };
-    }
-    
-    // If no menu items at all, create dummy dishes
-    return {
-      healthiest: { title: 'Healthiest Option' },
-      balanced: { title: 'Balanced Option' },
-      indulgent: { title: 'Indulgent Option' }
-    };
-  }
-  
-  /**
-   * Create a fallback dish result when processing fails
-   */
-  private createFallbackDishResult(dish: StructuredMenuItem): EnrichedDishResult {
-    return {
-      title: dish.title,
-      price: dish.price,
-      category: '⚖️ Balanced',
-      summary: `${dish.title} provides a mix of nutrients.`,
-      macros: {
-        calories: 500,
-        protein: 'Mid',
-        carbs: 'Mid',
-        fat: 'Mid',
-        sugar: 'Low',
-        confidence: 0.5
-      },
-      health_prediction: {
-        short_term: 'May provide energy and satisfaction.',
-        long_term: 'Effects depend on overall diet balance.'
-      },
-      score: 50,
-      confidence: 0.5
-    };
   }
 }
