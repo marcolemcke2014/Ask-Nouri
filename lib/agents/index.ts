@@ -1,17 +1,12 @@
 /**
- * Multi-Agent Architecture Exports
+ * Export all agents and types
  */
 
-// Agent types
+// Export types
 export * from './types';
 
-// Agent implementations
-export { MenuStructurer } from './MenuStructurer';
-export { DishScorer } from './DishScorer';
-export { TopSelector } from './TopSelector';
-export { MacroProfiler } from './MacroProfiler';
-export { BenefitSummarizer } from './BenefitSummarizer';
-export { ScoreSynth } from './ScoreSynth';
-
-// Orchestrator
-export { AgentOrchestrator } from './orchestrator'; 
+// Export agents
+export * from './ocr_parser/agent';
+export * from './macro_estimator/agent';
+export * from './dish_ranker/agent';
+export * from './personalizer/agent'; 

@@ -1,0 +1,497 @@
+{
+  "foods": [
+    {
+      "name": "salmon",
+      "category": "protein",
+      "calories": 208,
+      "macros": {
+        "protein": "High",
+        "carbs": "Low",
+        "fat": "Mid",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "chicken",
+      "category": "protein",
+      "calories": 165,
+      "macros": {
+        "protein": "High",
+        "carbs": "Low", 
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "beef",
+      "category": "protein",
+      "calories": 250,
+      "macros": {
+        "protein": "High",
+        "carbs": "Low",
+        "fat": "High",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "tofu",
+      "category": "protein",
+      "calories": 144,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "Low",
+        "fat": "Mid",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "rice",
+      "category": "grain",
+      "calories": 130,
+      "macros": {
+        "protein": "Low",
+        "carbs": "High",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "quinoa",
+      "category": "grain",
+      "calories": 120,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "Mid",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "potato",
+      "category": "vegetable",
+      "calories": 77,
+      "macros": {
+        "protein": "Low",
+        "carbs": "High",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "sweet potato",
+      "category": "vegetable",
+      "calories": 86,
+      "macros": {
+        "protein": "Low",
+        "carbs": "High",
+        "fat": "Low",
+        "sugar": "Mid"
+      }
+    },
+    {
+      "name": "avocado",
+      "category": "fruit",
+      "calories": 160,
+      "macros": {
+        "protein": "Low",
+        "carbs": "Low",
+        "fat": "High",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "broccoli",
+      "category": "vegetable",
+      "calories": 34,
+      "macros": {
+        "protein": "Low",
+        "carbs": "Low",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "spinach",
+      "category": "vegetable",
+      "calories": 23,
+      "macros": {
+        "protein": "Low",
+        "carbs": "Low",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "kale",
+      "category": "vegetable",
+      "calories": 33,
+      "macros": {
+        "protein": "Low",
+        "carbs": "Low",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "pasta",
+      "category": "grain",
+      "calories": 158,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "High",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "bread",
+      "category": "grain",
+      "calories": 265,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "High",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "cheese",
+      "category": "dairy",
+      "calories": 402,
+      "macros": {
+        "protein": "High",
+        "carbs": "Low",
+        "fat": "High",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "yogurt",
+      "category": "dairy",
+      "calories": 59,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "Low",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "egg",
+      "category": "protein",
+      "calories": 68,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "Low",
+        "fat": "Mid",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "bean",
+      "category": "legume",
+      "calories": 347,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "High",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "lentil",
+      "category": "legume",
+      "calories": 116,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "Mid",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "nut",
+      "category": "nut",
+      "calories": 607,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "Low",
+        "fat": "High",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "burger",
+      "category": "fast food",
+      "calories": 550,
+      "macros": {
+        "protein": "High",
+        "carbs": "High",
+        "fat": "High",
+        "sugar": "Mid"
+      }
+    },
+    {
+      "name": "pizza",
+      "category": "fast food",
+      "calories": 285,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "High",
+        "fat": "High",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "fries",
+      "category": "fast food",
+      "calories": 365,
+      "macros": {
+        "protein": "Low",
+        "carbs": "High",
+        "fat": "High",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "salad",
+      "category": "vegetable",
+      "calories": 152,
+      "macros": {
+        "protein": "Low",
+        "carbs": "Low",
+        "fat": "Mid",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "steak",
+      "category": "protein",
+      "calories": 271,
+      "macros": {
+        "protein": "High",
+        "carbs": "Low",
+        "fat": "High",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "sushi",
+      "category": "seafood",
+      "calories": 349,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "High",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "soup",
+      "category": "mixed",
+      "calories": 175,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "Mid",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "chocolate",
+      "category": "dessert",
+      "calories": 546,
+      "macros": {
+        "protein": "Low",
+        "carbs": "High",
+        "fat": "High",
+        "sugar": "High"
+      }
+    },
+    {
+      "name": "cake",
+      "category": "dessert",
+      "calories": 371,
+      "macros": {
+        "protein": "Low",
+        "carbs": "High",
+        "fat": "High",
+        "sugar": "High"
+      }
+    },
+    {
+      "name": "ice cream",
+      "category": "dessert",
+      "calories": 207,
+      "macros": {
+        "protein": "Low",
+        "carbs": "Mid",
+        "fat": "High",
+        "sugar": "High"
+      }
+    }
+  ],
+  "cookingMethods": [
+    {
+      "method": "fried",
+      "modifiers": {
+        "calories": 1.5,
+        "fat": "increase"
+      }
+    },
+    {
+      "method": "grilled",
+      "modifiers": {
+        "calories": 1.0,
+        "fat": "neutral"
+      }
+    },
+    {
+      "method": "baked",
+      "modifiers": {
+        "calories": 1.0,
+        "fat": "neutral"
+      }
+    },
+    {
+      "method": "steamed",
+      "modifiers": {
+        "calories": 0.9,
+        "fat": "decrease"
+      }
+    },
+    {
+      "method": "roasted",
+      "modifiers": {
+        "calories": 1.1,
+        "fat": "slight_increase"
+      }
+    },
+    {
+      "method": "sauteed",
+      "modifiers": {
+        "calories": 1.2,
+        "fat": "increase"
+      }
+    },
+    {
+      "method": "boiled",
+      "modifiers": {
+        "calories": 0.8,
+        "fat": "decrease"
+      }
+    },
+    {
+      "method": "braised",
+      "modifiers": {
+        "calories": 1.0,
+        "fat": "neutral"
+      }
+    },
+    {
+      "method": "poached",
+      "modifiers": {
+        "calories": 0.9,
+        "fat": "decrease"
+      }
+    }
+  ],
+  "commonDishes": [
+    {
+      "name": "Grilled Salmon",
+      "ingredients": ["salmon"],
+      "cookingMethods": ["grilled"],
+      "calories": 350,
+      "macros": {
+        "protein": "High",
+        "carbs": "Low",
+        "fat": "Mid",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "Chicken Caesar Salad",
+      "ingredients": ["chicken", "salad", "cheese"],
+      "cookingMethods": ["grilled"],
+      "calories": 400,
+      "macros": {
+        "protein": "High",
+        "carbs": "Low",
+        "fat": "Mid",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "Pasta Primavera",
+      "ingredients": ["pasta", "broccoli", "spinach"],
+      "cookingMethods": ["boiled"],
+      "calories": 450,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "High",
+        "fat": "Low",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "Steak and Potatoes",
+      "ingredients": ["steak", "potato"],
+      "cookingMethods": ["grilled", "baked"],
+      "calories": 650,
+      "macros": {
+        "protein": "High",
+        "carbs": "High",
+        "fat": "High",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "Vegetable Stir Fry",
+      "ingredients": ["broccoli", "tofu"],
+      "cookingMethods": ["sauteed"],
+      "calories": 300,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "Mid",
+        "fat": "Mid",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "Cheeseburger",
+      "ingredients": ["burger", "cheese"],
+      "cookingMethods": ["fried"],
+      "calories": 750,
+      "macros": {
+        "protein": "High",
+        "carbs": "High",
+        "fat": "High",
+        "sugar": "Mid"
+      }
+    },
+    {
+      "name": "Quinoa Bowl",
+      "ingredients": ["quinoa", "avocado", "egg"],
+      "cookingMethods": ["boiled"],
+      "calories": 450,
+      "macros": {
+        "protein": "Mid",
+        "carbs": "Mid",
+        "fat": "Mid",
+        "sugar": "Low"
+      }
+    },
+    {
+      "name": "Chocolate Cake",
+      "ingredients": ["chocolate", "cake"],
+      "cookingMethods": ["baked"],
+      "calories": 450,
+      "macros": {
+        "protein": "Low",
+        "carbs": "High",
+        "fat": "High",
+        "sugar": "High"
+      }
+    }
+  ]
+} 

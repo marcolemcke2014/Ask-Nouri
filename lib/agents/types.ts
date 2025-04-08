@@ -1,6 +1,5 @@
 /**
- * Types for the Multi-Agent Architecture
- * Each agent has a focused responsibility in the menu analysis pipeline
+ * Types for the New 4-Agent Architecture
  */
 
 import { AIProvider } from '@/types/ai';
@@ -15,7 +14,7 @@ export interface UserProfile {
 }
 
 /**
- * Raw OCR result structure
+ * Raw OCR result from Agent 1
  */
 export interface OCRResult {
   text: string;
@@ -25,46 +24,15 @@ export interface OCRResult {
 /**
  * Structured menu item from Agent 1
  */
-export interface StructuredMenuItem {
-  title: string;
-  description?: string;
-  price?: string;
+export interface MenuItem {
+  name: string;
+  price?: number;
   section?: string;
+  description?: string;
 }
 
 /**
- * Menu item with scores from Agent 2
- */
-export interface ScoredMenuItem extends StructuredMenuItem {
-  score: number;
-  confidence?: number;
-}
-
-/**
- * Menu summary from Agent 2
- */
-export interface MenuSummary {
-  averageScore: number;
-  category: '🥗 Healthy' | '⚖️ Balanced' | '🍟 Indulgent';
-  confidence: number;
-}
-
-/**
- * Top dishes selector result from Agent 3
- */
-export interface TopDishesResult {
-  healthiest: string; // dish title
-  balanced: string; // dish title
-  indulgent: string; // dish title
-  rationale: {
-    healthiest: string;
-    balanced: string;
-    indulgent: string;
-  };
-}
-
-/**
- * Macro profile estimation from Agent 4
+ * Macro nutrition profile from Agent 2
  */
 export interface MacroProfile {
   calories: number;
@@ -72,55 +40,48 @@ export interface MacroProfile {
   carbs: 'High' | 'Mid' | 'Low';
   fat: 'High' | 'Mid' | 'Low';
   sugar: 'High' | 'Mid' | 'Low';
-  confidence: number;
 }
 
 /**
- * Benefit summary from Agent 5
+ * Dish health score and category from Agent 3
  */
-export interface BenefitSummary {
-  shortTerm: string;
-  longTerm: string;
-  summary: string;
+export interface DishScore {
+  healthScore: number; // 0-100 
+  category: 'Healthiest' | 'Balanced' | 'Indulgent';
 }
 
 /**
- * Health prediction synthesis from Agent 6
+ * Dish with added macro profile and health score
  */
-export interface ScoreSynthesis {
-  score: number; // 0-100
-  category: '🥗 Healthiest' | '⚖️ Balanced' | '🍔 Indulgent';
-  confidence: number;
-}
-
-/**
- * Final enriched dish result for the UI
- */
-export interface EnrichedDishResult {
-  title: string;
-  price?: string;
-  category: '🥗 Healthiest' | '⚖️ Balanced' | '🍔 Indulgent';
-  summary: string;
+export interface EnrichedDish extends MenuItem {
   macros: MacroProfile;
-  health_prediction: {
-    short_term: string;
-    long_term: string;
-  };
-  score: number;
-  confidence: number;
+  healthScore: number;
+  category: 'Healthiest' | 'Balanced' | 'Indulgent';
 }
 
 /**
- * Complete analysis results
+ * Personalized recommendations from Agent 4
  */
-export interface AnalysisResults {
-  averageMenuScore: number;
-  menuCategory: '🥗 Healthy' | '⚖️ Balanced' | '🍟 Indulgent';
+export interface PersonalizedInsights {
+  healthPrediction: string;
+  todayRecommendation: string;
+}
+
+/**
+ * Complete menu analysis result
+ */
+export interface MenuAnalysisResult {
+  restaurantName?: string;
+  location?: string;
+  timestamp: string;
+  averageHealthScore: number;
+  dishes: EnrichedDish[];
   topDishes: {
-    healthiest: EnrichedDishResult;
-    balanced: EnrichedDishResult;
-    indulgent: EnrichedDishResult;
+    healthiest: EnrichedDish;
+    balanced: EnrichedDish;
+    indulgent: EnrichedDish;
   };
+  personalInsights?: PersonalizedInsights;
 }
 
 /**
@@ -128,5 +89,4 @@ export interface AnalysisResults {
  */
 export interface Agent<InputType, OutputType> {
   process(input: InputType, provider?: AIProvider): Promise<OutputType>;
-  getPrompt(input: InputType): string;
-}
+} 
