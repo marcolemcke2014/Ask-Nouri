@@ -6,10 +6,6 @@ const withPWA = require('next-pwa')({
   skipWaiting: true,
 });
 
-// Load config files from config directory
-const tailwindConfig = require('./config/tailwind.config.js');
-const postcssConfig = require('./config/postcss.config.js');
-
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -26,12 +22,6 @@ const nextConfig = {
     NEXT_PUBLIC_OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     NEXT_PUBLIC_ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   },
-  // Enable the experimental App Router alongside Pages Router
-  experimental: {
-    appDir: true,
-  },
-  // Point to config directory for other configuration files
-  postcss: postcssConfig,
 };
 
 module.exports = withPWA(nextConfig);

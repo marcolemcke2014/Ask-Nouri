@@ -3,10 +3,10 @@
   "menuCategory": "⚖️ Balanced",
   "topDishes": {
     "healthiest": {
-      "title": "Roasted Salmon",
-      "price": "$28",
+      "title": "Grilled Salmon",
+      "price": "$32",
       "category": "🥗 Healthiest",
-      "summary": "High in omega-3 fatty acids with anti-inflammatory benefits. Supports protein needs for muscle recovery.",
+      "summary": "High in omega-3 fatty acids and protein. Excellent for muscle recovery and growth while being naturally low in sodium.",
       "macros": {
         "calories": 450,
         "protein": "High",
@@ -16,39 +16,39 @@
         "confidence": 0.85
       },
       "health_prediction": {
-        "short_term": "Mental clarity and sustained energy without bloating.",
-        "long_term": "Improved muscle recovery and reduced inflammation."
+        "short_term": "Provides clean, lean protein for immediate muscle repair with minimal water retention due to low sodium.",
+        "long_term": "Supports consistent muscle gain while maintaining heart health through regular omega-3 intake."
       },
       "score": 88,
       "confidence": 0.9
     },
     "balanced": {
-      "title": "Chicken Paillard",
-      "price": "$26",
+      "title": "Herb-Roasted Chicken",
+      "price": "$28",
       "category": "⚖️ Balanced",
-      "summary": "Lean protein with a good balance of nutrients. Light preparation supports digestive comfort.",
+      "summary": "Good source of protein with moderate fat content. The wild rice provides complex carbs for sustained energy.",
       "macros": {
-        "calories": 380,
+        "calories": 550,
         "protein": "High",
-        "carbs": "Low",
-        "fat": "Low",
+        "carbs": "Mid",
+        "fat": "Mid",
         "sugar": "Low",
         "confidence": 0.8
       },
       "health_prediction": {
-        "short_term": "Steady energy levels with good satiety.",
-        "long_term": "Consistent protein intake supports muscle maintenance."
+        "short_term": "Complete meal providing balanced energy and satiety for approximately 4-5 hours.",
+        "long_term": "Reasonable protein support for muscle maintenance while offering diverse nutrient intake."
       },
       "score": 75,
       "confidence": 0.85
     },
     "indulgent": {
       "title": "House Burger",
-      "price": "$25",
+      "price": "$22",
       "category": "🍔 Indulgent",
-      "summary": "High protein option that satisfies cravings. Ask for sauce on the side to control sodium.",
+      "summary": "High protein from beef but also high in sodium from bacon and cheese. Request sauce on the side to reduce sodium intake.",
       "macros": {
-        "calories": 650,
+        "calories": 850,
         "protein": "High",
         "carbs": "High",
         "fat": "High",
@@ -56,8 +56,8 @@
         "confidence": 0.8
       },
       "health_prediction": {
-        "short_term": "May cause some fullness but provides good post-workout recovery proteins.",
-        "long_term": "Occasional indulgence is fine when balanced with healthier choices."
+        "short_term": "Delivers ample protein for muscle-building but may cause temporary water retention due to sodium content.",
+        "long_term": "Can support muscle gains when balanced with lower-sodium options in other meals."
       },
       "score": 55,
       "confidence": 0.75
