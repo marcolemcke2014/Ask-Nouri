@@ -1,72 +1,52 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { AnalysisResults } from '@/lib/agents/types';
+import { MenuAnalysisResult } from '@/lib/agents/types';
 import fs from 'fs';
 import path from 'path';
 
 // Mock data for successful response
-const mockAnalysisResults: AnalysisResults = {
-  averageMenuScore: 68,
-  menuCategory: "⚖️ Balanced",
+const mockAnalysisResults: MenuAnalysisResult = {
+  timestamp: new Date().toISOString(),
+  averageHealthScore: 68,
+  dishes: [],
   topDishes: {
     healthiest: {
-      title: "Grilled Salmon",
-      price: "$32",
-      category: "🥗 Healthiest",
-      summary: "High in omega-3 fatty acids and protein. Excellent for muscle recovery and growth while being naturally low in sodium.",
+      name: "Grilled Salmon",
+      price: 32,
       macros: {
         calories: 450,
         protein: "High",
         carbs: "Low",
         fat: "Mid",
-        sugar: "Low",
-        confidence: 0.85
+        sugar: "Low"
       },
-      health_prediction: {
-        short_term: "Provides clean, lean protein for immediate muscle repair with minimal water retention due to low sodium.",
-        long_term: "Supports consistent muscle gain while maintaining heart health through regular omega-3 intake."
-      },
-      score: 88,
-      confidence: 0.9
+      healthScore: 88,
+      category: "Healthiest"
     },
     balanced: {
-      title: "Herb-Roasted Chicken",
-      price: "$28",
-      category: "⚖️ Balanced",
-      summary: "Good source of protein with moderate fat content. The wild rice provides complex carbs for sustained energy.",
+      name: "Herb-Roasted Chicken",
+      price: 28,
       macros: {
         calories: 550,
         protein: "High",
         carbs: "Mid",
         fat: "Mid",
-        sugar: "Low",
-        confidence: 0.8
+        sugar: "Low"
       },
-      health_prediction: {
-        short_term: "Complete meal providing balanced energy and satiety for approximately 4-5 hours.",
-        long_term: "Reasonable protein support for muscle maintenance while offering diverse nutrient intake."
-      },
-      score: 75,
-      confidence: 0.85
+      healthScore: 75,
+      category: "Balanced"
     },
     indulgent: {
-      title: "House Burger",
-      price: "$22",
-      category: "🍔 Indulgent",
-      summary: "High protein from beef but also high in sodium from bacon and cheese. Request sauce on the side to reduce sodium intake.",
+      name: "House Burger",
+      price: 22,
       macros: {
         calories: 850,
         protein: "High",
         carbs: "High",
         fat: "High",
-        sugar: "Mid",
-        confidence: 0.8
+        sugar: "Mid"
       },
-      health_prediction: {
-        short_term: "Delivers ample protein for muscle-building but may cause temporary water retention due to sodium content.",
-        long_term: "Can support muscle gains when balanced with lower-sodium options in other meals."
-      },
-      score: 55,
-      confidence: 0.75
+      healthScore: 55,
+      category: "Indulgent"
     }
   }
 };

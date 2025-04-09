@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
+import { extractTextFromBuffer } from '@/lib/ocr';
+import { OCRParser } from '@/lib/agents/ocr_parser/agent';
+import { OCRResult } from '@/types/ocr';
 
 /**
  * Type for the save scan request body
@@ -28,80 +31,65 @@ interface SaveScanRequest {
  */
 export async function POST(request: Request) {
   try {
-    // Parse the request body
-    const body: SaveScanRequest = await request.json();
+    // Get the image data from the request
+    const imageBuffer = Buffer.from(await request.arrayBuffer());
     
-    // Validate the request
-    if (!body.rawText) {
+    if (!imageBuffer || imageBuffer.length === 0) {
       return NextResponse.json(
-        { error: 'Raw text content is required' },
+        { error: 'Image data is required' },
         { status: 400 }
       );
     }
     
-    if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
-      return NextResponse.json(
-        { error: 'Analyzed items are required' },
-        { status: 400 }
-      );
-    }
+    console.log(`Processing image of size: ${imageBuffer.length} bytes`);
     
-    // Generate a unique ID for this scan
-    const scanId = uuidv4();
-    const timestamp = new Date().toISOString();
-    
-    // In a real implementation, this would save to a database
-    // For now, we'll just log it to demonstrate the endpoint works
-    console.log(`Saving scan ${scanId} at ${timestamp}`);
-    
-    // Here's where you would add database saving logic
-    // Example with Supabase would be:
-    /*
-    const { data, error } = await supabase
-      .from('scans')
-      .insert({
+    // Extract text from image using PaddleOCR
+    try {
+      const extractedText = await extractTextFromBuffer(imageBuffer);
+      console.log('Extracted text from image:', extractedText);
+      
+      // Process through OCR parser agent
+      const ocrParser = new OCRParser();
+      const ocrResult: OCRResult = {
+        text: extractedText,
+        processedAt: new Date(),
+        confidence: 0.9
+      };
+      
+      const menuItems = await ocrParser.process(ocrResult);
+      
+      // Generate a unique ID for this scan
+      const scanId = uuidv4();
+      const timestamp = new Date().toISOString();
+      
+      // In a real implementation, this would save to a database
+      // For now, we'll just log it to demonstrate the endpoint works
+      console.log(`Saving scan ${scanId} at ${timestamp}`);
+      console.log(`Extracted ${menuItems.length} menu items`);
+      
+      // Return success response with the extracted text and menu items
+      return NextResponse.json({
+        success: true,
         id: scanId,
-        created_at: timestamp,
-        raw_text: body.rawText,
-        cleaned_text: body.cleanedText || body.rawText,
-        restaurant_name: body.restaurantName,
-        image_data_url: body.imageDataUrl,
-        user_id: body.userId,
-        user_goals: body.userGoals
+        timestamp,
+        rawText: extractedText,
+        items: menuItems,
+        message: 'Menu scanned successfully'
       });
       
-    if (error) {
-      throw new Error(`Database error: ${error.message}`);
+    } catch (error) {
+      console.error('OCR processing error:', error);
+      return NextResponse.json(
+        { error: 'Failed to extract text from image' },
+        { status: 500 }
+      );
     }
-    
-    // Save the analyzed items
-    for (const item of body.items) {
-      await supabase
-        .from('menu_items')
-        .insert({
-          scan_id: scanId,
-          name: item.name,
-          score: item.score,
-          tags: item.tags,
-          flags: item.flags,
-          improvements: item.improvements
-        });
-    }
-    */
-    
-    // Return success response
-    return NextResponse.json({
-      success: true,
-      id: scanId,
-      timestamp,
-      message: 'Scan saved successfully'
-    });
     
   } catch (error) {
     console.error('Error in save scan endpoint:', error);
     
     return NextResponse.json(
-      { error: 'Failed to save scan' },
+      { error: 'Failed to process image' },
       { status: 500 }
     );
   }

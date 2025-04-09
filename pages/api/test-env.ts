@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   OPENAI_API_KEY,
-  GOOGLE_VISION_KEY,
+  OPENROUTER_API_KEY,
   ANTHROPIC_API_KEY,
 } from '@/lib/env';
 import { OpenAI } from 'openai';
@@ -30,7 +30,7 @@ export default async function handler(
   // Check if environment variables are set
   const status = {
     OPENAI_API_KEY: !!OPENAI_API_KEY,
-    GOOGLE_VISION_KEY: !!GOOGLE_VISION_KEY,
+    OPENROUTER_API_KEY: !!OPENROUTER_API_KEY,
     ANTHROPIC_API_KEY: !!ANTHROPIC_API_KEY,
   };
 
@@ -76,11 +76,11 @@ export default async function handler(
         }
       }
 
-      // Google Vision API requires more complex setup (skip for basic validation)
-      validKeys.GOOGLE_VISION_KEY = status.GOOGLE_VISION_KEY;
-      details.GOOGLE_VISION_KEY = status.GOOGLE_VISION_KEY
-        ? '✅ Google Vision key is set (validation skipped)'
-        : '❌ Google Vision key is not set';
+      // OpenRouter API validation
+      validKeys.OPENROUTER_API_KEY = status.OPENROUTER_API_KEY;
+      details.OPENROUTER_API_KEY = status.OPENROUTER_API_KEY
+        ? '✅ OpenRouter API key is set (validation skipped)'
+        : '❌ OpenRouter API key is not set';
 
       const allKeysValid = Object.values(validKeys).every(Boolean);
 

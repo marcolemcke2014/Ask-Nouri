@@ -1,10 +1,18 @@
-import { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle, useState, RefObject } from 'react';
 
-const CameraScanner = forwardRef(({ onCapture }, ref) => {
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [cameraStatus, setCameraStatus] = useState('loading'); // 'loading', 'ready', 'error'
+interface CameraScannerProps {
+  onCapture: (blob: Blob) => void;
+}
+
+interface CameraScannerHandle {
+  captureFrame: () => void;
+}
+
+const CameraScanner = forwardRef<CameraScannerHandle, CameraScannerProps>(({ onCapture }, ref) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [cameraStatus, setCameraStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
   useEffect(() => {
     const startCamera = async () => {
@@ -44,10 +52,13 @@ const CameraScanner = forwardRef(({ onCapture }, ref) => {
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.drawImage(video, 0, 0);
 
     canvas.toBlob((blob) => {
-      if (onCapture) onCapture(blob);
+      if (blob && onCapture) onCapture(blob);
     }, 'image/jpeg');
   };
 

@@ -32,6 +32,7 @@
     "openai": "^4.28.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "sharp": "^0.34.1",
     "tailwind-merge": "^3.1.0",
     "tailwindcss-animate": "^1.0.7",
     "tesseract.js": "^5.0.3",
@@ -40,16 +41,21 @@
   },
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",
-    "@types/node": "^20.11.5",
+    "@types/form-data": "^2.2.1",
+    "@types/node": "^20.17.30",
+    "@types/node-fetch": "^2.6.12",
     "@types/react": "18.3.20",
     "@types/react-dom": "^18.2.18",
     "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.1.0",
+    "form-data": "^4.0.2",
+    "node-fetch": "^2.7.0",
     "postcss": "^8.4.33",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "5.8.2"
   }
 }

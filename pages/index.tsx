@@ -1,26 +1,89 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import CameraScanner from '../components/CameraScanner'
 import MobileDrawer from '../components/layout/MobileDrawer'
 import HamburgerButton from '../components/ui/HamburgerButton'
 import { useNavigation } from '../contexts/NavigationContext'
 import { useRouter } from 'next/router'
 
+interface CameraScannerHandle {
+  captureFrame: () => void;
+}
+
 export default function Home() {
-  const cameraRef = useRef();
+  const cameraRef = useRef<CameraScannerHandle>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { isMenuOpen, toggleMenu } = useNavigation();
   const router = useRouter();
+  const [isScanning, setIsScanning] = useState(false);
   
-  const handleScanImage = (imageBlob) => {
-    console.log('Image captured:', imageBlob);
-    // Later: send to MediaPipe OCR or backend
+  const handleScanImage = async (imageBlob: Blob) => {
+    console.log('Image captured, sending to OCR service...');
+    setIsScanning(true);
+    
+    try {
+      // Convert blob to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(imageBlob);
+      reader.onloadend = async () => {
+        const base64data = reader.result;
+        
+        // Send to backend
+        const response = await fetch('/api/save-scan', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+          },
+          body: imageBlob,
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('OCR processed successfully:', data);
+          
+          // Navigate to results page or show success
+          router.push('/scan?latest=true');
+        } else {
+          console.error('OCR processing failed');
+          alert('Failed to process the menu image. Please try again.');
+        }
+      };
+    } catch (error) {
+      console.error('Error processing image:', error);
+      alert('An error occurred while processing the image.');
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Process the selected file just like a camera capture
+    handleScanImage(file);
+  };
+
+  const handleUploadClick = () => {
+    // Trigger the hidden file input when the upload button is clicked
+    fileInputRef.current?.click();
   };
 
   return (
     <div className="flex flex-col min-h-screen relative bg-gray-900">
       {/* Camera component providing full-screen background */}
       <CameraScanner ref={cameraRef} onCapture={handleScanImage} />
+      
+      {/* Hidden file input for image uploads */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileUpload}
+        disabled={isScanning}
+      />
       
       {/* Content container with z-index to ensure it's above the camera background */}
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -95,6 +158,7 @@ export default function Home() {
                   e.currentTarget.style.transform = '';
                 }}
                 aria-label="Scan Menu"
+                disabled={isScanning}
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20 5h-3.2L15 3H9L7.2 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-8 13c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5z" />
@@ -104,14 +168,15 @@ export default function Home() {
               </button>
               
               <button
-                onClick={() => router.push('/scan?latest=true')}
+                onClick={handleUploadClick}
                 className="backdrop-blur-lg text-white h-14 aspect-square rounded-full flex items-center justify-center focus:outline-none transition-all duration-200 ease-in-out active:scale-[0.98] hover:scale-[1.01]"
                 style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.7)',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
                 }}
-                title="View Last Analysis"
-                aria-label="View Last Analysis"
+                title="Upload Image"
+                aria-label="Upload Image"
+                disabled={isScanning}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -124,10 +189,9 @@ export default function Home() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  <line x1="11" y1="8" x2="11" y2="14"></line>
-                  <line x1="8" y1="11" x2="14" y2="11"></line>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
               </button>
             </div>

@@ -225,21 +225,21 @@ export default function ScanScreen() {
         {/* Action buttons */}
         {isCameraActive && !displayError && (
           <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-4">
-            {/* Scan button */}
+            {/* Upload button with icon */}
             <ScannerButton
-              onClick={handleScan}
+              onClick={handleUploadClick}
               isProcessing={isProcessing}
               size="lg"
             />
             
-            {/* Upload button */}
+            {/* Scan button */}
             <Button 
               variant="secondary" 
-              onClick={handleUploadClick}
+              onClick={handleScan}
               className="bg-gray-800 bg-opacity-70 text-white"
               disabled={isProcessing}
             >
-              Upload Image
+              Scan Menu
             </Button>
           </div>
         )}

@@ -1,9 +1,9 @@
 /**
- * OCR implementation using a simpler approach due to MediaPipe limitations in Next.js
+ * OCR implementation for text extraction from images
  */
 
 import { OCRProvider, OCRResult, OCROptions } from '@/types/ocr';
-import { GOOGLE_VISION_KEY } from '@/lib/env';
+import { extractTextWithPaddleOCR } from './ocr/paddleOCR';
 
 // Use a mock implementation for now to get the app working
 let isInitialized = false;
@@ -70,11 +70,11 @@ export const cleanOCRResult = (text: string): string => {
 
 /**
  * OCR Service for text extraction from images
- * Supports both cloud-based (Google Vision) and local (MediaPipe) OCR
+ * Supports PaddleOCR with OpenRouter vision fallback
  */
 
 // Default OCR provider
-let defaultProvider: OCRProvider = OCRProvider.GOOGLE_VISION;
+let defaultProvider: OCRProvider = OCRProvider.PADDLE_OCR;
 
 /**
  * Set the default OCR provider
@@ -110,107 +110,29 @@ export async function extractTextFromImage(
   const cleanedImageData = imageData.replace(/^data:image\/\w+;base64,/, '');
   
   switch (activeProvider) {
-    case OCRProvider.GOOGLE_VISION:
-      return extractTextWithGoogleVision(cleanedImageData);
-    case OCRProvider.MEDIAPIPE:
-      return extractTextWithMediaPipe(cleanedImageData);
+    case OCRProvider.PADDLE_OCR:
+      return extractTextWithPaddleOCR(Buffer.from(cleanedImageData, 'base64'))
+        .then(text => ({
+          text,
+          confidence: 0.9,
+          processedAt: new Date()
+        }));
     default:
       throw new Error(`Unsupported OCR provider: ${activeProvider}`);
   }
 }
 
 /**
- * Extract text from an image using Google Cloud Vision API
- * @param imageBase64 Base64 encoded image (without prefix)
+ * Extract text from an image buffer
+ * @param imageBuffer Raw image buffer
  * @returns OCR result with extracted text
  */
-async function extractTextWithGoogleVision(imageBase64: string): Promise<OCRResult> {
+export async function extractTextFromBuffer(imageBuffer: Buffer): Promise<string> {
   try {
-    // Use our environment variable module to access the Google Vision API key
-    const API_KEY = GOOGLE_VISION_KEY;
-    const endpoint = `https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`;
-    
-    const requestData = {
-      requests: [
-        {
-          image: {
-            content: imageBase64
-          },
-          features: [
-            {
-              type: 'TEXT_DETECTION'
-            }
-          ]
-        }
-      ]
-    };
-    
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Google Vision API error: ${errorData.error?.message || response.statusText}`);
-    }
-    
-    const data = await response.json();
-    
-    // Extract text from response
-    if (!data.responses?.[0]?.textAnnotations?.[0]?.description) {
-      return {
-        text: '',
-        confidence: 0,
-        processedAt: new Date()
-      };
-    }
-    
-    return {
-      text: data.responses[0].textAnnotations[0].description,
-      confidence: 0.9, // Google doesn't provide confidence scores for full text
-      processedAt: new Date()
-    };
+    return await extractTextWithPaddleOCR(imageBuffer);
   } catch (error) {
-    console.error('Google Vision OCR error:', error);
-    throw new Error(`Google Vision OCR failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-}
-
-/**
- * Extract text from an image using MediaPipe Vision (WebAssembly)
- * @param imageBase64 Base64 encoded image (without prefix)
- * @returns OCR result with extracted text
- */
-async function extractTextWithMediaPipe(imageBase64: string): Promise<OCRResult> {
-  try {
-    // This is a placeholder for MediaPipe implementation
-    // For a real implementation, you would:
-    // 1. Load the MediaPipe WASM module
-    // 2. Convert the base64 image to a format MediaPipe can process
-    // 3. Run the text detection task
-    
-    console.warn('MediaPipe OCR implementation is a placeholder - use Google Vision for now');
-    
-    // Mock implementation for now
-    return {
-      text: "MediaPipe OCR not yet fully implemented",
-      confidence: 0,
-      processedAt: new Date()
-    };
-    
-    // Real implementation would look something like:
-    // const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
-    // const textDetector = await TextDetector.createFromOptions(vision, {...});
-    // const img = await createImageBitmap(imageBase64ToBlob(imageBase64));
-    // const result = textDetector.detect(img);
-    // return { text: result.text, confidence: result.confidence, processedAt: new Date() };
-  } catch (error) {
-    console.error('MediaPipe OCR error:', error);
-    throw new Error(`MediaPipe OCR failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('OCR error:', error);
+    throw new Error(`OCR processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

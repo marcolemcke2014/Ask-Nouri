@@ -72,5 +72,6 @@ export enum OCRProvider {
   MEDIAPIPE = 'mediapipe',
   TESSERACT = 'tesseract',
   GOOGLE_VISION = 'google-vision',
-  EXTERNAL_API = 'external-api'
+  EXTERNAL_API = 'external-api',
+  PADDLE_OCR = 'paddle-ocr'
 } 
