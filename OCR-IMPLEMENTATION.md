@@ -48,3 +48,6 @@ The system now uses:
 2. Obtain an API key with vision model access for improved OCR accuracy
 3. Add caching for OCR results to improve performance
 4. Implement a feature toggle to choose between local and API-based OCR 
+
+## Git Implementation Notes
+Added to allow Git tracking 

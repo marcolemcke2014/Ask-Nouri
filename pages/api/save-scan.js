@@ -1,4 +1,5 @@
 // Image upload handler with OpenRouter OCR integration
+// Updated for Git commit
 import busboy from 'busboy';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/lib/supabase';

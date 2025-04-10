@@ -1,4 +1,5 @@
 // Test script for OpenRouter API connectivity
+// Updated for Git tracking
 require('dotenv').config({ path: '.env.local' });
 const fetch = require('node-fetch');
 
