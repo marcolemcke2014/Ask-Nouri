@@ -3,27 +3,43 @@
  * Assigns a health score (0-100) and category to dishes
  */
 
-import { Agent, MenuItem, MacroProfile, DishScore, UserProfile } from '../types';
+import { Agent, MenuItem, MacroProfile, DishScore, UserProfile, AIResponse } from '../types';
 import { generateDishRankerPrompt } from './prompts/ranking';
 import { AIProvider } from '@/types/ai';
 
-// Local AI integration - should be replaced with your actual AI client
-// We're stubbing this function since the actual implementation depends
-// on your AI service
+// OpenRouter integration for AI processing
 async function callAI(
   prompt: string, 
   provider: AIProvider = AIProvider.OPENAI
-): Promise<any> {
-  // This would call your OpenAI or other AI service
-  // For now, we'll just log the prompt and return a mock response
-  console.log(`[AI Request] Provider: ${provider}`);
-  console.log(`Prompt: ${prompt.substring(0, 100)}...`);
-  
-  // Mock response - in production this would come from the AI
+): Promise<AIResponse> {
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+  if (!OPENROUTER_API_KEY) {
+    throw new Error("Missing OpenRouter API key.");
+  }
+
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://nutriflow.vercel.app", 
+      "X-Title": "NutriFlow AI", 
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-4o",
+      messages: [
+        { role: "system", content: "You are a helpful health-focused nutritionist AI." },
+        { role: "user", content: prompt },
+      ],
+    }),
+  });
+
+  const json = await res.json();
+
   return {
-    healthScore: 75,
-    category: "Balanced",
-    reasoning: "This is a mock response since we're not calling a real AI service."
+    text: json.choices[0]?.message?.content || "No response.",
+    raw: json,
+    model: json.model,
   };
 }
 
@@ -148,23 +164,41 @@ export class DishRanker implements Agent<DishRankerInput, DishScore> {
     });
     
     // Call AI
-    const response = await callAI(prompt, provider);
+    const aiResponse = await callAI(prompt, provider);
     
-    // Parse response (handle potential errors in response format)
-    let healthScore = typeof response.healthScore === 'number' ? response.healthScore : 50;
-    let category = response.category || this.scoreToCategory(healthScore);
-    
-    // Ensure category is one of our expected values
-    if (!['Healthiest', 'Balanced', 'Indulgent'].includes(category)) {
-      category = this.scoreToCategory(healthScore);
+    try {
+      // Parse the text response which should be in JSON format
+      const responseData = JSON.parse(aiResponse.text);
+      
+      // Extract the health score and category from the parsed response
+      let healthScore = typeof responseData.healthScore === 'number' ? responseData.healthScore : 50;
+      let category = responseData.category || this.scoreToCategory(healthScore);
+      const reasoning = responseData.reasoning || '';
+      
+      // Ensure category is one of our expected values
+      if (!['Healthiest', 'Balanced', 'Indulgent'].includes(category)) {
+        category = this.scoreToCategory(healthScore);
+      }
+      
+      // Ensure score is between 0-100
+      healthScore = Math.max(0, Math.min(100, healthScore));
+      
+      return {
+        healthScore,
+        category: category as 'Healthiest' | 'Balanced' | 'Indulgent',
+        reasoning
+      };
+    } catch (error) {
+      console.error('Error parsing AI response:', error);
+      console.error('Raw response:', aiResponse.text);
+      
+      // Fallback to a default score
+      const defaultScore = 50;
+      return {
+        healthScore: defaultScore,
+        category: this.scoreToCategory(defaultScore),
+        reasoning: 'Error processing AI response.'
+      };
     }
-    
-    // Ensure score is between 0-100
-    healthScore = Math.max(0, Math.min(100, healthScore));
-    
-    return {
-      healthScore,
-      category: category as 'Healthiest' | 'Balanced' | 'Indulgent'
-    };
   }
 } 

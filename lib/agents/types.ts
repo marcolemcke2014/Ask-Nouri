@@ -5,6 +5,15 @@
 import { AIProvider } from '@/types/ai';
 
 /**
+ * Common AI service response format
+ */
+export interface AIResponse {
+  text: string;
+  raw: any;
+  model: string;
+}
+
+/**
  * User health profile / context
  */
 export interface UserProfile {
@@ -48,6 +57,7 @@ export interface MacroProfile {
 export interface DishScore {
   healthScore: number; // 0-100 
   category: 'Healthiest' | 'Balanced' | 'Indulgent';
+  reasoning?: string; // Explanation for the score and category
 }
 
 /**
@@ -57,6 +67,7 @@ export interface EnrichedDish extends MenuItem {
   macros: MacroProfile;
   healthScore: number;
   category: 'Healthiest' | 'Balanced' | 'Indulgent';
+  reasoning?: string;
 }
 
 /**

@@ -1,0 +1,780 @@
+/**
+ * End-to-End Test Script for OCR and Supabase Integration
+ * 
+ * This script tests the complete flow:
+ * 1. Load a menu image
+ * 2. Process with OCR fallback chain
+ * 3. Structure the extracted text
+ * 4. Save structured data to Supabase
+ * 5. Verify data persistence
+ */
+
+// --- SETUP & CONFIGURATION ---
+require('dotenv').config({ path: '.env.local' });
+const fs = require('fs');
+const path = require('path');
+const fetch = require('node-fetch');
+const { createClient } = require('@supabase/supabase-js');
+const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto'); // For hashing
+const chalk = require('chalk');
+const stableStringify = require('fast-json-stable-stringify'); // Add this dependency for stable JSON stringification
+
+// Constants
+// Test user ID - this user should exist in your user_profile table
+const TEST_USER_ID = process.env.TEST_USER_ID || '00000000-0000-0000-0000-000000000000';
+// Allow TEST_IMAGE_PATH to be specified via environment variable for multi-user testing
+const TEST_IMAGE_PATH = process.env.TEST_IMAGE_PATH || path.join(__dirname, '..', 'public', 'sample-menus', 'sample-menu.jpg');
+const RESTAURANT_NAME = 'Soho House Toronto';
+const RESTAURANT_LOCATION = 'Toronto, Canada';
+
+// --- SUPABASE CONFIGURATION ---
+// Read environment variables
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
+
+// Validate environment variables
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  console.error('❌ ERROR: Missing Supabase environment variables');
+  console.error('  Required: SUPABASE_URL and SUPABASE_SERVICE_KEY');
+  process.exit(1);
+}
+
+// Initialize Supabase client with service role key (bypasses RLS)
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+// Define OpenRouter vision models to try (in order of preference)
+const OCR_MODEL_CHAIN = [
+  { id: "meta-llama/llama-3.2-11b-vision-instruct:free", name: "Llama 3.2 Vision (Free)" },
+  { id: "qwen/qwen-2.5-vl-7b-instruct:free", name: "Qwen 2.5 VL (Free)" },
+  { id: "google/gemini-flash-1.5", name: "Gemini Flash 1.5" },
+  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
+  { id: "anthropic/claude-3-haiku", name: "Claude 3 Haiku" },
+  { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" }
+];
+
+// Text processing model for structuring OCR text
+const STRUCTURING_MODEL = "openai/gpt-4o-mini";
+
+// Hash calculation helper functions
+/**
+ * Calculate SHA-256 hash of a buffer
+ */
+function calculateSHA256(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+/**
+ * Calculate stable hash of structured content
+ * Ensures consistent ordering of properties and arrays for stable hashing
+ */
+function calculateContentHash(structuredData) {
+  // Create a stable version of the data by sorting keys and arrays
+  const stableData = JSON.parse(JSON.stringify(structuredData));
+  
+  // Normalize string values to trim whitespace and standardize case
+  const normalizeTextValues = (obj) => {
+    if (!obj || typeof obj !== 'object') return;
+    
+    Object.entries(obj).forEach(([key, value]) => {
+      // Normalize string values (trim whitespace, standardize, etc.)
+      if (typeof value === 'string') {
+        // For dish names and categories, preserve case but trim whitespace
+        if (key === 'name' || key === 'category') {
+          obj[key] = value.trim();
+        } else if (key === 'description') {
+          // For descriptions, standardize whitespace
+          obj[key] = value.trim().replace(/\s+/g, ' ');
+        }
+      } 
+      // Recursively process nested objects
+      else if (value && typeof value === 'object') {
+        if (Array.isArray(value)) {
+          value.forEach(item => normalizeTextValues(item));
+        } else {
+          normalizeTextValues(value);
+        }
+      }
+    });
+  };
+  
+  // Apply text normalization
+  normalizeTextValues(stableData);
+  
+  // Use fast-json-stable-stringify for consistent JSON serialization
+  const stableString = stableStringify(stableData);
+  
+  // Log complete string for debugging
+  const logFilePath = path.join(__dirname, '..', 'test-results', 'content-hash-input.json');
+  try {
+    // Create test-results directory if it doesn't exist
+    const resultsDir = path.join(__dirname, '..', 'test-results');
+    if (!fs.existsSync(resultsDir)) {
+      fs.mkdirSync(resultsDir, { recursive: true });
+    }
+    
+    // Log hash input to file
+    fs.writeFileSync(logFilePath, stableString);
+    log('INFO', `Pre-hash JSON string saved to: ${logFilePath}`);
+    
+    // Log summary of the string that will be hashed
+    log('INFO', 'Pre-hash JSON summary:', {
+      characterCount: stableString.length,
+      restaurantName: stableData.restaurant.name,
+      categoryCount: stableData.categories.length,
+      dishCount: stableData.categories.reduce((sum, cat) => sum + (cat.dishes?.length || 0), 0)
+    });
+  } catch (error) {
+    log('WARN', `Failed to log pre-hash JSON string: ${error.message}`);
+  }
+  
+  // Calculate hash
+  return calculateSHA256(Buffer.from(stableString, 'utf8'));
+}
+
+/**
+ * Check if a scan with the given image hash exists for the user
+ */
+async function checkForExistingUserScan(userId, imageHash) {
+  if (!imageHash) return null;
+  
+  try {
+    const { data, error } = await supabase
+      .from('menu_scan')
+      .select('id, restaurant_name, scanned_at')
+      .eq('user_id', userId)
+      .eq('image_hash', imageHash)
+      .order('scanned_at', { ascending: false })
+      .limit(1);
+    
+    if (error) {
+      log('ERROR', `Error checking for existing user scan by image hash`, error);
+      return null;
+    }
+    
+    return data && data.length > 0 ? data[0] : null;
+  } catch (error) {
+    log('WARN', `Exception checking for existing user scan by image hash`, error);
+    return null;
+  }
+}
+
+/**
+ * Check if a canonical menu with the given content hash exists
+ */
+async function checkForExistingCanonicalMenu(contentHash) {
+  if (!contentHash) return null;
+  
+  try {
+    const { data, error } = await supabase
+      .from('canonical_menus')
+      .select('id, dish_count, created_at')
+      .eq('content_hash', contentHash)
+      .limit(1);
+    
+    if (error) {
+      if (error.code === 'PGRST204') {
+        // Column doesn't exist, which is fine - return null
+        log('WARN', `The content_hash column doesn't exist in canonical_menus table`);
+        return null;
+      }
+      
+      log('ERROR', `Error checking for existing canonical menu`, error);
+      return null;
+    }
+    
+    return data && data.length > 0 ? data[0] : null;
+  } catch (error) {
+    log('WARN', `Exception checking for existing canonical menu`, error);
+    return null;
+  }
+}
+
+// --- LOGGING UTILITY ---
+/**
+ * Formatted logging utility
+ */
+function log(level, message, details = null) {
+  const timestamp = new Date().toISOString();
+  const COLOR = {
+    INFO: '\x1b[36m%s\x1b[0m',    // Cyan
+    SUCCESS: '\x1b[32m%s\x1b[0m',  // Green
+    WARN: '\x1b[33m%s\x1b[0m',     // Yellow
+    ERROR: '\x1b[31m%s\x1b[0m',    // Red
+    DATABASE: '\x1b[35m%s\x1b[0m'  // Purple
+  };
+  
+  console.log(COLOR[level] || COLOR.INFO, `[${timestamp}] [${level}]`, message);
+  if (details) {
+    if (typeof details === 'object') {
+      console.log(JSON.stringify(details, null, 2));
+    } else {
+      console.log(details);
+    }
+  }
+}
+
+// --- OCR EXTRACTION WITH FALLBACK CHAIN ---
+/**
+ * Extract text from a menu image using a cascade of OpenRouter vision models
+ */
+async function runOcrWithFallbackChain(imageBase64) {
+  log('INFO', '--- STARTING OCR EXTRACTION WITH FALLBACK CHAIN ---');
+  
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+  if (!OPENROUTER_API_KEY) {
+    throw new Error('OpenRouter API key is missing from environment variables');
+  }
+  
+  // Try each model in sequence until one succeeds
+  for (let i = 0; i < OCR_MODEL_CHAIN.length; i++) {
+    const model = OCR_MODEL_CHAIN[i];
+    log('INFO', `Attempting OCR with model ${i+1}/${OCR_MODEL_CHAIN.length}: ${model.name}`, {
+      modelId: model.id
+    });
+    
+    try {
+      // Create request payload for vision model
+      const requestPayload = {
+        model: model.id,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Extract all menu text from this image. Return it as clean, structured text, preserving categories, dishes, and prices where possible."
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:image/jpeg;base64,${imageBase64}`
+                }
+              }
+            ]
+          }
+        ]
+      };
+      
+      // Set timeout for API call (45 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
+      
+      // Execute API request
+      const startTime = Date.now();
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "HTTP-Referer": "https://paquapp.vercel.app",
+          "X-Title": "PaquappTest"
+        },
+        body: JSON.stringify(requestPayload),
+        signal: controller.signal
+      });
+      const responseTime = ((Date.now() - startTime) / 1000).toFixed(2);
+      
+      // Clear timeout
+      clearTimeout(timeoutId);
+      
+      log('INFO', `Response received from ${model.name} in ${responseTime}s`);
+      
+      // Check if request succeeded
+      if (!response.ok) {
+        const errorText = await response.text();
+        log('ERROR', `${model.name} API request failed, will try next model`, {
+          status: response.status,
+          statusText: response.statusText,
+          responseBody: errorText.substring(0, 200)
+        });
+        // Continue to the next model
+        continue;
+      }
+      
+      // Parse the response
+      const result = await response.json();
+      const extractedText = result.choices?.[0]?.message?.content;
+      
+      // Validate that we got meaningful text
+      if (!extractedText || typeof extractedText !== 'string' || extractedText.trim().length < 20) {
+        log('ERROR', `${model.name} returned insufficient text, will try next model`, {
+          textLength: extractedText?.length || 0,
+          textSample: extractedText?.substring(0, 50) || 'empty'
+        });
+        // Continue to the next model
+        continue;
+      }
+      
+      // Success! We have valid OCR text
+      log('SUCCESS', `Successfully extracted text with ${model.name}`, {
+        textLength: extractedText.length,
+        textSample: extractedText.substring(0, 100) + '...'
+      });
+      
+      // Save the extracted text to a file for reference
+      const resultsDir = path.join(__dirname, '..', 'test-results');
+      if (!fs.existsSync(resultsDir)) {
+        fs.mkdirSync(resultsDir, { recursive: true });
+      }
+      const outputPath = path.join(resultsDir, `ocr-result-${model.id.replace(/\//g, '-')}.txt`);
+      fs.writeFileSync(outputPath, extractedText);
+      
+      return {
+        success: true,
+        text: extractedText,
+        model: {
+          id: model.id,
+          name: model.name
+        },
+        metadata: {
+          responseTime,
+          extractedAt: new Date().toISOString(),
+          textLength: extractedText.length
+        }
+      };
+      
+    } catch (error) {
+      // Handle errors with this model attempt
+      if (error.name === 'AbortError') {
+        log('ERROR', `${model.name} request timed out after 45 seconds, will try next model`);
+      } else {
+        log('ERROR', `Exception during ${model.name} API call, will try next model`, {
+          error: error.message
+        });
+      }
+      // Continue to the next model
+    }
+  }
+  
+  // If we reach here, all models failed
+  log('ERROR', 'All OCR models failed. No text could be extracted from the image.');
+  
+  throw new Error('OCR failed – all models failed to extract valid text from the image');
+}
+
+// --- STRUCTURING THE OCR TEXT ---
+/**
+ * Structure raw OCR text into a format suitable for database storage
+ * Uses an LLM to parse the text into structured JSON
+ */
+async function structureOcrData(ocrResult) {
+  log('INFO', '--- STRUCTURING OCR DATA ---');
+  
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+  if (!OPENROUTER_API_KEY) {
+    throw new Error('OpenRouter API key is missing');
+  }
+  
+  try {
+    log('INFO', `Using ${STRUCTURING_MODEL} to structure OCR text`);
+    
+    // Create prompt for structuring the text
+    const prompt = `
+You are a specialized parser for restaurant menu OCR text. Your task is to extract menu categories and dishes from the following OCR text.
+
+The data needs to be organized in the following JSON format for database storage:
+{
+  "restaurant": {
+    "name": "${RESTAURANT_NAME}",
+    "location": "${RESTAURANT_LOCATION}"
+  },
+  "categories": [
+    {
+      "name": "CATEGORY_NAME", 
+      "dishes": [
+        {
+          "name": "DISH_NAME",
+          "description": "DISH_DESCRIPTION",
+          "price": PRICE_AS_NUMBER_OR_NULL,
+          "dietary_tags": ["tag1", "tag2"]  // e.g., "gf", "v", "pb", etc.
+        }
+      ]
+    }
+  ]
+}
+
+Focus on extracting:
+1. Category names (e.g., "APPETIZERS", "ENTREES", "DESSERTS")
+2. Dish names
+3. Dish descriptions
+4. Prices (as numbers without currency symbols)
+5. Dietary tags (including "gf" for gluten-free, "v" for vegetarian, "pb" for plant-based, etc.)
+
+Follow these rules:
+- Ensure the JSON is valid and properly nested
+- Preserve section/category structure from the menu
+- Clean up any OCR errors as best you can
+- If price is missing, use null
+- Make sure all dishes have names
+- Only include dietary tags that are explicitly mentioned
+
+Here is the OCR text to parse:
+
+${ocrResult.text}
+
+Return only the JSON without any explanation or commentary.
+`;
+    
+    // Set up request
+    const requestPayload = {
+      model: STRUCTURING_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.2, // Low temperature for more predictable output
+      response_format: { type: "json_object" } // Ensure we get valid JSON
+    };
+    
+    // Make request to OpenRouter
+    const startTime = Date.now();
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "HTTP-Referer": "https://paquapp.vercel.app",
+        "X-Title": "PaquappTest"
+      },
+      body: JSON.stringify(requestPayload)
+    });
+    const responseTime = ((Date.now() - startTime) / 1000).toFixed(2);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      log('ERROR', 'Failed to structure OCR data', {
+        status: response.status,
+        errorText: errorText.substring(0, 200)
+      });
+      throw new Error(`Failed to structure OCR data: ${response.status} ${response.statusText}`);
+    }
+    
+    // Parse the response
+    const result = await response.json();
+    const structuredText = result.choices?.[0]?.message?.content;
+    
+    if (!structuredText) {
+      log('ERROR', 'No structured data returned from LLM');
+      throw new Error('Failed to structure OCR data: Empty response');
+    }
+    
+    // Parse the structured text as JSON
+    let structuredData;
+    try {
+      structuredData = JSON.parse(structuredText);
+      log('SUCCESS', `Successfully structured OCR data in ${responseTime}s`, {
+        categoriesCount: structuredData.categories.length,
+        sampleCategory: structuredData.categories[0].name,
+        dishesCount: structuredData.categories.reduce((sum, cat) => sum + cat.dishes.length, 0)
+      });
+      
+      // Save structured data to a file for reference
+      const resultsDir = path.join(__dirname, '..', 'test-results');
+      const outputPath = path.join(resultsDir, `structured-menu-data.json`);
+      fs.writeFileSync(outputPath, JSON.stringify(structuredData, null, 2));
+      log('INFO', `Structured data saved to: ${outputPath}`);
+      
+      return {
+        ...ocrResult,
+        structuredData
+      };
+    } catch (error) {
+      log('ERROR', 'Failed to parse structured data as JSON', { error: error.message });
+      throw new Error(`Failed to parse structured data: ${error.message}`);
+    }
+  } catch (error) {
+    log('ERROR', 'Error during OCR data structuring', { error: error.message });
+    throw error;
+  }
+}
+
+// --- SAVING TO SUPABASE ---
+/**
+ * Save structured menu data to Supabase following the canonical menu design
+ */
+async function saveToSupabase(structuredResult, userId) {
+  log('DATABASE', '--- SAVING DATA TO SUPABASE ---');
+  
+  // 1. Extract key data
+  const imageHash = structuredResult.imageHash;
+  const contentHash = structuredResult.contentHash;
+  const structuredData = structuredResult.structuredData;
+  
+  // 2. Check if this user already scanned this exact image (by image hash)
+  const existingScan = await checkForExistingUserScan(userId, imageHash);
+  
+  if (existingScan) {
+    log('INFO', `DUPLICATE DETECTED (Image Hash): User ${userId} already scanned this exact image`, {
+      existingScanId: existingScan.id,
+      restaurant: existingScan.restaurant_name,
+      scannedAt: existingScan.scanned_at
+    });
+    
+    return {
+      scanId: existingScan.id,
+      method: 'duplicate_image_hash',
+      existingScan: true
+    };
+  }
+  
+  // 3. Ensure user exists
+  await ensureUserExists(userId);
+  
+  // 4. Check if a canonical menu with this content hash already exists
+  const existingCanonicalMenu = await checkForExistingCanonicalMenu(contentHash);
+  
+  // 5. Generate a unique scan ID
+  const scanId = uuidv4();
+  log('INFO', `Generated scan ID: ${scanId}`);
+  
+  try {
+    if (existingCanonicalMenu) {
+      // Scenario A: Canonical menu already exists
+      log('INFO', `Canonical menu content already exists. Reusing canonical menu ID: ${existingCanonicalMenu.id}`, {
+        canonicalId: existingCanonicalMenu.id,
+        dishCount: existingCanonicalMenu.dish_count,
+        createdAt: existingCanonicalMenu.created_at
+      });
+      
+      // Insert only into menu_scan, linking to the existing canonical menu
+      const { data: scanData, error: scanError } = await supabase
+        .from('menu_scan')
+        .insert({
+          id: scanId,
+          user_id: userId,
+          menu_raw_text: structuredResult.text,
+          scanned_at: new Date().toISOString(),
+          restaurant_name: structuredData.restaurant.name,
+          location: structuredData.restaurant.location,
+          ocr_method: structuredResult.model.id,
+          image_hash: imageHash,
+          canonical_menu_id: existingCanonicalMenu.id
+        })
+        .select('id')
+        .single();
+      
+      if (scanError) {
+        log('ERROR', 'Failed to insert scan record', scanError);
+        throw new Error(`Scan insert failed: ${scanError.message}`);
+      }
+      
+      log('SUCCESS', `Created new scan record ${scanId} linked to existing canonical menu ${existingCanonicalMenu.id}`, {
+        scanId,
+        canonicalId: existingCanonicalMenu.id,
+        dishCount: existingCanonicalMenu.dish_count
+      });
+      
+      log('INFO', 'No new dishes inserted (using existing dishes from canonical menu)');
+      
+      return {
+        scanId,
+        method: 'canonical_menu_reuse',
+        canonicalId: existingCanonicalMenu.id,
+        existingCanonicalMenuFirstScanId: existingCanonicalMenu.first_scan_id,
+        dishCount: existingCanonicalMenu.dish_count,
+        newDishes: false
+      };
+      
+    } else {
+      // Scenario B: Canonical menu does not exist - create everything
+      log('INFO', 'New canonical menu content detected. Creating new canonical menu and associated dishes');
+      
+      // Count the dishes in the structured data
+      const dishCount = structuredData.categories.reduce((sum, category) => 
+        sum + (category.dishes ? category.dishes.length : 0), 0);
+      
+      // Step 1: Insert into canonical_menus
+      const { data: canonicalData, error: canonicalError } = await supabase
+        .from('canonical_menus')
+        .insert({
+          content_hash: contentHash,
+          dish_count: dishCount,
+          created_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+      
+      if (canonicalError) {
+        log('ERROR', 'Failed to insert canonical menu record', canonicalError);
+        throw new Error(`Canonical menu insert failed: ${canonicalError.message}`);
+      }
+      
+      const canonicalId = canonicalData.id;
+      log('SUCCESS', `Created new canonical menu with ID: ${canonicalId}`);
+      
+      // Step 2: Insert into menu_scan
+      const { data: scanData, error: scanError } = await supabase
+        .from('menu_scan')
+        .insert({
+          id: scanId,
+          user_id: userId,
+          menu_raw_text: structuredResult.text,
+          scanned_at: new Date().toISOString(),
+          restaurant_name: structuredData.restaurant.name,
+          location: structuredData.restaurant.location,
+          ocr_method: structuredResult.model.id,
+          image_hash: imageHash,
+          canonical_menu_id: canonicalId
+        })
+        .select('id')
+        .single();
+      
+      if (scanError) {
+        log('ERROR', 'Failed to insert scan record', scanError);
+        throw new Error(`Scan insert failed: ${scanError.message}`);
+      }
+      
+      log('SUCCESS', `Created scan record with ID: ${scanId}`);
+      
+      // Step 3: Update canonical_menus.first_scan_id
+      const { error: updateError } = await supabase
+        .from('canonical_menus')
+        .update({ first_scan_id: scanId })
+        .eq('id', canonicalId);
+      
+      if (updateError) {
+        log('WARN', 'Failed to update first_scan_id in canonical_menus', updateError);
+        // Non-critical error, continue
+      } else {
+        log('INFO', `Updated canonical menu ${canonicalId} with first_scan_id ${scanId}`);
+      }
+      
+      // Step 4: Insert all dishes into menu_dishes
+      let insertedDishCount = 0;
+      let dishErrors = [];
+      
+      // Extract dishes from all categories
+      const allDishes = [];
+      structuredData.categories.forEach(category => {
+        if (category.dishes) {
+          category.dishes.forEach(dish => {
+            allDishes.push({
+              ...dish,
+              category: category.name
+            });
+          });
+        }
+      });
+      
+      log('INFO', `Inserting ${allDishes.length} dishes for canonical menu ID: ${canonicalId}`);
+      
+      // Insert dishes in batches to avoid hitting rate limits
+      const BATCH_SIZE = 10;
+      for (let i = 0; i < allDishes.length; i += BATCH_SIZE) {
+        const batch = allDishes.slice(i, i + BATCH_SIZE).map(dish => ({
+          canonical_menu_id: canonicalId,
+          dish_name: dish.name,
+          description: dish.description || '',
+          price: dish.price,
+          category: dish.category,
+          tags: (dish.dietary_tags && dish.dietary_tags.length) ? dish.dietary_tags : null
+        }));
+        
+        const { data: dishData, error: dishError } = await supabase
+          .from('menu_dishes')
+          .insert(batch)
+          .select('id');
+        
+        if (dishError) {
+          log('ERROR', `Failed to insert dish batch ${Math.floor(i/BATCH_SIZE) + 1}`, dishError);
+          dishErrors.push(dishError);
+        } else {
+          insertedDishCount += dishData.length;
+          log('INFO', `Inserted batch ${Math.floor(i/BATCH_SIZE) + 1}: ${dishData.length} dishes`);
+        }
+      }
+      
+      if (dishErrors.length > 0) {
+        log('WARN', `Completed with ${dishErrors.length} errors while inserting dishes`);
+      }
+      
+      log('SUCCESS', `Created new canonical menu ${canonicalId}. Created new scan record ${scanId}. Inserted ${insertedDishCount} dishes.`);
+      
+      return {
+        scanId,
+        method: 'new_canonical_menu',
+        canonicalId,
+        dishCount: insertedDishCount,
+        newDishes: true
+      };
+    }
+  } catch (error) {
+    log('ERROR', 'Error saving to Supabase', { error: error.message });
+    throw error;
+  }
+}
+
+/**
+ * Ensure user exists in the database
+ */
+async function ensureUserExists(userId) {
+  try {
+    // Check if user exists
+    const { data: userExists, error: userError } = await supabase
+      .from('user_profile')
+      .select('id')
+      .eq('id', userId)
+      .single();
+    
+    if (userError && userError.code !== 'PGRST116') {
+      log('ERROR', 'Error checking if test user exists', userError);
+      throw new Error(`User check failed: ${userError.message}`);
+    }
+    
+    // If user doesn't exist, create a test user profile
+    if (!userExists) {
+      log('INFO', `Test user ${userId} not found, creating test user profile`);
+      const { data: newUser, error: createError } = await supabase
+        .from('user_profile')
+        .insert({
+          id: userId,
+          email: 'test@example.com',
+          created_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+      
+      if (createError) {
+        log('ERROR', 'Failed to create test user', createError);
+        throw new Error(`User creation failed: ${createError.message}`);
+      }
+      
+      log('SUCCESS', `Created test user profile: ${userId}`);
+    } else {
+      log('INFO', `Test user ${userId} found`);
+    }
+    
+    return true;
+  } catch (error) {
+    log('ERROR', 'Error ensuring user exists', error);
+    throw error;
+  }
+}
+
+// --- VERIFICATION ---
+/**
+ * Verifies that the data was correctly saved to Supabase
+ * @param {Object} saveResult - The result of the saveToSupabase function
+ * @returns {Promise<boolean>} - Whether the verification passed
+ */
+async function verifySupabaseData(saveResult) {
+  console.log(chalk.cyan('[DATABASE] --- VERIFYING DATA IN SUPABASE ---'));
+  
+  try {
+    // First fetch the scan record
+    const { data: scanData, error: scanError } = await supabase
+      .from('menu_scan')
+      .select('*')
+      .eq('id', saveResult.scanId)
+      .single();
+    
+    if (scanError) {
+      console.log(chalk.red('[ERROR] Failed to retrieve scan record'));
+      console.log(scanError);
+      throw new Error(`Verification failed: ${scanError.message}`);
+    }
+    
+    if (!scanData) {
+      console.log(chalk.red('[ERROR] Scan record not found'));
+      throw new Error('Verification failed: Scan record not found');
+    }
+    
+    console.log(chalk.green(`

@@ -8,18 +8,42 @@ import {
   MenuItem, 
   MacroProfile, 
   UserProfile, 
-  PersonalizedInsights 
+  PersonalizedInsights,
+  AIResponse
 } from '../types';
 import { generatePersonalizerPrompt } from './prompts/insights';
 import { AIProvider } from '@/types/ai';
 
-// Mock AI call for development
-async function callAI(prompt: string, provider: AIProvider): Promise<any> {
-  console.log(`[AI Request] Provider: ${provider}`);
+// OpenRouter integration for AI processing
+async function callAI(prompt: string, provider: AIProvider): Promise<AIResponse> {
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+  if (!OPENROUTER_API_KEY) {
+    throw new Error("Missing OpenRouter API key.");
+  }
+
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://nutriflow.vercel.app", 
+      "X-Title": "NutriFlow AI", 
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-4o",
+      messages: [
+        { role: "system", content: "You are a helpful health-focused nutritionist AI." },
+        { role: "user", content: prompt },
+      ],
+    }),
+  });
+
+  const json = await res.json();
   
   return {
-    healthPrediction: "You'll likely feel energized for 3-4 hours with stable blood sugar levels.",
-    todayRecommendation: "Try to include a fiber-rich snack later today to balance your nutrition intake."
+    text: json.choices[0]?.message?.content || "No response.",
+    raw: json,
+    model: json.model,
   };
 }
 
@@ -43,12 +67,21 @@ export class Personalizer implements Agent<PersonalizerInput, PersonalizedInsigh
       }
       
       const prompt = generatePersonalizerPrompt(input);
-      const response = await callAI(prompt, provider);
+      const aiResponse = await callAI(prompt, provider);
+      
+      try {
+        // Parse the text response which should be in JSON format
+        const responseData = JSON.parse(aiResponse.text);
       
       return {
-        healthPrediction: response.healthPrediction || this.generateDefaultHealthPrediction(input.macros),
-        todayRecommendation: response.todayRecommendation || this.generateDefaultRecommendation(input.userProfile)
+          healthPrediction: responseData.healthPrediction || this.generateDefaultHealthPrediction(input.macros),
+          todayRecommendation: responseData.todayRecommendation || this.generateDefaultRecommendation(input.userProfile)
       };
+      } catch (error) {
+        console.error('Error parsing AI response:', error);
+        console.error('Raw response:', aiResponse.text);
+        return this.getDefaultInsights(input.macros);
+      }
     } catch (error) {
       console.error('Error in Personalizer:', error);
       return this.getDefaultInsights(input.macros);

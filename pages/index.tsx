@@ -1,11 +1,13 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import CameraScanner from '../components/CameraScanner'
 import MobileDrawer from '../components/layout/MobileDrawer'
 import HamburgerButton from '../components/ui/HamburgerButton'
 import { useNavigation } from '../contexts/NavigationContext'
 import { useRouter } from 'next/router'
+import { supabase } from '@/lib/supabase'
+import logger from '@/lib/logger'
 
 interface CameraScannerHandle {
   captureFrame: () => void;
@@ -17,40 +19,97 @@ export default function Home() {
   const { isMenuOpen, toggleMenu } = useNavigation();
   const router = useRouter();
   const [isScanning, setIsScanning] = useState(false);
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+  
+  // Check if user has completed onboarding
+  useEffect(() => {
+    async function checkOnboardingStatus() {
+      try {
+        // Get current session
+        logger.log('AUTH', 'Checking user session for homepage');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          logger.error('AUTH', 'Error retrieving session', sessionError);
+        }
+        
+        if (session?.user) {
+          logger.log('AUTH', `User authenticated: ${session.user.id}`);
+          logger.log('ONBOARDING', `Checking onboarding status for user`, { userId: session.user.id });
+          
+          // Query user profile to check onboarding status
+          const { data: profile, error } = await supabase
+            .from('user_profile')
+            .select('onboarding_complete')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (error && error.code !== 'PGRST116') {
+            logger.error('ERROR', 'Failed to check onboarding status', error);
+          } else if (!profile || profile.onboarding_complete === false) {
+            // User hasn't completed onboarding
+            logger.log('ONBOARDING', 'User has not completed onboarding');
+            logger.log('ONBOARDING', 'Redirecting user to onboarding flow');
+            router.push('/onboarding');
+            return;
+          }
+          
+          logger.log('ONBOARDING', 'User has completed onboarding');
+          logger.log('AUTH', 'Showing homepage for authenticated user');
+        } else {
+          logger.log('AUTH', 'No authenticated user, showing public homepage');
+        }
+      } catch (err) {
+        logger.error('ERROR', 'Error checking onboarding status', err);
+      } finally {
+        setIsCheckingOnboarding(false);
+      }
+    }
+    
+    checkOnboardingStatus();
+  }, [router]);
   
   const handleScanImage = async (imageBlob: Blob) => {
-    console.log('Image captured, sending to OCR service...');
+    logger.log('UPLOAD', 'Image selected for scanning', { 
+      size: Math.round(imageBlob.size / 1024) + ' KB',
+      bytes: imageBlob.size
+    });
     setIsScanning(true);
     
     try {
-      // Convert blob to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(imageBlob);
-      reader.onloadend = async () => {
-        const base64data = reader.result;
+      // Create FormData and append the image blob
+      const formData = new FormData();
+      formData.append('image', imageBlob);
+      
+      logger.log('UPLOAD', 'Sending image to /api/save-scan endpoint');
+      // Send to backend using FormData
+      const response = await fetch('/api/save-scan', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        logger.log('OCR', 'OCR processing completed successfully', data);
         
-        // Send to backend
-        const response = await fetch('/api/save-scan', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/octet-stream',
-          },
-          body: imageBlob,
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('OCR processed successfully:', data);
-          
-          // Navigate to results page or show success
-          router.push('/scan?latest=true');
-        } else {
-          console.error('OCR processing failed');
-          alert('Failed to process the menu image. Please try again.');
+        // Log the Supabase insert ID if available
+        if (data.success && data.supabaseInsertId) {
+          logger.log('SUPABASE', `Scan saved to database with ID: ${data.supabaseInsertId}`);
         }
-      };
+        
+        // Navigate to results page or show success
+        logger.log('AUTH', 'Redirecting to scan results page');
+        router.push('/scan?latest=true');
+      } else {
+        const errorData = await response.json();
+        logger.error('ERROR', 'Scan processing failed', {
+          error: errorData.error || 'Unknown error',
+          statusCode: response.status
+        });
+        alert('Failed to process the menu image. Please try again.');
+      }
     } catch (error) {
-      console.error('Error processing image:', error);
+      logger.error('ERROR', 'Exception during scan processing', error);
       alert('An error occurred while processing the image.');
     } finally {
       setIsScanning(false);
@@ -59,16 +118,39 @@ export default function Home() {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      logger.warn('UPLOAD', 'No file selected in file picker');
+      return;
+    }
+    
+    logger.log('UPLOAD', 'File selected from device', {
+      filename: file.name,
+      type: file.type,
+      size: Math.round(file.size / 1024) + ' KB'
+    });
     
     // Process the selected file just like a camera capture
     handleScanImage(file);
   };
 
   const handleUploadClick = () => {
+    logger.log('UPLOAD', 'User clicked upload button, opening file picker');
     // Trigger the hidden file input when the upload button is clicked
     fileInputRef.current?.click();
   };
+
+  // Show loading indicator while checking onboarding status
+  if (isCheckingOnboarding) {
+    logger.log('AUTH', 'Showing loading indicator while checking auth/onboarding status');
+    return (
+      <div className="flex flex-col min-h-screen items-center justify-center bg-gray-900">
+        <div className="text-white text-center">
+          <p className="mb-2">Loading...</p>
+          <div className="w-8 h-8 border-t-2 border-b-2 border-white rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen relative bg-gray-900">
@@ -97,7 +179,10 @@ export default function Home() {
         <header className="flex justify-between items-center p-6">
           <div className="flex-1 flex justify-start">
             <HamburgerButton 
-              onClick={toggleMenu}
+              onClick={() => {
+                logger.log('AUTH', 'User toggled menu');
+                toggleMenu();
+              }}
               isOpen={isMenuOpen}
             />
           </div>
@@ -125,7 +210,10 @@ export default function Home() {
           <div className="w-full max-w-md mx-auto">
             <div className="flex items-center gap-2">
               <button
-                onClick={() => cameraRef.current?.captureFrame()}
+                onClick={() => {
+                  logger.log('UPLOAD', 'User clicked scan menu button');
+                  cameraRef.current?.captureFrame();
+                }}
                 className="backdrop-blur-lg text-white flex-1 h-14 rounded-full flex items-center justify-center focus:outline-none font-medium text-lg transition-all duration-200 ease-in-out active:scale-[0.98] hover:scale-[1.01]"
                 style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.7)',
@@ -200,7 +288,10 @@ export default function Home() {
       </div>
       
       {/* Mobile Drawer */}
-      <MobileDrawer isOpen={isMenuOpen} onClose={() => toggleMenu()} />
+      <MobileDrawer isOpen={isMenuOpen} onClose={() => {
+        logger.log('AUTH', 'User closed menu');
+        toggleMenu();
+      }} />
     </div>
   );
 } 
