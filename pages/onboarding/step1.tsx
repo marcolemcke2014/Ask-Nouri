@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import OnboardingLayout from './layout';
 import { supabase } from '@/lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 // Goal options
 const GOALS = [
@@ -17,49 +18,52 @@ const GOALS = [
   { id: 'explore', label: 'Just Exploring / Curious!' }
 ];
 
-export default function Step1() {
+// Add a type for the component props
+interface Step1Props {
+  user: User | null;
+}
+
+export default function Step1({ user }: Step1Props) {
   const router = useRouter();
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Fetch user's first name on component mount
+  // Get user's first name from the global auth state
   useEffect(() => {
     async function fetchUserName() {
+      // If no user is available from props, we can't proceed
+      if (!user) {
+        console.error('No user found in global state');
+        return;
+      }
+      
       try {
-        // Get current user
-        const { data, error } = await supabase.auth.getUser();
-        
-        if (error) {
-          console.error('Error fetching user:', error);
+        // Get user profile to get the first name
+        const { data: profileData, error: profileError } = await supabase
+          .from('user_profile')
+          .select('first_name')
+          .eq('id', user.id)
+          .single();
+          
+        if (profileError) {
+          console.error('Error fetching user profile:', profileError);
           return;
         }
         
-        if (data.user) {
-          // Get user profile to get the first name
-          const { data: profileData, error: profileError } = await supabase
-            .from('user_profile')
-            .select('first_name')
-            .eq('id', data.user.id)
-            .single();
-            
-          if (profileError) {
-            console.error('Error fetching user profile:', profileError);
-            return;
-          }
-          
-          if (profileData && profileData.first_name) {
-            setFirstName(profileData.first_name);
-          }
+        if (profileData && profileData.first_name) {
+          setFirstName(profileData.first_name);
         }
       } catch (err) {
         console.error('Unexpected error fetching user data:', err);
       }
     }
     
-    fetchUserName();
-  }, []);
+    if (user) {
+      fetchUserName();
+    }
+  }, [user]);
 
   const handleGoalSelect = (goalId: string) => {
     setSelectedGoal(goalId);
@@ -74,14 +78,12 @@ export default function Step1() {
       setIsLoading(true);
       setErrorMessage(null);
       
-      // Get current user
-      const { data, error } = await supabase.auth.getUser();
-      
-      if (error || !data.user) {
+      // Check if user is available from the global state
+      if (!user) {
         throw new Error('User not authenticated. Please sign in again.');
       }
       
-      const userId = data.user.id;
+      const userId = user.id;
       
       // Prepare data to save
       const dataToSave = { 
