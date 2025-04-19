@@ -8,7 +8,10 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/router'
 
 // List of paths that don't require authentication
-const PUBLIC_PATHS = ['/login', '/', '/api/auth/callback']
+const PUBLIC_PATHS = ['/login', '/', '/api/auth/callback', '/signup', '/choose-plan']
+
+// Enable this flag to bypass authentication checks for onboarding pages during development
+const DEV_MODE = process.env.NODE_ENV === 'development'
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter()
@@ -34,7 +37,13 @@ function MyApp({ Component, pageProps }) {
         
         // Check if user needs to be redirected to login
         const currentPath = router.pathname
-        if (!PUBLIC_PATHS.includes(currentPath) && !session?.user) {
+        
+        // Allow access to onboarding pages in development mode
+        const isOnboardingPath = currentPath.startsWith('/onboarding')
+        const isPublicPath = PUBLIC_PATHS.includes(currentPath)
+        
+        // Only redirect if: not public path AND no user AND not (dev mode AND onboarding path)
+        if (!isPublicPath && !session?.user && !(DEV_MODE && isOnboardingPath)) {
           console.log('[AUTH] Redirecting unauthenticated user to login')
           router.push('/login')
         }
@@ -57,7 +66,12 @@ function MyApp({ Component, pageProps }) {
       } else if (event === 'SIGNED_OUT') {
         console.log('[AUTH] User signed out')
         setUser(null)
-        router.push('/login')
+        
+        // Don't redirect if in DEV_MODE and on onboarding path
+        const isOnboardingPath = router.pathname.startsWith('/onboarding')
+        if (!(DEV_MODE && isOnboardingPath)) {
+          router.push('/login')
+        }
       }
     })
 
@@ -67,7 +81,7 @@ function MyApp({ Component, pageProps }) {
         authListener.subscription.unsubscribe()
       }
     }
-  }, [router])
+  }, [router.pathname, router.isReady, router])
 
   if (loading) {
     // Show loading screen while checking auth
