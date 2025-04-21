@@ -6,9 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "test:ocr": "node scripts/single-ocr-test.js",
-    "test:e2e-ocr": "node scripts/test-full-ocr-flow.js"
+    "lint": "next lint"
   },
   "keywords": [
     "food",

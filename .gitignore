@@ -93,4 +93,16 @@ sdist/
 var/
 *.egg-info/
 .installed.cfg
-*.egg 
+*.egg
+
+# Ignore test files and scripts
+**/__tests__/
+scripts/test-*.js
+scripts/single-ocr-test.js
+pages/api/test-*.js
+test-*.js
+*.test.js
+*.spec.js
+*.test.ts
+*.spec.ts
+test-results/ 
