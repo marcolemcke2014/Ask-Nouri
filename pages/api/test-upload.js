@@ -1,5 +1,4 @@
-import formidable from 'formidable';
-import { promises as fs } from 'fs';
+import busboy from 'busboy';
 
 // Disable the default body parser to handle form data
 export const config = {
@@ -9,7 +8,8 @@ export const config = {
 };
 
 /**
- * Test API endpoint for file uploads
+ * Test API endpoint for file uploads using busboy instead of formidable
+ * for better compatibility with Vercel serverless environment
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -19,8 +19,8 @@ export default async function handler(req, res) {
   console.log("📥 Received test upload request");
   
   try {
-    // Parse the form data
-    const data = await parseForm(req);
+    // Parse the form data using busboy
+    const data = await parseFormData(req);
     const { fields, files } = data;
     
     console.log("Received fields:", Object.keys(fields));
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     
     if (files.image) {
       const imageFile = files.image;
-      console.log(`Received image: ${imageFile.originalFilename || 'unknown'}, size: ${imageFile.size} bytes`);
+      console.log(`Received image: ${imageFile.name || 'unknown'}, size: ${imageFile.size} bytes`);
     } else {
       console.log("No image field found in request");
     }
@@ -45,14 +45,56 @@ export default async function handler(req, res) {
   }
 }
 
-// Helper function to parse form data
-function parseForm(req) {
+/**
+ * Parse the multipart form data using busboy
+ */
+function parseFormData(req) {
   return new Promise((resolve, reject) => {
-    const form = new formidable.IncomingForm();
+    // Initialize result object
+    const result = {
+      fields: {},
+      files: {}
+    };
     
-    form.parse(req, (err, fields, files) => {
-      if (err) return reject(err);
-      resolve({ fields, files });
+    // Create busboy instance
+    const bb = busboy({ headers: req.headers });
+    
+    // Handle file fields
+    bb.on('file', (name, file, info) => {
+      const { filename, encoding, mimeType } = info;
+      const chunks = [];
+      
+      file.on('data', (data) => {
+        chunks.push(data);
+      });
+      
+      file.on('end', () => {
+        result.files[name] = {
+          name: filename,
+          mimeType: mimeType,
+          encoding: encoding,
+          data: Buffer.concat(chunks),
+          size: Buffer.concat(chunks).length
+        };
+      });
     });
+    
+    // Handle regular fields
+    bb.on('field', (name, val) => {
+      result.fields[name] = val;
+    });
+    
+    // Handle parsing completion
+    bb.on('close', () => {
+      resolve(result);
+    });
+    
+    // Handle error
+    bb.on('error', (err) => {
+      reject(err);
+    });
+    
+    // Pipe the request to busboy
+    req.pipe(bb);
   });
 } 
