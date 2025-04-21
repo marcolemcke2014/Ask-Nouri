@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -22,6 +22,31 @@ export default function SignupPage() {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session?.user) {
+          // User is already logged in, redirect to scan page
+          router.replace('/scan');
+        }
+      } catch (error) {
+        console.error('Failed to check auth status:', error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, [router]);
+
+  // Show minimal loading state while checking auth
+  if (isCheckingAuth) {
+    return null; // Return nothing while checking auth to prevent page flash
+  }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
