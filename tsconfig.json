@@ -23,11 +23,13 @@
         "name": "next"
       }
     ],
+    /* Commenting out paths as it may cause issues with Next.js 15.3.1
     "paths": {
       "@/*": [
         "./*"
       ]
     }
+    */
   },
   "include": [
     "next-env.d.ts",
@@ -36,6 +38,8 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "archive",
+    "backup"
   ]
 }

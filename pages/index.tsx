@@ -6,8 +6,8 @@ import MobileDrawer from '../components/layout/MobileDrawer'
 import HamburgerButton from '../components/ui/HamburgerButton'
 import { useNavigation } from '../contexts/NavigationContext'
 import { useRouter } from 'next/router'
-import { supabase } from '@/lib/supabase'
-import logger from '@/lib/logger'
+import { supabase } from '../lib/supabase'
+import logger from '../lib/logger'
 
 interface CameraScannerHandle {
   captureFrame: () => void;

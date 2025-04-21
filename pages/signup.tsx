@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import Input from '../components/auth/Input';
 import SocialLoginButton from '../components/auth/SocialLoginButton';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 
 export default function SignupPage() {
   const router = useRouter();

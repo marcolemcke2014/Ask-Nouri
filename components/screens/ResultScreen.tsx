@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { XCircle } from 'lucide-react';
 import AppShell from '../layout/AppShell';
 import Button from '../ui/Button';
 import Tag from '../ui/Tag';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import { ParsedMenuItem } from '@/types/menu';
-import { FlagLevel } from '@/types/menu';
+import { ParsedMenuItem } from '../../types/menu';
+import { FlagLevel } from '../../types/menu';
 
 interface ResultData {
   text: string;

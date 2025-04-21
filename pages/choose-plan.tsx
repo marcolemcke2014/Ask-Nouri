@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 
 // Simplified plan data with updated pricing
 const PLANS = [

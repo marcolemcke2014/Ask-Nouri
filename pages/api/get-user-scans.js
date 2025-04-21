@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 /**
  * API endpoint to retrieve a user's scan history

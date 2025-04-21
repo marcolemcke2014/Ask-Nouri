@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { supabase } from '@/lib/supabase';
-import OnboardingHeader from '@/components/OnboardingHeader';
+import { supabase } from '../../lib/supabase';
+import OnboardingHeader from '../../components/OnboardingHeader';
 
 interface User {
   id: string;

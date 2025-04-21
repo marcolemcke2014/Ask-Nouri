@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '@/lib/supabase';
-import { createUserProfileIfNeeded } from '@/lib/auth';
+import { supabase } from '../../../lib/supabase';
+import { createUserProfileIfNeeded } from '../../../lib/auth';
 
 /**
  * Authentication callback handler

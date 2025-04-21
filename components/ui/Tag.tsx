@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlagLevel } from '@/types/menu';
+import { FlagLevel } from '../../types/menu';
 
 interface TagProps {
   label: string;

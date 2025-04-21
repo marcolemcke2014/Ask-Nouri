@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-// import { AgentOrchestrator, OrchestratorInput } from '@/lib/agents/orchestrator';
-import { AIProvider } from '@/types/ai';
-import { MenuAnalysisResult } from '@/lib/agents/types';
+// import { AgentOrchestrator, OrchestratorInput } from '../../lib/agents/orchestrator';
+import { AIProvider } from '../../types/ai';
+import { MenuAnalysisResult } from '../../lib/agents/types';
 
 // Detailed error response type
 interface ErrorResponse {

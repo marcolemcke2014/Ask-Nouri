@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { AIAnalysisResponse, MenuItemAnalysis } from '@/types/ai';
+import { AIAnalysisResponse, MenuItemAnalysis } from '../types/ai';
 import { v4 as uuidv4 } from 'uuid';
 
 interface AnalyzeState {

@@ -1,4 +1,4 @@
-import { ParsedMenuItem } from '@/types/menu';
+import { ParsedMenuItem } from '../types/menu';
 
 /**
  * Parse OCR text into structured menu items

@@ -4,7 +4,7 @@
  */
 
 import { Agent, OCRResult, MenuItem } from '../types';
-import { AIProvider } from '@/types/ai';
+import { AIProvider } from '../../../types/ai';
 
 export class OCRParser implements Agent<OCRResult, MenuItem[]> {
   /**

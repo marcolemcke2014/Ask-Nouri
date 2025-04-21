@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 interface HeaderProps {
   title?: string;

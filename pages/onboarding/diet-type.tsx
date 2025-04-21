@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { supabase } from '@/lib/supabase';
-import OnboardingHeader from '@/components/OnboardingHeader';
-import SelectionCard from '@/components/SelectionCard';
+import { supabase } from '../../lib/supabase';
+import OnboardingHeader from '../../components/OnboardingHeader';
+import SelectionCard from '../../components/SelectionCard';
 
 // Define the diet type options
 const DIET_PREFERENCES = [

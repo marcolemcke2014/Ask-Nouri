@@ -1,8 +1,8 @@
 /**
- * Types for the New 4-Agent Architecture
+ * Type definitions for the agent system
  */
 
-import { AIProvider } from '@/types/ai';
+import { AIProvider } from '../../types/ai';
 
 /**
  * Common AI service response format

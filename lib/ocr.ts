@@ -2,7 +2,7 @@
  * OCR implementation for text extraction from images
  */
 
-import { OCRProvider, OCRResult, OCROptions } from '@/types/ocr';
+import { OCRProvider, OCRResult, OCROptions } from '../types/ocr';
 import { extractTextWithPaddleOCR } from './ocr/paddleOCR';
 
 // Use a mock implementation for now to get the app working

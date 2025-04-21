@@ -4,7 +4,7 @@ import { OCRProvider } from '../contexts/OCRContext'
 import { MenuAnalysisProvider } from '../contexts/MenuAnalysisContext'
 import { NavigationProvider } from '../contexts/NavigationContext'
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/router'
 
 // List of paths that don't require authentication

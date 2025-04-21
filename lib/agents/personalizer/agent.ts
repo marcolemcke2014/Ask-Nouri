@@ -12,7 +12,7 @@ import {
   AIResponse
 } from '../types';
 import { generatePersonalizerPrompt } from './prompts/insights';
-import { AIProvider } from '@/types/ai';
+import { AIProvider } from '../../../types/ai';
 
 // OpenRouter integration for AI processing
 async function callAI(prompt: string, provider: AIProvider): Promise<AIResponse> {

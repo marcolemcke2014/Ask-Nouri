@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import OnboardingLayout from './layout';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 // Add type definition for component props
 interface StepWellnessProps {

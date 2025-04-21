@@ -1,6 +1,6 @@
 // pages/api/openai.js
 import OpenAI from "openai";
-import { OPENAI_API_KEY } from "@/lib/env";
+import { getEnvVar, OPENAI_API_KEY } from '../../lib/env';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

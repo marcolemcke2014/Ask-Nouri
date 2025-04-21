@@ -4,11 +4,11 @@ import AppShell from '../layout/AppShell';
 import ScannerButton from '../ui/ScannerButton';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import Button from '../ui/Button';
-import { useCameraFeed } from '@/hooks/useCameraFeed';
-import { extractTextFromImage } from '@/lib/ocr';
-import { parseMenu } from '@/lib/parseMenu';
-import { OCRProvider } from '@/types/ocr';
-import { ParsedMenuItem } from '@/types/menu';
+import { useCameraFeed } from '../../hooks/useCameraFeed';
+import { extractTextFromImage } from '../../lib/ocr';
+import { parseMenu } from '../../lib/parseMenu';
+import { OCRProvider } from '../../types/ocr';
+import { ParsedMenuItem } from '../../types/menu';
 
 /**
  * Screen showing live camera feed for menu scanning

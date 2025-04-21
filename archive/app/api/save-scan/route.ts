@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-import { extractTextFromBuffer } from '@/lib/ocr';
-import { OCRParser } from '@/lib/agents/ocr_parser/agent';
-import { OCRResult } from '@/types/ocr';
-import { supabase } from '@/lib/supabase';
+import { extractTextFromBuffer } from '../../../lib/ocr';
+import { OCRParser } from '../../../lib/agents/ocr_parser/agent';
+import { OCRResult } from '../../../types/ocr';
+import { supabase } from '../../../lib/supabase';
 
 /**
  * Type for the save scan request body

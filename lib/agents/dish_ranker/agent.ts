@@ -5,7 +5,7 @@
 
 import { Agent, MenuItem, MacroProfile, DishScore, UserProfile, AIResponse } from '../types';
 import { generateDishRankerPrompt } from './prompts/ranking';
-import { AIProvider } from '@/types/ai';
+import { AIProvider } from '../../../types/ai';
 
 // OpenRouter integration for AI processing
 async function callAI(

@@ -2,9 +2,11 @@
 // Updated for Git commit
 import busboy from 'busboy';
 import { v4 as uuidv4 } from 'uuid';
-import { supabase } from '@/lib/supabase';
-import { getUserIdForScan } from '@/lib/utils/getUserIdForScan';
-import logger from '@/lib/logger';
+import path from 'path';
+import formidable from 'formidable';
+import { supabase } from '../../lib/supabase';
+import { getUserIdForScan } from '../../lib/utils/getUserIdForScan';
+import logger from '../../lib/logger';
 
 /**
  * OPENROUTER VISION MODEL IMPLEMENTATION:

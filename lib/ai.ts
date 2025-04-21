@@ -3,7 +3,7 @@
  */
 
 import { systemPrompt } from './prompts';
-import { AIProvider } from '@/types/ai';
+import { AIProvider } from '../types/ai';
 
 // Types for API responses
 export interface AIAnalysisResponse {

@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Agent, MenuItem, MacroProfile } from '../types';
-import { AIProvider } from '@/types/ai';
+import { AIProvider } from '../../../types/ai';
 
 // Types that match our lookup table structure
 interface FoodMacros {

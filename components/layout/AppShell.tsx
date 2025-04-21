@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from './Header';
 import MobileDrawer from './MobileDrawer';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 interface AppShellProps {
   children: React.ReactNode;

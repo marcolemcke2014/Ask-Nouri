@@ -1,6 +1,6 @@
 // pages/api/anthropic.js
 import Anthropic from '@anthropic-ai/sdk';
-import { ANTHROPIC_API_KEY } from "@/lib/env";
+import { getEnvVar, ANTHROPIC_API_KEY } from '../../lib/env';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
