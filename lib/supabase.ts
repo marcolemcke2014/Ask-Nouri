@@ -14,8 +14,10 @@ console.log(`[Supabase Debug] Value of supabaseKey before createClient: --${supa
 // Set client options for improved stability
 const options = {
   auth: {
-    persistSession: false,
-    autoRefreshToken: false,
+    persistSession: true,  // Enable session persistence
+    autoRefreshToken: true, // Enable token refresh
+    detectSessionInUrl: true, // Enable detection of auth tokens in URL
+    storageKey: 'nutriflow-auth', // Set a custom storage key
   },
   global: {
     headers: {

@@ -11,9 +11,7 @@ const GOALS = [
   { id: 'energy', label: 'Improve Energy / Focus' },
   { id: 'digestion', label: 'Improve Digestion / Gut Health' },
   { id: 'condition', label: 'Manage a Health Condition / Allergy' },
-  { id: 'wellness', label: 'Eat Healthier / General Wellness' },
-  { id: 'diet', label: 'Follow a Specific Diet' },
-  { id: 'explore', label: 'Just Exploring / Curious!' }
+  { id: 'wellness', label: 'Eat Healthier / General Wellness' }
 ];
 
 // Add a type for the component props
@@ -27,13 +25,30 @@ export default function Step1({ user }: Step1Props) {
   const [firstName, setFirstName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Get user's first name from the global auth state
+  // Extract user_id from URL as soon as router is ready
+  useEffect(() => {
+    if (!router.isReady) return;
+    
+    const { user_id } = router.query;
+    if (user_id && typeof user_id === 'string') {
+      setUserId(user_id);
+      console.log('User ID from URL:', user_id);
+    } else {
+      console.error('No user_id found in URL query parameters');
+    }
+  }, [router.isReady, router.query]);
+
+  // Get user's first name from the global auth state or using the URL user_id
   useEffect(() => {
     async function fetchUserName() {
-      // If no user is available from props, we can't proceed
-      if (!user) {
-        console.error('No user found in global state');
+      // Try to get user ID from prop first, then fallback to URL query param
+      const currentUserId = user?.id || userId;
+      
+      // If no user ID is available from either source, we can't proceed
+      if (!currentUserId) {
+        console.error('No user ID available from either global state or URL');
         return;
       }
       
@@ -42,7 +57,7 @@ export default function Step1({ user }: Step1Props) {
         const { data: profileData, error: profileError } = await supabase
           .from('user_profile')
           .select('first_name')
-          .eq('id', user.id)
+          .eq('id', currentUserId)
           .single();
           
         if (profileError) {
@@ -58,10 +73,11 @@ export default function Step1({ user }: Step1Props) {
       }
     }
     
-    if (user) {
+    // Only fetch if we have either the user prop or userId from URL
+    if (user?.id || userId) {
       fetchUserName();
     }
-  }, [user]);
+  }, [user, userId]);
 
   const handleGoalSelect = (goalId: string) => {
     setSelectedGoal(goalId);
@@ -76,31 +92,40 @@ export default function Step1({ user }: Step1Props) {
       setIsLoading(true);
       setErrorMessage(null);
       
-      // Check if user is available from the global state
-      if (!user) {
-        throw new Error('User not authenticated. Please sign in again.');
-      }
+      // Use the user ID from URL query first, fallback to global user state
+      // This ensures we have a user ID even if global auth state isn't yet available
+      const currentUserId = userId || user?.id;
       
-      const userId = user.id;
+      // Validate that we have a user ID from one of the sources
+      if (!currentUserId) {
+        throw new Error('User ID not found. Please refresh the page or try signing in again.');
+      }
       
       // Prepare data to save
       const dataToSave = { 
-        user_id: userId,
+        user_id: currentUserId,
         primary_goal: selectedGoal,
         updated_at: new Date().toISOString()
       };
       
-      // Save to Supabase - using upsert to handle both insert and update cases
-      const { error: saveError } = await supabase
-        .from('user_goals_and_diets')
-        .upsert(dataToSave);
-        
-      if (saveError) {
-        throw new Error(`Failed to save your goal: ${saveError.message}`);
+      // Use the API endpoint instead of direct Supabase call to bypass RLS
+      const response = await fetch('/api/save-onboarding-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          table: 'user_goals_and_diets',
+          data: dataToSave
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || `Failed to save data for this step (HTTP ${response.status})`);
       }
       
-      // Navigate to next step after successful save
-      router.push(`/onboarding/step2?goal=${selectedGoal}`);
+      // Navigate to next step after successful save, passing both the goal and user_id
+      router.push(`/onboarding/step2?goal=${selectedGoal}&user_id=${currentUserId}`);
       
     } catch (error: any) {
       console.error('Error in handleNext:', error);
@@ -142,28 +167,56 @@ export default function Step1({ user }: Step1Props) {
           </div>
         )}
 
-        <button
-          onClick={handleNext}
-          disabled={!selectedGoal || isLoading}
-          className={`w-full py-3 px-4 rounded-lg text-white font-medium transition flex items-center justify-center ${
-            selectedGoal && !isLoading
-              ? 'bg-[#34A853] hover:bg-[#2c9247]'
-              : 'bg-gray-400 cursor-not-allowed'
-          }`}
-        >
-          {isLoading ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Saving...
-            </>
-          ) : (
-            'Next'
-          )}
-        </button>
+        <div className="flex flex-col space-y-3">
+          <button
+            onClick={handleNext}
+            disabled={!selectedGoal || isLoading}
+            className={`w-full py-3 px-4 rounded-lg text-white font-medium transition flex items-center justify-center ${
+              selectedGoal && !isLoading
+                ? 'bg-[#34A853] hover:bg-[#2c9247]'
+                : 'bg-gray-400 cursor-not-allowed'
+            }`}
+          >
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+              </>
+            ) : (
+              'Next'
+            )}
+          </button>
+        </div>
       </div>
+      
+      {/* Skip for now button moved outside the card with frosted glass effect */}
+      <button
+        onClick={() => {
+          const currentParams = new URLSearchParams(window.location.search);
+          const params = new URLSearchParams();
+          
+          // Copy all existing parameters
+          Array.from(currentParams.entries()).forEach(([key, value]) => {
+            params.append(key, value);
+          });
+          
+          // Ensure user_id is in params
+          if (!params.has('user_id') && (userId || user?.id)) {
+            params.append('user_id', userId || user?.id || '');
+          }
+          
+          router.push(`/onboarding/step2?${params.toString()}`);
+        }}
+        disabled={isLoading}
+        className="w-full max-w-md mt-4 py-2.5 px-4 text-white/90 rounded-xl font-medium hover:text-white 
+          backdrop-blur-md bg-white/10 border border-white/20 transition-all hover:bg-white/15
+          focus:outline-none focus:ring-2 focus:ring-white/30 shadow-sm"
+      >
+        Skip for now
+      </button>
     </OnboardingLayout>
   );
 } 

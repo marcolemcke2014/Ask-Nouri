@@ -5,6 +5,9 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    fontFamily: {
+      sans: ['Poppins', 'sans-serif'],
+    },
     container: {
       center: true,
       padding: "2rem",
@@ -86,6 +89,7 @@ module.exports = {
         },
         'figma-green': '#145345',
         'figma-green-light': '#86efac',
+        'off-white': '#f8f9fa',
       },
       borderRadius: {
         lg: "var(--radius)",

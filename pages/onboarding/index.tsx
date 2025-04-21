@@ -11,36 +11,18 @@ interface User {
   };
 }
 
-export default function Onboarding({ user }: { user: User | null }) {
+export default function OnboardingIndex() {
   const router = useRouter();
-  
-  // Check authentication and redirect to first onboarding step
+
   useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      console.log('[ONBOARDING UI] Checking auth status before redirecting');
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        console.log('[ONBOARDING UI] No user session found, redirecting to login');
-        router.push('/login');
-      } else {
-        console.log('[ONBOARDING UI] User authenticated, redirecting to welcome step');
-        router.push('/onboarding/welcome');
-      }
-    };
-    
-    checkAuthAndRedirect();
+    // Redirect to the welcome page on component mount
+    router.replace('/onboarding/welcome');
   }, [router]);
-  
+
+  // Return a loading state while redirecting
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Head>
-        <title>Getting Started - NutriFlow</title>
-      </Head>
-      
-      <div className="text-center">
-        <div className="animate-pulse text-xl text-gray-600">Setting up your profile...</div>
-      </div>
+    <div className="flex items-center justify-center">
+      <p className="text-white">Loading onboarding...</p>
     </div>
   );
 } 

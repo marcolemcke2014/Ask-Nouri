@@ -1,39 +1,91 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 import Head from 'next/head';
-import Image from 'next/image';
+import Input from '../components/auth/Input';
+import SocialLoginButton from '../components/auth/SocialLoginButton';
+import { supabase } from '../lib/supabase';
 
-export default function Login() {
+export default function LoginPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSocialLoading, setIsSocialLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-  // Check if user is already logged in
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log('[AUTH] Already logged in, redirecting...');
-        router.push('/dashboard');
-      }
-    };
-    checkSession();
-  }, [router]);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submitted');
+    setErrorMessage('');
+    setPasswordError('');
+    
+    // Basic validation
+    if (!email) {
+      setErrorMessage('Please enter your email address');
+      return;
+    }
+    
+    if (!password) {
+      setPasswordError('Please enter your password');
+      return;
+    }
+    
+    setIsLoading(true);
 
-  // Handle Google login
-  const handleGoogleLogin = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.user) {
+        // Redirect to scan page
+        router.push('/scan');
+      }
+    } catch (error: any) {
+      console.error('Login error:', error.message);
+      // More user-friendly error message based on the error
+      if (error.message.includes('credentials')) {
+        setErrorMessage('The email or password you entered is incorrect. Please try again.');
+      } else {
+        setErrorMessage(error.message || 'Failed to sign in. Please try again later.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailChange = (value: string) => {
+    console.log('Setting email to:', value);
+    setEmail(value);
+    if (errorMessage) setErrorMessage(''); // Clear error when user types
+  };
+
+  const handlePasswordChange = (value: string) => {
+    console.log('Setting password to:', value);
+    setPassword(value);
+    if (passwordError) setPasswordError(''); // Clear error when user types
+  };
+
+  const handleSocialLogin = async (provider: 'google') => {
+    try {
+      setIsSocialLoading(true);
+      setErrorMessage('');
       
-      console.log('[AUTH] Initiating Google login...');
+      console.log(`Initiating login with ${provider}`);
       
-      // Redirect to Google login
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider,
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`
+          redirectTo: `${window.location.origin}/auth/callback`,
+          // You can add additional scopes if needed, for example:
+          // scopes: 'email profile'
         }
       });
 
@@ -41,67 +93,125 @@ export default function Login() {
         throw error;
       }
       
-      console.log('[AUTH] Google login initiated:', data);
-    } catch (err: any) {
-      console.error('[AUTH] Login error:', err.message);
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      // If successful, Supabase will redirect the user to the provider's login page
+      // We don't need to do anything else here as the redirect happens automatically
+      
+    } catch (error: any) {
+      console.error(`${provider} login error:`, error.message);
+      setErrorMessage(`Failed to sign in with ${provider}. ${error.message}`);
+      setIsSocialLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50 p-4">
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif]">
       <Head>
         <title>Login - NutriFlow</title>
+        <meta name="description" content="Login to your NutriFlow account" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
       </Head>
-
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">NutriFlow</h1>
-          <p className="text-gray-600">Your personalized nutrition assistant</p>
+      
+      <main className="flex-1 flex flex-col items-center justify-center w-full px-4 py-8 sm:px-6">
+        {/* Logo */}
+        <div className="mb-8 h-20 w-64">
+          <img 
+            src="/images/Forkcast_Logo.svg" 
+            alt="Forkcast Logo" 
+            className="h-full w-full"
+          />
         </div>
+        
+        <div className="w-full max-w-[325px] bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5">
+          {/* Welcome Header */}
+          <div className="mb-6">
+            <h1 className="text-xl sm:text-2xl font-light text-off-white text-center">Welcome Back</h1>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-semibold mb-6 text-center">Log in or sign up</h2>
-          
-          {error && (
-            <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4">
-              {error}
+          {/* Show general error message at the top if needed */}
+          {errorMessage && (errorMessage.includes('try again later') || errorMessage.includes('Failed to sign in with')) && (
+            <div className="mb-3 p-2.5 bg-red-100 border border-red-300 text-red-800 rounded-md text-sm">
+              {errorMessage}
             </div>
           )}
-          
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-800 font-medium rounded-md px-4 py-3 mb-4 hover:bg-gray-50 transition-colors"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24">
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                fill="#EA4335"
-              />
-            </svg>
-            {loading ? 'Connecting...' : 'Continue with Google'}
-          </button>
-          
-          <div className="text-center text-sm text-gray-500 mt-4">
-            By signing up, you agree to our Terms of Service and Privacy Policy
+
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="w-full space-y-3">
+            <Input
+              id="email"
+              label="Email address"
+              type="email"
+              placeholder="Your email"
+              value={email}
+              onChange={handleEmailChange}
+              error={errorMessage && !errorMessage.includes('Failed to sign in with') ? errorMessage : ''}
+              autoFocus={true}
+            />
+
+            <Input
+              id="password"
+              label="Password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={handlePasswordChange}
+              error={passwordError}
+            />
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors mt-7 flex items-center justify-center shadow-md text-sm"
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </>
+              ) : (
+                'Log in'
+              )}
+            </button>
+          </form>
+
+          {/* Social Login Divider */}
+          <div className="flex items-center my-6">
+            <div className="flex-1 h-px bg-off-white/30"></div>
+            <span className="px-3 text-xs text-off-white/90">Or</span>
+            <div className="flex-1 h-px bg-off-white/30"></div>
+          </div>
+
+          {/* Social Login Button - Google only */}
+          <div className="w-full">
+            <SocialLoginButton
+              provider="google"
+              onClick={() => handleSocialLogin('google')}
+              isLoading={isSocialLoading}
+            />
+          </div>
+
+          {/* Sign Up Link and Forgot Password together with consistent styling */}
+          <div className="mt-6 text-center space-y-1">
+            <p className="text-xs text-[#84F7AC]">
+              Don't have an account?{' '}
+              <Link href="/signup">
+                <a className="font-normal hover:underline">
+                  Sign up
+                </a>
+              </Link>
+            </p>
+            
+            <Link href="/forgot-password">
+              <a className="text-xs text-[#84F7AC] hover:underline transition-colors">
+                Forgot password?
+              </a>
+            </Link>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 } 

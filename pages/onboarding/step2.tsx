@@ -15,12 +15,24 @@ export default function OnboardingStep2({ user }: Step2Props) {
     // Only proceed with redirection if router is ready and query parameters are available
     if (!router.isReady) return;
     
-    const { goal } = router.query;
+    const { goal, user_id } = router.query;
     
+    // Validate we have the required parameters
     if (!goal) {
       console.warn('No goal parameter found in URL, redirecting to step1');
       router.replace('/onboarding/step1');
       return;
+    }
+    
+    // Validate user_id is present
+    if (!user_id) {
+      console.warn('No user_id parameter found in URL');
+      // Try to get it from the global user state
+      const currentUserId = user?.id;
+      if (!currentUserId) {
+        console.error('No user ID available from URL or global state');
+        // Proceed anyway, but log the error
+      }
     }
     
     console.log(`Redirecting based on goal: ${goal}`);
@@ -41,9 +53,21 @@ export default function OnboardingStep2({ user }: Step2Props) {
         break;
     }
     
-    // Redirect to the appropriate next step, keeping the goal parameter
-    router.replace(`${nextPath}?goal=${goal}`);
-  }, [router.isReady, router.query]);
+    // Construct query parameters for the next step, including user_id if available
+    const queryParams = new URLSearchParams();
+    queryParams.append('goal', goal.toString());
+    
+    // Add user_id to query parameters if available
+    if (user_id) {
+      queryParams.append('user_id', user_id.toString());
+    } else if (user?.id) {
+      // Fallback to global user state if URL doesn't have it
+      queryParams.append('user_id', user.id);
+    }
+    
+    // Redirect to the appropriate next step with all parameters
+    router.replace(`${nextPath}?${queryParams.toString()}`);
+  }, [router.isReady, router.query, user]);
 
   // Render minimal loading state while redirection happens
   return (

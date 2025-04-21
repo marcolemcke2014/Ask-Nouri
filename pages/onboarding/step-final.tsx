@@ -25,8 +25,9 @@ export default function StepFinal({ user }: StepFinalProps) {
   const [gender, setGender] = useState<string | null>(null);
   
   // UI state
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   
   // Extract query parameters when router is ready
   useEffect(() => {
@@ -40,19 +41,34 @@ export default function StepFinal({ user }: StepFinalProps) {
     setOnboardingData(params);
   }, [router.isReady, router.query]);
   
+  // Extract user_id from URL as soon as router is ready
+  useEffect(() => {
+    if (!router.isReady) return;
+    
+    const { user_id } = router.query;
+    if (user_id && typeof user_id === 'string') {
+      setUserId(user_id);
+      console.log('User ID from URL:', user_id);
+    } else {
+      console.warn('No user_id found in URL query parameters');
+    }
+  }, [router.isReady, router.query]);
+  
   // Handle form submission
   const handleFinishSetup = async () => {
     try {
       setIsLoading(true);
       setErrorMessage(null);
       
-      // Use user from props instead of fetching again
-      if (!user) {
-        throw new Error('No authenticated user found. Please sign in again.');
+      // Get userId from URL query parameter first, fallback to user prop
+      const currentUserId = userId || user?.id;
+      
+      // Check if user ID is available from one of the sources
+      if (!currentUserId) {
+        throw new Error('User ID not found. Please refresh the page or try signing in again.');
       }
       
-      const userId = user.id;
-      console.log('Saving onboarding data for user:', userId);
+      console.log('Saving onboarding data for user:', currentUserId);
       
       // Convert boolean strings to actual booleans
       const booleanFields = ['intermittentFasting'];
@@ -73,7 +89,7 @@ export default function StepFinal({ user }: StepFinalProps) {
       
       // Prepare health data object
       const healthData = {
-        user_id: userId,
+        user_id: currentUserId,
         height: height ? parseInt(height, 10) : null,
         weight: weight ? parseInt(weight, 10) : null,
         age: age ? parseInt(age, 10) : null,
@@ -94,7 +110,7 @@ export default function StepFinal({ user }: StepFinalProps) {
       
       // Prepare goals and diets data object
       const goalsAndDietsData = {
-        user_id: userId,
+        user_id: currentUserId,
         primary_goal: onboardingData.goal || null,
         protein_focus: onboardingData.proteinFocus || null,
         avoid_bloat: onboardingData.avoidBloat === 'true',
@@ -121,17 +137,59 @@ export default function StepFinal({ user }: StepFinalProps) {
       console.log('Prepared health data:', healthData);
       console.log('Prepared goals and diets data:', goalsAndDietsData);
       
-      // Save to Supabase
-      const { error: healthError } = await supabase.from('user_health_data').upsert(healthData);
-      if (healthError) {
-        console.error('Error saving health data:', healthError);
-        throw new Error(`Failed to save health data: ${healthError.message}`);
+      // Save health data using API endpoint
+      const healthResponse = await fetch('/api/save-onboarding-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          table: 'user_health_data',
+          data: healthData
+        })
+      });
+      
+      const healthResult = await healthResponse.json();
+      
+      if (!healthResponse.ok) {
+        throw new Error(healthResult.error || `Failed to save health data (HTTP ${healthResponse.status})`);
       }
       
-      const { error: goalsError } = await supabase.from('user_goals_and_diets').upsert(goalsAndDietsData);
-      if (goalsError) {
-        console.error('Error saving goals data:', goalsError);
-        throw new Error(`Failed to save goals data: ${goalsError.message}`);
+      // Save goals and diets data using API endpoint
+      const goalsResponse = await fetch('/api/save-onboarding-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          table: 'user_goals_and_diets',
+          data: goalsAndDietsData
+        })
+      });
+      
+      const goalsResult = await goalsResponse.json();
+      
+      if (!goalsResponse.ok) {
+        throw new Error(goalsResult.error || `Failed to save goals data (HTTP ${goalsResponse.status})`);
+      }
+      
+      // Update user profile to mark onboarding as completed
+      const profileResponse = await fetch('/api/save-onboarding-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          table: 'user_profile',
+          data: {
+            id: currentUserId, // For user_profile table, use 'id' as primary key
+            onboarding_completed: true,
+            updated_at: new Date().toISOString()
+          }
+        })
+      });
+      
+      const profileResult = await profileResponse.json();
+      
+      if (!profileResponse.ok) {
+        // Log error but don't throw - we've already saved the main data
+        console.error(`Failed to mark onboarding as completed: ${profileResult.error || `HTTP ${profileResponse.status}`}`);
+      } else {
+        console.log('Successfully marked onboarding as completed');
       }
       
       console.log('Successfully saved all onboarding data!');
