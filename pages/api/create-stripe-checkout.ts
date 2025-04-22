@@ -109,7 +109,7 @@ export default async function handler(
       mode: 'subscription',
       line_items: [{ price: stripePriceId, quantity: 1 }],
       customer: customerId,
-      success_url: `${siteUrl}/scan?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${siteUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/choose-plan`,
       client_reference_id: userId,
       subscription_data: {
