@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabase';
+import { loadStripe } from '@stripe/stripe-js';
+
+// Initialize Stripe.js
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 // Simplified plan data with updated pricing
 const PLANS = [
@@ -76,37 +80,75 @@ export default function ChoosePlan() {
       const { new_user_id } = router.query;
       if (!new_user_id || typeof new_user_id !== 'string') {
         setErrorMessage('User ID not found in URL. Cannot save plan.');
+        setIsLoading(false);
         return;
       }
       
       const userId = new_user_id as string;
 
-      // Call our API endpoint
-      const response = await fetch('/api/save-plan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: userId,
-          planType: selectedPlan 
-        })
-      });
+      // For free plan, use the existing flow
+      if (selectedPlan === 'free') {
+        // Call our API endpoint to save the free plan selection
+        const response = await fetch('/api/save-plan', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            planType: selectedPlan 
+          })
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || `Failed to save plan (HTTP ${response.status})`);
+        if (!response.ok) {
+          throw new Error(result.error || `Failed to save plan (HTTP ${response.status})`);
+        }
+        
+        // Wait a brief moment before redirecting
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Pass the user_id in the URL query parameter
+        router.push(`/onboarding/step1?user_id=${userId}`);
+      } 
+      // For paid plans, redirect to Stripe checkout
+      else {
+        // Call our Stripe checkout API endpoint
+        const response = await fetch('/api/create-stripe-checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            planId: selectedPlan // 'weekly' or 'annual'
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || `Failed to create checkout session (HTTP ${response.status})`);
+        }
+
+        // Get the Stripe session ID
+        const { sessionId } = result;
+
+        // Load Stripe and redirect to checkout
+        const stripe = await stripePromise;
+        if (!stripe) {
+          throw new Error('Failed to initialize Stripe');
+        }
+
+        const { error } = await stripe.redirectToCheckout({ sessionId });
+        
+        if (error) {
+          throw new Error(error.message || 'Failed to redirect to Stripe checkout');
+        }
       }
-      
-      // Wait a brief moment before redirecting
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Pass the user_id in the URL query parameter
-      router.push(`/onboarding/step1?user_id=${userId}`);
     } catch (error: any) {
       setErrorMessage(error.message || 'An unexpected error occurred. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
