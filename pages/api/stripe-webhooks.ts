@@ -228,9 +228,9 @@ export default async function handler(
 
         // Determine plan type based on price ID
         let planType = 'unknown';
-        if (priceId === process.env.STRIPE_PRICE_ID_WEEKLY) {
+        if (priceId === process.env.STRIPE_WEEKLY_PRICE_ID) {
           planType = 'weekly';
-        } else if (priceId === process.env.STRIPE_PRICE_ID_ANNUAL) {
+        } else if (priceId === process.env.STRIPE_ANNUALLY_PRICE_ID) {
           planType = 'annual';
         }
 
