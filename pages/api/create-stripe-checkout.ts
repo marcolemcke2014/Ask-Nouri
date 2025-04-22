@@ -103,7 +103,7 @@ export default async function handler(
     }
 
     // Create Stripe Checkout Session
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.asknouri.com';
     
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',

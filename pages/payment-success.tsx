@@ -118,7 +118,7 @@ export default function PaymentSuccess() {
           
           {/* Help Link */}
           <p className="text-off-white/50 text-xs mt-6">
-            Need help? <a href="mailto:support@nutriflow.app" className="text-[#84F7AC]">Contact support</a>
+            Need help? <a href="mailto:support@asknouri.com" className="text-[#84F7AC]">Contact support</a>
           </p>
         </div>
       </div>
