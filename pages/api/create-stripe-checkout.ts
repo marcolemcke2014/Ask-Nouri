@@ -100,7 +100,7 @@ export default async function handler(
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('user_profile')
       .select('email, stripe_customer_id')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single();
 
     console.log('[Stripe API] Profile query result:', { 
@@ -138,7 +138,7 @@ export default async function handler(
         const { data: newProfile, error: createError } = await supabaseAdmin
           .from('user_profile')
           .insert({
-            user_id: userId,
+            id: userId,
             email: authUser.user?.email,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -200,7 +200,7 @@ export default async function handler(
         const { error: updateError } = await supabaseAdmin
           .from('user_profile')
           .update({ stripe_customer_id: stripeCustomerId })
-          .eq('user_id', userId);
+          .eq('id', userId);
 
         if (updateError) {
           console.error('[Stripe API] Failed to update user profile with Stripe customer ID:', updateError);
