@@ -106,10 +106,11 @@ export default function ChoosePlan() {
           throw new Error(result.error || `Failed to save plan (HTTP ${response.status})`);
         }
         
-        // Wait a brief moment before redirecting
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // API call was successful
+        console.log('API call successful, plan saved.');
+        console.log(`Navigating to onboarding step 1 for user: ${userId}`);
         
-        // Pass the user_id in the URL query parameter
+        // Immediately redirect to the first onboarding step with the user_id
         router.push(`/onboarding/step1?user_id=${userId}`);
       } 
       // For paid plans, redirect to Stripe checkout
