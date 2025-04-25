@@ -40,25 +40,24 @@ export default function Step1({ user }: Step1Props) {
     }
   }, [router.isReady, router.query]);
 
-  // Get user's first name from the global auth state or using the URL user_id
+  // Get user's first name prioritizing the URL user_id
   useEffect(() => {
     async function fetchUserName() {
-      // Try to get user ID from prop first, then fallback to URL query param
-      const currentUserId = user?.id || userId;
+      // Only proceed if we have a userIdFromQuery
+      const userIdFromQuery = userId;
       
-      // If no user ID is available from either source, we can't proceed
-      if (!currentUserId) {
-        console.error('No user ID available from either global state or URL');
+      if (!userIdFromQuery) {
+        console.error('No user ID available from URL query parameter');
         return;
       }
       
       try {
-        // Get user profile to get the first name
+        // Get user profile to get the first name using maybeSingle() instead of single()
         const { data: profileData, error: profileError } = await supabase
           .from('user_profile')
           .select('first_name')
-          .eq('id', currentUserId)
-          .single();
+          .eq('id', userIdFromQuery)
+          .maybeSingle();
           
         if (profileError) {
           console.error('Error fetching user profile:', profileError);
@@ -73,11 +72,11 @@ export default function Step1({ user }: Step1Props) {
       }
     }
     
-    // Only fetch if we have either the user prop or userId from URL
-    if (user?.id || userId) {
+    // Only fetch if we have the userId from URL
+    if (userId) {
       fetchUserName();
     }
-  }, [user, userId]);
+  }, [userId]);
 
   const handleGoalSelect = (goalId: string) => {
     setSelectedGoal(goalId);
@@ -92,18 +91,14 @@ export default function Step1({ user }: Step1Props) {
       setIsLoading(true);
       setErrorMessage(null);
       
-      // Use the user ID from URL query first, fallback to global user state
-      // This ensures we have a user ID even if global auth state isn't yet available
-      const currentUserId = userId || user?.id;
-      
-      // Validate that we have a user ID from one of the sources
-      if (!currentUserId) {
-        throw new Error('User ID not found. Please refresh the page or try signing in again.');
+      // Use ONLY the user ID from URL query
+      if (!userId) {
+        throw new Error('User ID not found in URL query. Please refresh the page or try signing in again.');
       }
       
       // Prepare data to save
       const dataToSave = { 
-        user_id: currentUserId,
+        user_id: userId,
         primary_goal: selectedGoal,
         updated_at: new Date().toISOString()
       };
@@ -125,7 +120,7 @@ export default function Step1({ user }: Step1Props) {
       }
       
       // Navigate to next step after successful save, passing both the goal and user_id
-      router.push(`/onboarding/step2?goal=${selectedGoal}&user_id=${currentUserId}`);
+      router.push(`/onboarding/step2?goal=${selectedGoal}&user_id=${userId}`);
       
     } catch (error: any) {
       console.error('Error in handleNext:', error);
