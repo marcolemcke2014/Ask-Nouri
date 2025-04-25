@@ -58,42 +58,81 @@ export default async function handler(
       return res.status(400).json({ error: 'Invalid planId. Must be "weekly" or "annual"' });
     }
 
-    // Get user profile
+    // Get or create user profile
+    let userProfile;
+    let stripeCustomerId;
+
+    // Try to get existing user profile
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('user_profile')
       .select('email, stripe_customer_id')
       .eq('user_id', userId)
       .single();
 
+    // If user profile not found, try to get the user from auth and create a profile
     if (profileError || !profile) {
-      return res.status(404).json({ error: 'User profile not found' });
+      console.log(`User profile not found for ID: ${userId}, attempting to retrieve from auth...`);
+      
+      // Check if user exists in auth
+      const { data: authUser, error: authError } = await supabaseAdmin
+        .auth
+        .admin
+        .getUserById(userId);
+      
+      if (authError || !authUser) {
+        console.error('User not found in auth:', authError);
+        return res.status(404).json({ error: 'User not found in authentication system' });
+      }
+
+      // User exists in auth but not in profile, create a profile
+      const { data: newProfile, error: createError } = await supabaseAdmin
+        .from('user_profile')
+        .insert({
+          user_id: userId,
+          email: authUser.user?.email,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          onboarded: false,
+          plan_type: 'pending' // Will be updated after checkout
+        })
+        .select('email, stripe_customer_id')
+        .single();
+      
+      if (createError || !newProfile) {
+        console.error('Failed to create user profile:', createError);
+        return res.status(500).json({ error: 'Failed to create user profile' });
+      }
+      
+      console.log(`Created new profile for user ${userId}`);
+      userProfile = newProfile;
+    } else {
+      // Existing profile found
+      userProfile = profile;
     }
 
     // Get or create Stripe customer
-    let customerId: string;
-
-    if (profile.stripe_customer_id) {
+    if (userProfile.stripe_customer_id) {
       // Use existing customer
-      customerId = profile.stripe_customer_id;
+      stripeCustomerId = userProfile.stripe_customer_id;
     } else {
       // Create new customer
-      if (!profile.email) {
+      if (!userProfile.email) {
         return res.status(400).json({ error: 'User email is required to create a Stripe customer' });
       }
 
       const customer = await stripe.customers.create({
-        email: profile.email,
+        email: userProfile.email,
         metadata: {
           supabaseUserId: userId
         }
       });
 
-      customerId = customer.id;
+      stripeCustomerId = customer.id;
 
       // Update user profile with Stripe customer ID
       const { error: updateError } = await supabaseAdmin
         .from('user_profile')
-        .update({ stripe_customer_id: customerId })
+        .update({ stripe_customer_id: stripeCustomerId })
         .eq('user_id', userId);
 
       if (updateError) {
@@ -108,7 +147,7 @@ export default async function handler(
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: stripePriceId, quantity: 1 }],
-      customer: customerId,
+      customer: stripeCustomerId,
       success_url: `${siteUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/choose-plan`,
       client_reference_id: userId,
