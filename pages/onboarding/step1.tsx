@@ -91,14 +91,17 @@ export default function Step1({ user }: Step1Props) {
       setIsLoading(true);
       setErrorMessage(null);
       
-      // Use ONLY the user ID from URL query
-      if (!userId) {
-        throw new Error('User ID not found in URL query. Please refresh the page or try signing in again.');
+      // Use the user ID from URL query first, fallback to global user state
+      const currentUserId = userId || user?.id;
+      
+      // Validate that we have a user ID from one of the sources
+      if (!currentUserId) {
+        throw new Error('User ID not found. Please refresh the page or try signing in again.');
       }
       
       // Prepare data to save
       const dataToSave = { 
-        user_id: userId,
+        user_id: currentUserId,
         primary_goal: selectedGoal,
         updated_at: new Date().toISOString()
       };
@@ -120,7 +123,7 @@ export default function Step1({ user }: Step1Props) {
       }
       
       // Navigate to next step after successful save, passing both the goal and user_id
-      router.push(`/onboarding/step2?goal=${selectedGoal}&user_id=${userId}`);
+      router.push(`/onboarding/step2?goal=${selectedGoal}&user_id=${currentUserId}`);
       
     } catch (error: any) {
       console.error('Error in handleNext:', error);
