@@ -81,7 +81,7 @@ function MyApp({ Component, pageProps }) {
         authListener.subscription.unsubscribe()
       }
     }
-  }, [router.pathname, router.isReady, router])
+  }, [router.pathname, router.isReady, router.push, router.replace])
 
   if (loading) {
     // Show loading screen while checking auth
