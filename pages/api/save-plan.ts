@@ -41,7 +41,7 @@ export default async function handler(
       .update({ 
           plan_type: planType
       })
-      .eq('user_id', userId)
+      .eq('id', userId)
       .select() // Select to confirm update
       .single(); // Expecting only one row
 
