@@ -69,46 +69,16 @@ export default async function handler(
       .eq('user_id', userId)
       .single();
 
-    // If user profile not found, try to get the user from auth and create a profile
+    // If user profile not found, return a specific error
     if (profileError || !profile) {
-      console.log(`User profile not found for ID: ${userId}, attempting to retrieve from auth...`);
-      
-      // Check if user exists in auth
-      const { data: authUser, error: authError } = await supabaseAdmin
-        .auth
-        .admin
-        .getUserById(userId);
-      
-      if (authError || !authUser) {
-        console.error('User not found in auth:', authError);
-        return res.status(404).json({ error: 'User not found in authentication system' });
-      }
-
-      // User exists in auth but not in profile, create a profile
-      const { data: newProfile, error: createError } = await supabaseAdmin
-        .from('user_profile')
-        .insert({
-          user_id: userId,
-          email: authUser.user?.email,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          onboarded: false,
-          plan_type: 'pending' // Will be updated after checkout
-        })
-        .select('email, stripe_customer_id')
-        .single();
-      
-      if (createError || !newProfile) {
-        console.error('Failed to create user profile:', createError);
-        return res.status(500).json({ error: 'Failed to create user profile' });
-      }
-      
-      console.log(`Created new profile for user ${userId}`);
-      userProfile = newProfile;
-    } else {
-      // Existing profile found
-      userProfile = profile;
+      console.error(`User profile not found for ID: ${userId}. User exists in Auth but not in user_profile table.`);
+      return res.status(404).json({ 
+        error: 'User profile record not found. Please complete the registration process first.', 
+        details: 'The user exists in authentication but is missing a profile record.'
+      });
     }
+
+    userProfile = profile;
 
     // Get or create Stripe customer
     if (userProfile.stripe_customer_id) {
