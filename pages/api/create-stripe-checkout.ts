@@ -60,6 +60,17 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // In development mode, optionally bypass processing to improve HMR stability
+  if (process.env.NODE_ENV === 'development' && req.headers['x-skip-in-dev']) {
+    console.log('[Stripe API] Bypassing in development mode');
+    return res.status(200).json({ 
+      success: true, 
+      mock: true, 
+      message: 'Bypassed in development mode',
+      sessionId: 'mock-session-id-123456789'
+    });
+  }
+
   try {
     // Extract and validate request data
     const { planId, userId } = req.body;

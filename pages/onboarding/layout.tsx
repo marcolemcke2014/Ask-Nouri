@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
@@ -39,8 +39,8 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({ children, currentSt
     }
   }, [router.pathname, providedStep]);
 
-  // Generate progress dots
-  const renderProgressDots = () => {
+  // Memoize the progress dots rendering function
+  const renderProgressDots = useCallback(() => {
     return (
       <div className="flex justify-center space-x-2 mb-4">
         {Array.from({ length: TOTAL_STEPS }).map((_, index) => (
@@ -57,7 +57,7 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({ children, currentSt
         ))}
       </div>
     );
-  };
+  }, [currentStep]); // Only re-create when currentStep changes
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#145328]">

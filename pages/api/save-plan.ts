@@ -15,6 +15,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // In development mode, optionally bypass processing to improve HMR stability
+  if (process.env.NODE_ENV === 'development' && req.headers['x-skip-in-dev']) {
+    console.log('[API /save-plan] Bypassing in development mode');
+    return res.status(200).json({ success: true, mock: true, message: 'Bypassed in development mode' });
+  }
+
   // Check for required environment variables
   if (!supabaseAdmin) {
     console.error('[API /save-plan] Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY');
