@@ -38,12 +38,12 @@ function MyApp({ Component, pageProps }) {
         // Check if user needs to be redirected to login
         const currentPath = router.pathname
         const isPublicPath = PUBLIC_PATHS.includes(currentPath);
-        const isOnboardingPath = currentPath.startsWith('/onboarding');
+        const isOnboardingPath = currentPath.startsWith('/onboarding') || currentPath === '/payment-success'; // Include payment-success
         const hasSession = !!session?.user;
         
         console.log('[AUTH Check]', { currentPath, isPublicPath, hasSession, DEV_MODE, isOnboardingPath });
         
-        // Simplified check: Redirect if not public, not onboarding, and no session
+        // Simplified check: Redirect if not public, not onboarding/success, and no session
         if (!isPublicPath && !isOnboardingPath && !hasSession) { 
           console.log(`[AUTH] Redirecting unauthenticated user from restricted path (${currentPath}) to login`);
           router.push('/login'); 
@@ -71,14 +71,14 @@ function MyApp({ Component, pageProps }) {
         // Check conditions before redirecting
         const currentPath = router.pathname;
         const isPublicPath = PUBLIC_PATHS.includes(currentPath);
-        const isOnboardingPath = currentPath.startsWith('/onboarding');
+        const isOnboardingPath = currentPath.startsWith('/onboarding') || currentPath === '/payment-success'; // Include payment-success
         
-        // Simplified check: Redirect if not public and not onboarding after sign out
+        // Simplified check: Redirect if not public and not onboarding/success after sign out
         if (!isPublicPath && !isOnboardingPath) {
           console.log(`[AUTH] Redirecting signed out user from restricted path (${currentPath}) to login`);
           router.push('/login')
         } else {
-          console.log(`[AUTH] Not redirecting from ${currentPath} after sign out (public path or onboarding path)`);
+          console.log(`[AUTH] Not redirecting from ${currentPath} after sign out (public, onboarding, or success path)`);
         }
       }
     })
@@ -102,16 +102,16 @@ function MyApp({ Component, pageProps }) {
     )
   }
 
-  // Restore ALL providers
+  // Restore ALL providers --> // Re-enabling providers
   return (
     <NavigationProvider>
-      <UserProfileProvider>
-        <OCRProvider>
-          <MenuAnalysisProvider>
+     <UserProfileProvider>
+       <OCRProvider>
+         <MenuAnalysisProvider>
             <Component {...pageProps} user={user} />
-          </MenuAnalysisProvider>
-        </OCRProvider>
-      </UserProfileProvider>
+         </MenuAnalysisProvider>
+       </OCRProvider>
+     </UserProfileProvider>
     </NavigationProvider>
   );
 }

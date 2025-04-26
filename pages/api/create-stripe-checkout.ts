@@ -84,13 +84,13 @@ export default async function handler(
     // Map planId to Stripe Price ID
     let stripePriceId;
     console.log('[Stripe API] Mapping planId to Stripe Price ID...');
-    if (planId === 'weekly') {
+    if (planId === 'Weekly Plan') {
       if (!process.env.STRIPE_WEEKLY_PRICE_ID) {
         console.error('[Stripe API] Missing STRIPE_WEEKLY_PRICE_ID environment variable');
         return res.status(500).json({ error: 'Missing STRIPE_WEEKLY_PRICE_ID environment variable' });
       }
       stripePriceId = process.env.STRIPE_WEEKLY_PRICE_ID;
-    } else if (planId === 'annual') {
+    } else if (planId === 'Annual Plan') {
       if (!process.env.STRIPE_ANNUALLY_PRICE_ID) {
         console.error('[Stripe API] Missing STRIPE_ANNUALLY_PRICE_ID environment variable');
         return res.status(500).json({ error: 'Missing STRIPE_ANNUALLY_PRICE_ID environment variable' });
@@ -98,7 +98,7 @@ export default async function handler(
       stripePriceId = process.env.STRIPE_ANNUALLY_PRICE_ID;
     } else {
       console.error('[Stripe API] Invalid planId:', planId);
-      return res.status(400).json({ error: 'Invalid planId. Must be "weekly" or "annual"' });
+      return res.status(400).json({ error: 'Invalid planId. Must be "Weekly Plan" or "Annual Plan"' });
     }
     console.log('[Stripe API] Selected Stripe Price ID:', stripePriceId);
 

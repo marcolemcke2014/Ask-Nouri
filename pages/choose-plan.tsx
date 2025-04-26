@@ -10,7 +10,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 // Simplified plan data with updated pricing
 const PLANS = [
   {
-    id: 'weekly',
+    id: 'Weekly Plan',
     name: 'Weekly Plan',
     price: '€1.99',
     period: 'per week',
@@ -24,7 +24,7 @@ const PLANS = [
     footer: 'Perfect if you want flexibility without missing out.'
   },
   {
-    id: 'annual',
+    id: 'Annual Plan',
     name: 'Annual Plan',
     price: '€19.99',
     period: 'per year',
@@ -38,7 +38,7 @@ const PLANS = [
     footer: 'One choice today = 365 days of smarter eating.'
   },
   {
-    id: 'free',
+    id: 'Free Plan',
     name: 'Free Trial',
     price: '€0',
     period: 'limited',
@@ -54,12 +54,12 @@ const PLANS = [
 
 export default function ChoosePlan() {
   const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState<string>('weekly'); // Default to weekly plan now
+  const [selectedPlan, setSelectedPlan] = useState<string>('Weekly Plan');
   const [isPromoOpen, setIsPromoOpen] = useState<boolean>(false);
   const [promoCode, setPromoCode] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [expandedPlans, setExpandedPlans] = useState<string[]>(['weekly']); // Track expanded plans, initialize with default selection
+  const [expandedPlans, setExpandedPlans] = useState<string[]>(['Weekly Plan']);
   
   // Handle plan selection
   const handlePlanSelect = (planId: string) => {
@@ -87,7 +87,7 @@ export default function ChoosePlan() {
       const userId = new_user_id as string;
 
       // For free plan, use the existing flow
-      if (selectedPlan === 'free') {
+      if (selectedPlan === 'Free Plan') {
         // Call our API endpoint to save the free plan selection
         const response = await fetch('/api/save-plan', {
           method: 'POST',
@@ -108,10 +108,10 @@ export default function ChoosePlan() {
         
         // API call was successful
         console.log('API call successful, plan saved.');
-        console.log(`Navigating to onboarding step 1 for user: ${userId}`);
+        console.log(`Navigating to payment success page for user: ${userId}`);
         
-        // Immediately redirect to the first onboarding step with the user_id
-        router.push(`/onboarding/step1?user_id=${userId}`);
+        // Redirect to the payment success page
+        router.push(`/payment-success`);
       } 
       // For paid plans, redirect to Stripe checkout
       else {
@@ -123,7 +123,7 @@ export default function ChoosePlan() {
           },
           body: JSON.stringify({
             userId: userId,
-            planId: selectedPlan // 'weekly' or 'annual'
+            planId: selectedPlan
           })
         });
 
@@ -241,7 +241,7 @@ export default function ChoosePlan() {
                         <div className="w-full">
                           <h3 className="text-off-white font-medium flex items-center justify-between">
                             <span>{plan.name}</span> 
-                            <span className="text-off-white/80">{plan.price}{plan.id !== 'free' ? ` / ${plan.period.split(' ')[1]}` : ''}</span>
+                            <span className="text-off-white/80">{plan.price}{plan.id !== 'Free Plan' ? ` / ${plan.period.split(' ')[1]}` : ''}</span>
                           </h3>
                           
                           {/* Plan description */}
@@ -268,20 +268,20 @@ export default function ChoosePlan() {
                           {/* Plan footer text */}
                           {plan.footer && (
                             <p className="text-xs text-off-white/70 mt-3 pl-1 font-medium flex items-center">
-                              {plan.id === 'weekly' && (
+                              {plan.id === 'Weekly Plan' && (
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5 mr-1.5 text-[#84F7AC] flex-shrink-0">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
                                 </svg>
                               )}
                               
-                              {plan.id === 'annual' && (
+                              {plan.id === 'Annual Plan' && (
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5 mr-1.5 text-[#84F7AC] flex-shrink-0">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
                               )}
                               
-                              {plan.id === 'free' && (
+                              {plan.id === 'Free Plan' && (
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5 mr-1.5 text-[#84F7AC] flex-shrink-0">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -355,9 +355,9 @@ export default function ChoosePlan() {
                 Processing...
               </>
             ) : (
-              selectedPlan === 'annual' 
+              selectedPlan === 'Annual Plan'
                 ? 'Upgrade. Get 80% Discount' 
-                : selectedPlan === 'free'
+                : selectedPlan === 'Free Plan'
                   ? 'Start Free Trial'
                   : 'Subscribe Now'
             )}
