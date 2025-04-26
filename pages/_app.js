@@ -43,14 +43,10 @@ function MyApp({ Component, pageProps }) {
         
         console.log('[AUTH Check]', { currentPath, isPublicPath, hasSession, DEV_MODE, isOnboardingPath });
         
-        if (!isPublicPath && !hasSession) { // If path needs auth AND user has no session...
-          // ...BUT allow access if we are in DEV_MODE AND on an onboarding path
-          if (!(DEV_MODE && isOnboardingPath)) { 
-            console.log(`[AUTH] Redirecting unauthenticated user from restricted path (${currentPath}) to login`);
-            router.push('/login'); 
-          } else {
-            console.log(`[AUTH] DEV_MODE: Allowing access to onboarding path (${currentPath}) without session.`);
-          }
+        // Simplified check: Redirect if not public, not onboarding, and no session
+        if (!isPublicPath && !isOnboardingPath && !hasSession) { 
+          console.log(`[AUTH] Redirecting unauthenticated user from restricted path (${currentPath}) to login`);
+          router.push('/login'); 
         }
       } catch (error) {
         console.error('[AUTH] Error initializing auth:', error.message)
@@ -77,12 +73,12 @@ function MyApp({ Component, pageProps }) {
         const isPublicPath = PUBLIC_PATHS.includes(currentPath);
         const isOnboardingPath = currentPath.startsWith('/onboarding');
         
-        // Don't redirect if in DEV_MODE and on onboarding path or if on a public path
-        if (!isPublicPath && !(DEV_MODE && isOnboardingPath)) {
+        // Simplified check: Redirect if not public and not onboarding after sign out
+        if (!isPublicPath && !isOnboardingPath) {
           console.log(`[AUTH] Redirecting signed out user from restricted path (${currentPath}) to login`);
           router.push('/login')
         } else {
-          console.log(`[AUTH] Not redirecting from ${currentPath} after sign out (public path or DEV_MODE onboarding)`);
+          console.log(`[AUTH] Not redirecting from ${currentPath} after sign out (public path or onboarding path)`);
         }
       }
     })
