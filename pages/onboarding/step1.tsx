@@ -87,6 +87,8 @@ export default function Step1({ user }: Step1Props) {
   const handleNext = async () => {
     if (!selectedGoal) return;
     
+    console.log('[handleNext step1] Start. State userId:', userId, 'Prop user:', user);
+    
     try {
       setIsLoading(true);
       setErrorMessage(null);
@@ -94,8 +96,11 @@ export default function Step1({ user }: Step1Props) {
       // Use the user ID from URL query first, fallback to global user state
       const currentUserId = userId || user?.id;
       
+      console.log('[handleNext step1] currentUserId determined:', currentUserId);
+      
       // Validate that we have a user ID from one of the sources
       if (!currentUserId) {
+        console.error('[handleNext step1] Error condition met! currentUserId is falsy.');
         throw new Error('User ID not found. Please refresh the page or try signing in again.');
       }
       
