@@ -41,11 +41,77 @@ export default async function handler(
     }
     console.log(`[API /save-plan] Received request for user: ${userId}, plan: ${planType}`);
 
-    // Use admin client to update the user profile
+    // 1. First check if user profile exists
+    console.log(`[API /save-plan] Checking if user profile exists for: ${userId}`);
+    const { data: existingProfile, error: checkError } = await supabaseAdmin
+      .from('user_profile')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error(`[API /save-plan] Error checking profile for ${userId}:`, checkError);
+      return res.status(500).json({ error: `Database error checking profile: ${checkError.message}` });
+    }
+
+    // 2. If user profile doesn't exist, try to get user from auth and create a profile
+    if (!existingProfile) {
+      console.log(`[API /save-plan] User profile not found, attempting to create one for ${userId}`);
+      
+      try {
+        // Try to get user info from Auth API
+        const { data: authUser, error: authError } = await supabaseAdmin
+          .auth
+          .admin
+          .getUserById(userId);
+
+        if (authError || !authUser) {
+          console.error(`[API /save-plan] User not found in auth system: ${userId}`);
+          return res.status(404).json({ error: 'User not found in authentication system' });
+        }
+
+        // Create a basic profile
+        console.log(`[API /save-plan] Creating user profile for ${userId} with email ${authUser.user?.email}`);
+        const { data: newProfile, error: createError } = await supabaseAdmin
+          .from('user_profile')
+          .insert({
+            id: userId,
+            email: authUser.user?.email,
+            plan_type: planType, // Set the requested plan type directly
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            onboarded: false
+          })
+          .select()
+          .single();
+
+        if (createError || !newProfile) {
+          console.error(`[API /save-plan] Failed to create profile for ${userId}:`, createError);
+          return res.status(500).json({ error: `Failed to create user profile: ${createError?.message || 'Unknown error'}` });
+        }
+
+        console.log(`[API /save-plan] Successfully created new user profile for ${userId}`);
+        return res.status(200).json({ 
+          success: true, 
+          updatedProfile: newProfile,
+          isNewProfile: true
+        });
+      } catch (authError) {
+        console.error(`[API /save-plan] Error accessing Auth API:`, authError);
+        return res.status(500).json({ 
+          error: 'Error accessing Auth API', 
+          details: authError instanceof Error ? authError.message : 'Unknown error' 
+        });
+      }
+    }
+
+    // 3. If user profile exists, update it
+    console.log(`[API /save-plan] Updating plan type for existing user: ${userId}`);
     const { data, error } = await supabaseAdmin
       .from('user_profile')
       .update({ 
-          plan_type: planType
+          plan_type: planType,
+          updated_at: new Date().toISOString()
       })
       .eq('id', userId)
       .select() // Select to confirm update
@@ -53,15 +119,11 @@ export default async function handler(
 
     if (error) {
       console.error(`[API /save-plan] Error updating profile for ${userId}:`, error);
-      // Check for specific errors, like row not found (though trigger should create it)
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'User profile not found for the given ID.' });
-      }
       return res.status(500).json({ error: `Database error: ${error.message}` });
     }
 
     if (!data) {
-      console.error(`[API /save-plan] Update seemed successful but no data returned for user ${userId}. Row might not exist or RLS issue persists unexpectedly.`);
+      console.error(`[API /save-plan] Update seemed successful but no data returned for user ${userId}`);
       return res.status(404).json({ error: 'User profile found but update failed silently.' });
     }
 

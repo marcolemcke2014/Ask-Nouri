@@ -46,17 +46,66 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Log client usage in handler - immediately before using supabaseAdmin
-    console.log(`[API Handler] Attempting UPSERT to table '${table}' using supabaseAdmin client.`);
+    console.log(`[API Handler] Attempting operation on table '${table}' using supabaseAdmin client.`);
     if (!supabaseAdmin) {
-      console.error('[API Handler] CRITICAL: supabaseAdmin client is NULL before upsert!');
+      console.error('[API Handler] CRITICAL: supabaseAdmin client is NULL before operation!');
       return res.status(500).json({ error: 'Admin client not initialized.' });
     }
 
+    // Special handling for user_profile to ensure it always exists
+    if (table === 'user_profile') {
+      const userId = data.id || data.user_id;
+      
+      // Check if profile already exists before upserting
+      console.log(`[API Handler] Checking if user profile exists for: ${userId}`);
+      const { data: existingProfile, error: checkError } = await supabaseAdmin
+        .from('user_profile')
+        .select('id')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error(`[API Handler] Error checking profile existence: ${checkError.message}`);
+        // Continue anyway, the upsert will handle it
+      }
+
+      if (!existingProfile && !data.email) {
+        // Try to fetch user email from auth if not provided
+        try {
+          console.log(`[API Handler] Fetching user data from auth for: ${userId}`);
+          const { data: authUser, error: authError } = await supabaseAdmin
+            .auth
+            .admin
+            .getUserById(userId);
+            
+          if (!authError && authUser?.user?.email) {
+            console.log(`[API Handler] Found email in auth: ${authUser.user.email}`);
+            data.email = authUser.user.email;
+          } else {
+            console.warn(`[API Handler] Could not find user email in auth: ${authError?.message || 'No auth user found'}`);
+          }
+        } catch (authError) {
+          console.warn(`[API Handler] Error accessing Auth API: ${authError instanceof Error ? authError.message : 'Unknown error'}`);
+          // Continue anyway with what we have
+        }
+      }
+      
+      // Ensure basic fields exist
+      if (!data.created_at) {
+        data.created_at = new Date().toISOString();
+      }
+      data.updated_at = new Date().toISOString();
+    }
+
+    // For any table, make sure we're using user_id or id as conflict column
+    const onConflict = table === 'user_profile' ? 'id' : 'user_id';
+
     // Perform the upsert operation using service role
+    console.log(`[API Handler] Performing UPSERT on table '${table}' with conflict column '${onConflict}'`);
     const { data: savedData, error } = await supabaseAdmin
       .from(table)
       .upsert(data, {
-        onConflict: 'user_id'
+        onConflict
       });
 
     // Handle errors
@@ -66,7 +115,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Log success
-    console.log(`[API Handler] Successfully saved data to '${table}' for user: ${data.user_id}`);
+    console.log(`[API Handler] Successfully saved data to '${table}' for user: ${data.user_id || data.id}`);
     
     // Return success
     return res.status(200).json({ success: true, data: savedData });
