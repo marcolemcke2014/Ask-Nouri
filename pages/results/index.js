@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
-import { Separator } from '../components/ui/Separator';
-import Button from '../components/ui/Button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Separator } from '../../components/ui/Separator';
+import Button from '../../components/ui/Button';
 
 // Restaurant card component
 const RestaurantCard = ({ restaurantName, location, timestamp, score, menuImage }) => {
@@ -303,7 +303,7 @@ export default function Results() {
         <Button 
           variant="secondary"
           size="lg"
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/scan')}
         >
           Try Again
         </Button>
@@ -320,7 +320,7 @@ export default function Results() {
         {/* Header with Last Scan info */}
         <header className="flex justify-between items-center mb-2">
           <h1 className="text-xl font-bold text-white">Your Last Scan</h1>
-          <a href="/history" className="text-green-300 text-sm">View History</a>
+          <a href="/scan/history" className="text-green-300 text-sm">View History</a>
         </header>
         
         {/* White rounded container */}
@@ -352,7 +352,7 @@ export default function Results() {
             size="lg"
             fullWidth
             className="rounded-full shadow-md"
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/scan')}
           >
             Scan Another Menu
           </Button>

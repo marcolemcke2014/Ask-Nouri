@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import Input from '../components/auth/Input'; // Uncommented
-import SocialLoginButton from '../components/auth/SocialLoginButton'; // Uncommented
-import { supabase } from '../lib/supabase'; // Uncommented for test
+import Input from '../../components/auth/Input'; // Updated path
+import SocialLoginButton from '../../components/auth/SocialLoginButton'; // Updated path
+import { supabase } from '../../lib/supabase'; // Updated path
 
 export default function LoginPage() {
   const router = useRouter();
@@ -203,14 +203,14 @@ export default function LoginPage() {
           <div className="mt-6 text-center space-y-1">
             <p className="text-xs text-[#84F7AC]">
               Don't have an account?{' '}
-              <Link href="/signup">
+              <Link href="/auth/signup">
                 <a className="font-normal hover:underline">
                   Sign up
                 </a>
               </Link>
             </p>
             
-            <Link href="/forgot-password">
+            <Link href="/auth/forgot-password">
               <a className="text-xs text-[#84F7AC] hover:underline transition-colors">
                 Forgot password?
               </a>

@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import Input from '../components/auth/Input';
-import SocialLoginButton from '../components/auth/SocialLoginButton';
-import { supabase } from '../lib/supabase';
+import Input from '../../components/auth/Input';
+import SocialLoginButton from '../../components/auth/SocialLoginButton';
+import { supabase } from '../../lib/supabase';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -142,7 +142,7 @@ export default function SignupPage() {
         console.log('Redirecting to choose-plan page with user ID...');
         
         // Pass the user ID as a query parameter
-        router.replace(`/choose-plan?new_user_id=${data.user.id}`);
+        router.replace(`/auth/choose-plan?new_user_id=${data.user.id}`);
       } else {
         console.warn('No user returned from signup call, but no error either');
       }
@@ -367,7 +367,7 @@ export default function SignupPage() {
           <div className="mt-6 text-center">
             <p className="text-xs text-[#84F7AC]">
               Already have an account?{' '}
-              <Link href="/login">
+              <Link href="/auth/login">
                 <a className="font-normal hover:underline">
                   Log in
                 </a>

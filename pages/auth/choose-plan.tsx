@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { loadStripe } from '@stripe/stripe-js';
 
 // Initialize Stripe.js
@@ -111,7 +111,7 @@ export default function ChoosePlan() {
         console.log(`Navigating to payment success page for user: ${userId}`);
         
         // Redirect to the payment success page
-        router.push(`/payment-success`);
+        router.push(`/auth/payment-success`);
       } 
       // For paid plans, redirect to Stripe checkout
       else {
@@ -156,7 +156,7 @@ export default function ChoosePlan() {
   
   // Handle back button click
   const handleBack = () => {
-    router.push('/signup');  // Navigate specifically to signup page
+    router.push('/auth/signup');  // Navigate specifically to signup page
   };
   
   // Toggle promo code input

@@ -1,9 +1,10 @@
+// auth-landing.tsx - Landing page that handles authentication routing
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
-import LoginPage from './login'
+import LoginPage from './auth/login'
 
-export default function Home() {
+export default function AuthLanding() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 

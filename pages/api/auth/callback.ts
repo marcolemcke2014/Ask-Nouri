@@ -46,8 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('[AUTH] New user, redirecting to onboarding');
       return res.redirect('/onboarding');
     } else {
-      console.log('[AUTH] Returning user, redirecting to dashboard');
-      return res.redirect('/dashboard');
+      console.log('[AUTH] Returning user, redirecting to scan page');
+      return res.redirect('/scan');
     }
   } catch (error: any) {
     console.error('[AUTH] Callback error:', error.message);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 interface User {
   id: string;
@@ -234,12 +234,6 @@ export default function Profile({ user }: { user: User | null }) {
           <h1 className="text-2xl font-semibold text-gray-900">NutriFlow</h1>
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => router.push('/dashboard')}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Dashboard
-            </button>
-            <button
               onClick={() => {
                 supabase.auth.signOut();
                 router.push('/login');
@@ -292,6 +286,7 @@ export default function Profile({ user }: { user: User | null }) {
               </div>
               
               <div 
+                onClick={() => router.push('/scan/history')}
                 className="border rounded-md p-4 hover:bg-gray-50 cursor-pointer"
               >
                 <h4 className="font-medium text-gray-900">Meal History</h4>
@@ -301,6 +296,7 @@ export default function Profile({ user }: { user: User | null }) {
               </div>
               
               <div 
+                onClick={() => router.push('/results')}
                 className="border rounded-md p-4 hover:bg-gray-50 cursor-pointer"
               >
                 <h4 className="font-medium text-gray-900">Recommendations</h4>
@@ -310,11 +306,12 @@ export default function Profile({ user }: { user: User | null }) {
               </div>
               
               <div 
+                onClick={() => router.push('/profile/settings')}
                 className="border rounded-md p-4 hover:bg-gray-50 cursor-pointer"
               >
-                <h4 className="font-medium text-gray-900">Analytics</h4>
+                <h4 className="font-medium text-gray-900">Settings</h4>
                 <p className="text-sm text-gray-500 mt-1">
-                  Track your nutrition progress over time
+                  Manage your app preferences
                 </p>
               </div>
             </div>

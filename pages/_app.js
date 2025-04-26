@@ -8,7 +8,13 @@ import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/router'
 
 // List of paths that don't require authentication
-const PUBLIC_PATHS = ['/login', '/', '/api/auth/callback', '/signup', '/choose-plan']
+const PUBLIC_PATHS = [
+  '/auth/login', 
+  '/', 
+  '/api/auth/callback', 
+  '/auth/signup', 
+  '/auth/choose-plan'
+]
 
 // Enable this flag to bypass authentication checks for onboarding pages during development
 const DEV_MODE = process.env.NODE_ENV === 'development'
@@ -38,7 +44,7 @@ function MyApp({ Component, pageProps }) {
         // Check if user needs to be redirected to login
         const currentPath = router.pathname
         const isPublicPath = PUBLIC_PATHS.includes(currentPath);
-        const isOnboardingPath = currentPath.startsWith('/onboarding') || currentPath === '/payment-success'; // Include payment-success
+        const isOnboardingPath = currentPath.startsWith('/onboarding') || currentPath === '/auth/payment-success'; 
         const hasSession = !!session?.user;
         
         console.log('[AUTH Check]', { currentPath, isPublicPath, hasSession, DEV_MODE, isOnboardingPath });
@@ -46,7 +52,7 @@ function MyApp({ Component, pageProps }) {
         // Simplified check: Redirect if not public, not onboarding/success, and no session
         if (!isPublicPath && !isOnboardingPath && !hasSession) { 
           console.log(`[AUTH] Redirecting unauthenticated user from restricted path (${currentPath}) to login`);
-          router.push('/login'); 
+          router.push('/auth/login'); 
         }
       } catch (error) {
         console.error('[AUTH] Error initializing auth:', error.message)
@@ -71,12 +77,12 @@ function MyApp({ Component, pageProps }) {
         // Check conditions before redirecting
         const currentPath = router.pathname;
         const isPublicPath = PUBLIC_PATHS.includes(currentPath);
-        const isOnboardingPath = currentPath.startsWith('/onboarding') || currentPath === '/payment-success'; // Include payment-success
+        const isOnboardingPath = currentPath.startsWith('/onboarding') || currentPath === '/auth/payment-success';
         
         // Simplified check: Redirect if not public and not onboarding/success after sign out
         if (!isPublicPath && !isOnboardingPath) {
           console.log(`[AUTH] Redirecting signed out user from restricted path (${currentPath}) to login`);
-          router.push('/login')
+          router.push('/auth/login')
         } else {
           console.log(`[AUTH] Not redirecting from ${currentPath} after sign out (public, onboarding, or success path)`);
         }

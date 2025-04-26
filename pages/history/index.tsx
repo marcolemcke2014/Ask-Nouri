@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { supabase } from '../lib/supabase';
-import logger from '../lib/logger';
+import { supabase } from '../../lib/supabase';
+import logger from '../../lib/logger';
 
 interface User {
   id: string;
@@ -140,7 +140,7 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
             <button
               onClick={() => {
                 logger.log('SCAN-HISTORY', 'User navigating to home');
-                router.push('/');
+                router.push('/scan');
               }}
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
             >
@@ -204,7 +204,7 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
             <button
               onClick={() => {
                 logger.log('SCAN-HISTORY', 'New user navigating to scan page');
-                router.push('/');
+                router.push('/scan');
               }}
               className="px-5 py-3 bg-green-500 text-white rounded-full font-medium hover:bg-green-600 transition-colors"
             >

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { CheckCircle2 } from 'lucide-react'; // Using lucide-react for icons
 
@@ -30,7 +30,7 @@ export default function PaymentSuccessPage() {
         }
         if (!authUser) {
           console.log('[PaymentSuccess] No authenticated user found. Redirecting to login.');
-          router.replace('/login'); // Redirect if no user
+          router.replace('/auth/login'); // Redirect if no user
           return;
         }
         setUser(authUser); // Store user object
@@ -66,7 +66,7 @@ export default function PaymentSuccessPage() {
         console.error('[PaymentSuccess] Unexpected error:', err);
         setError(err.message || 'An unexpected error occurred.');
         if (err.message.includes('log in again')) {
-          router.replace('/login');
+          router.replace('/auth/login');
         }
       } finally {
         setIsLoading(false);
