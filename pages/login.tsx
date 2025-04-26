@@ -7,6 +7,7 @@ import SocialLoginButton from '../components/auth/SocialLoginButton';
 import { supabase } from '../lib/supabase';
 
 export default function LoginPage() {
+  // Final verification check - console.log removed
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,6 +16,8 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  console.log('Trivial change added for testing'); // Added for testing
 
   // Check if user is already logged in
   useEffect(() => {

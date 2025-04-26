@@ -40,23 +40,25 @@ export default function Step1({ user }: Step1Props) {
     }
   }, [router.isReady, router.query]);
 
-  // Get user's first name prioritizing the URL user_id
+  // Get user's first name considering two sources: URL user_id and global user prop
   useEffect(() => {
     async function fetchUserName() {
-      // Only proceed if we have a userIdFromQuery
-      const userIdFromQuery = userId;
+      // Try to get userId from URL first, then fall back to user prop
+      const userIdToUse = userId || user?.id;
       
-      if (!userIdFromQuery) {
-        console.error('No user ID available from URL query parameter');
+      if (!userIdToUse) {
+        console.log('Profile fetch skipped, user prop not ready and no userId in URL.');
         return;
       }
       
       try {
-        // Get user profile to get the first name using maybeSingle() instead of single()
+        console.log(`Fetching profile data for user ID: ${userIdToUse}`);
+        
+        // Get user profile to get the first name
         const { data: profileData, error: profileError } = await supabase
           .from('user_profile')
           .select('first_name')
-          .eq('id', userIdFromQuery)
+          .eq('id', userIdToUse)
           .maybeSingle();
           
         if (profileError) {
@@ -66,17 +68,18 @@ export default function Step1({ user }: Step1Props) {
         
         if (profileData && profileData.first_name) {
           setFirstName(profileData.first_name);
+          console.log(`Profile fetch successful, first name: ${profileData.first_name}`);
+        } else {
+          console.log('Profile found but no first name available');
         }
       } catch (err) {
         console.error('Unexpected error fetching user data:', err);
+        // Don't show blocking UI error for profile fetch failures
       }
     }
     
-    // Only fetch if we have the userId from URL
-    if (userId) {
-      fetchUserName();
-    }
-  }, [userId]);
+    fetchUserName();
+  }, [userId, user]); // Depend on both userId from URL and user prop
 
   const handleGoalSelect = (goalId: string) => {
     setSelectedGoal(goalId);

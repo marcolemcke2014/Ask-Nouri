@@ -37,15 +37,20 @@ function MyApp({ Component, pageProps }) {
         
         // Check if user needs to be redirected to login
         const currentPath = router.pathname
+        const isPublicPath = PUBLIC_PATHS.includes(currentPath);
+        const isOnboardingPath = currentPath.startsWith('/onboarding');
+        const hasSession = !!session?.user;
         
-        // Allow access to onboarding pages in development mode
-        const isOnboardingPath = currentPath.startsWith('/onboarding')
-        const isPublicPath = PUBLIC_PATHS.includes(currentPath)
+        console.log('[AUTH Check]', { currentPath, isPublicPath, hasSession, DEV_MODE, isOnboardingPath });
         
-        // Only redirect if: not public path AND no user AND not (dev mode AND onboarding path)
-        if (!isPublicPath && !session?.user && !(DEV_MODE && isOnboardingPath)) {
-          console.log('[AUTH] Redirecting unauthenticated user to login')
-          router.push('/login')
+        if (!isPublicPath && !hasSession) { // If path needs auth AND user has no session...
+          // ...BUT allow access if we are in DEV_MODE AND on an onboarding path
+          if (!(DEV_MODE && isOnboardingPath)) { 
+            console.log(`[AUTH] Redirecting unauthenticated user from restricted path (${currentPath}) to login`);
+            router.push('/login'); 
+          } else {
+            console.log(`[AUTH] DEV_MODE: Allowing access to onboarding path (${currentPath}) without session.`);
+          }
         }
       } catch (error) {
         console.error('[AUTH] Error initializing auth:', error.message)
@@ -67,10 +72,17 @@ function MyApp({ Component, pageProps }) {
         console.log('[AUTH] User signed out')
         setUser(null)
         
-        // Don't redirect if in DEV_MODE and on onboarding path
-        const isOnboardingPath = router.pathname.startsWith('/onboarding')
-        if (!(DEV_MODE && isOnboardingPath)) {
+        // Check conditions before redirecting
+        const currentPath = router.pathname;
+        const isPublicPath = PUBLIC_PATHS.includes(currentPath);
+        const isOnboardingPath = currentPath.startsWith('/onboarding');
+        
+        // Don't redirect if in DEV_MODE and on onboarding path or if on a public path
+        if (!isPublicPath && !(DEV_MODE && isOnboardingPath)) {
+          console.log(`[AUTH] Redirecting signed out user from restricted path (${currentPath}) to login`);
           router.push('/login')
+        } else {
+          console.log(`[AUTH] Not redirecting from ${currentPath} after sign out (public path or DEV_MODE onboarding)`);
         }
       }
     })
@@ -81,7 +93,9 @@ function MyApp({ Component, pageProps }) {
         authListener.subscription.unsubscribe()
       }
     }
-  }, [router.pathname, router.isReady, router.push, router.replace])
+  // Keep the original dependency array for this test
+  }, [router.pathname, router.isReady, router.push, router.replace]) 
+
 
   if (loading) {
     // Show loading screen while checking auth
@@ -92,7 +106,7 @@ function MyApp({ Component, pageProps }) {
     )
   }
 
-  // Add user to pageProps for easy access in all components
+  // Restore ALL providers
   return (
     <NavigationProvider>
       <UserProfileProvider>
@@ -103,7 +117,7 @@ function MyApp({ Component, pageProps }) {
         </OCRProvider>
       </UserProfileProvider>
     </NavigationProvider>
-  )
+  );
 }
 
 export default MyApp
