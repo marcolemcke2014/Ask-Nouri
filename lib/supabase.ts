@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 
 // Extract environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-// const supabaseKey = process.env.SUPABASE_KEY!; // INCORRECT: This uses the service key, unsafe for frontend!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!; // CORRECT: Use the public anon key for the frontend client
 
 // Log configuration details for debugging

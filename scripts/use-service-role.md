@@ -18,12 +18,12 @@ For server-side API routes that need to bypass RLS (Row Level Security) policies
 
 2. **Update your `.env.local` file**:
    ```
-   SUPABASE_KEY=your-service-role-key-here
+   SUPABASE_SERVICE_KEY=your-service-role-key-here
    ```
 
 3. **Add the key to your deployment environment**:
    - For Vercel: Go to Project Settings → Environment Variables
-   - Add the `SUPABASE_KEY` with your service_role key
+   - Add the `SUPABASE_SERVICE_KEY` with your service_role key
    - Make sure to re-deploy after adding the key
 
 ## Security Best Practices

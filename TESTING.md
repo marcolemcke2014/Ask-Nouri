@@ -7,8 +7,7 @@ This document provides instructions for testing the full OCR and database insert
 1. Ensure you have your local development server running: `npm run dev`
 2. Make sure your `.env.local` file contains the following variables:
    - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-   - `SUPABASE_KEY` - Your Supabase API key (anon key for development)
-   - `TEST_USER_ID` - A UUID for testing (default: `11111111-1111-1111-1111-111111111111`)
+   - `SUPABASE_SERVICE_KEY` - Your Supabase API key (anon key for development)
 
 ## Setting Up Supabase Row Level Security (RLS)
 
@@ -21,7 +20,7 @@ Before running the tests, you need to configure the Row Level Security policy fo
 5. Copy and paste the contents of `scripts/setup-rls.sql` into the editor
 6. Click **Run** to apply the RLS policy
 
-This policy will allow database inserts only if the `user_id` matches the `TEST_USER_ID` from your `.env.local` file.
+This policy will allow database inserts for testing purposes.
 
 ## Running the Full End-to-End Test
 
@@ -51,13 +50,12 @@ After running the test, you should:
 
 1. Check the console output for success messages and the extracted OCR text
 2. Verify in the Supabase Dashboard that a new row was added to the `menu_scan` table
-3. Confirm that the row contains the correct OCR text and test user ID
+3. Confirm that the row contains the correct OCR text
 
 ## Troubleshooting
 
 If the test fails with an RLS policy error:
 - Make sure you've applied the SQL in `scripts/setup-rls.sql`
-- Verify that the `TEST_USER_ID` in `.env.local` matches the one in the SQL policy
 - Check the Supabase dashboard for any permission issues
 
 ## Production Considerations
@@ -65,5 +63,4 @@ If the test fails with an RLS policy error:
 ⚠️ **IMPORTANT**: The RLS policy created for testing is for development purposes only:
 
 - It should be replaced with a proper user-based policy before deploying to production
-- The `TEST_USER_ID` environment variable should be removed from production
 - The code includes safeguards to warn if test code is detected in production 

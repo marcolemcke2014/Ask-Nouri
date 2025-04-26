@@ -41,8 +41,7 @@ For the OCR pipeline to work properly, ensure:
 1. Environment variables are properly set in Vercel:
    - `OPENROUTER_API_KEY` - For OpenRouter vision model access
    - `NEXT_PUBLIC_SUPABASE_URL` - For database access 
-   - `SUPABASE_KEY` - Service role key for database access
-   - `TEST_USER_ID` - For development testing purposes only
+   - `SUPABASE_SERVICE_KEY` - Service role key for database access
 
 2. Supabase is configured correctly:
    - Menu scan table exists with proper schema
