@@ -9,24 +9,17 @@ export default function AuthLanding() {
   const router = useRouter()
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data: sessionData } = await supabase.auth.getSession()
-        
-        if (sessionData.session?.user) {
-          // User is logged in, redirect to scan page
-          router.replace('/scan')
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          // User is logged in, redirect to the scan page
+          router.replace('/scan/index')
         } else {
           // User is not logged in, show login page
           setLoading(false)
         }
-      } catch (error) {
-        console.error('Failed to check auth status:', error)
-        setLoading(false)
       }
-    }
-    
-    checkSession()
+    )
   }, [router])
 
   // Show loading indicator while checking auth status

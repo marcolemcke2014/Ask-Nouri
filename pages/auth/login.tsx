@@ -5,6 +5,8 @@ import Head from 'next/head';
 import Input from '../../components/auth/Input'; // Updated path
 import SocialLoginButton from '../../components/auth/SocialLoginButton'; // Updated path
 import { supabase } from '../../lib/supabase'; // Updated path
+import { AuthError, User } from '@supabase/supabase-js'; // Import User type
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +17,8 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState(''); // Uncommented
   const [passwordError, setPasswordError] = useState(''); // Uncommented
   const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Uncommented
+  const [user, setUser] = useState<User | null>(null); // Define type for user state
+  const [showPassword, setShowPassword] = useState(false);
 
   // Check if user is already logged in (Uncommented)
   useEffect(() => {
@@ -23,7 +27,8 @@ export default function LoginPage() {
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session?.user) {
           // User is already logged in, redirect to scan page
-          router.replace('/scan');
+          setUser(sessionData.session.user);
+          router.replace('/scan/index');
         }
       } catch (error) {
         console.error('Failed to check auth status:', error);
@@ -61,9 +66,14 @@ export default function LoginPage() {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password }); // Uncommented
       if (error) { throw error; } // Uncommented
-      if (data?.user) { router.push('/scan'); } // Uncommented
+      if (data?.user) { 
+        console.log('User logged in successfully:', data.user.id);
+        // Redirect to scan page after successful login
+        // Make sure the target route exists and is correct
+        router.push('/scan/index'); 
+      } // Updated scan path
     } catch (error: any) {
-      console.error('Login error:', error.message); // Keep console log
+      console.error('Login failed:', error.message);
       if (error.message.includes('credentials')) { setErrorMessage('The email or password you entered is incorrect. Please try again.'); } // Uncommented
       else { setErrorMessage(error.message || 'Failed to sign in. Please try again later.'); } // Uncommented
     } finally {
@@ -152,7 +162,7 @@ export default function LoginPage() {
              <Input
                id="password"
                label="Password"
-               type="password"
+               type={showPassword ? "text" : "password"}
                placeholder="Password"
                value={password}
                onChange={handlePasswordChange}

@@ -23,6 +23,7 @@ export default function SignupPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [user, setUser] = useState(null);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function SignupPage() {
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session?.user) {
           // User is already logged in, redirect to scan page
-          router.replace('/scan');
+          router.replace('/scan/index');
         }
       } catch (error) {
         console.error('Failed to check auth status:', error);
@@ -42,6 +43,13 @@ export default function SignupPage() {
 
     checkAuthStatus();
   }, [router]);
+
+  useEffect(() => {
+    // Redirect authenticated users away from signup
+    if (user) {
+      router.replace('/scan/index'); // Updated path
+    }
+  }, [user, router]);
 
   // Show minimal loading state while checking auth
   if (isCheckingAuth) {

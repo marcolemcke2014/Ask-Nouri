@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabase';
 import logger from '../../lib/logger';
+import { History, User } from 'lucide-react';
 
 interface User {
   id: string;
@@ -45,7 +46,7 @@ export default function ScanDetailPage({ user }: { user: User | null }) {
       
       if (!session?.user) {
         console.log('[AUTH] No authenticated user found, redirecting to login');
-        router.push('/login');
+        router.push('/auth/login');
       } else {
         console.log(`[AUTH] User authenticated: ${session.user.id}`);
       }
@@ -158,6 +159,11 @@ export default function ScanDetailPage({ user }: { user: User | null }) {
     return 'whitespace-pre-wrap max-h-60 overflow-hidden';
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
+
   if (!user) {
     console.log('[DETAILS] Rendering blocked: No authenticated user');
     return null; // Don't render if not authenticated
@@ -174,23 +180,21 @@ export default function ScanDetailPage({ user }: { user: User | null }) {
           <h1 className="text-2xl font-semibold text-gray-900">NutriFlow</h1>
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => router.push('/scan-history')}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
+              onClick={() => router.push('/history/index')}
             >
+              <History size={16} />
               Scan History
             </button>
             <button
-              onClick={() => router.push('/profile')}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
+              onClick={() => router.push('/profile/index')}
             >
+              <User size={16} />
               Profile
             </button>
             <button
-              onClick={() => {
-                console.log('[AUTH] User signing out');
-                supabase.auth.signOut();
-                router.push('/login');
-              }}
+              onClick={handleLogout}
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
             >
               Sign Out
@@ -202,12 +206,10 @@ export default function ScanDetailPage({ user }: { user: User | null }) {
       <main className="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
           <button
-            onClick={() => router.push('/scan-history')}
-            className="flex items-center text-green-600 hover:text-green-800"
+            className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
+            onClick={() => router.push('/history/index')}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
+            <History size={16} />
             Back to Scan History
           </button>
         </div>
@@ -238,7 +240,7 @@ export default function ScanDetailPage({ user }: { user: User | null }) {
             <h3 className="text-xl font-semibold text-gray-800 mb-2">Scan Not Found</h3>
             <p className="text-gray-500 mb-6">This scan doesn't exist or doesn't belong to your account.</p>
             <button
-              onClick={() => router.push('/scan-history')}
+              onClick={() => router.push('/history/index')}
               className="px-5 py-3 bg-green-500 text-white rounded-full font-medium hover:bg-green-600 transition-colors"
             >
               Return to Scan History
@@ -355,7 +357,7 @@ export default function ScanDetailPage({ user }: { user: User | null }) {
                 <button
                   onClick={() => {
                     console.log('[DETAILS] User navigating back to scan history');
-                    router.push('/scan-history');
+                    router.push('/history/index');
                   }}
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
                 >

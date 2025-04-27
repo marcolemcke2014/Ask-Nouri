@@ -13,7 +13,8 @@ const PUBLIC_PATHS = [
   '/', 
   '/api/auth/callback', 
   '/auth/signup', 
-  '/auth/choose-plan'
+  '/auth/choose-plan',
+  '/auth/payment-success'
 ]
 
 // Enable this flag to bypass authentication checks for onboarding pages during development
@@ -21,6 +22,7 @@ const DEV_MODE = process.env.NODE_ENV === 'development'
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter()
+  console.log(`[MyApp Render] Attempting to render path: ${router.pathname}`);
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 

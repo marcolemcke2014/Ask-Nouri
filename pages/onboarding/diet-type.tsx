@@ -28,6 +28,7 @@ export default function OnboardingDietType({ user }: { user: User | null }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [firstName, setFirstName] = useState('');
 
   // Check authentication status and onboarding status
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function OnboardingDietType({ user }: { user: User | null }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
         console.log('[ONBOARDING UI] No user session found, redirecting to login');
-        router.push('/login');
+        router.push('/auth/login');
         return;
       }
 
@@ -103,7 +104,7 @@ export default function OnboardingDietType({ user }: { user: User | null }) {
 
     if (!user) {
       setError('Please log in to continue');
-      router.push('/login');
+      router.push('/auth/login');
       return;
     }
 
@@ -169,6 +170,25 @@ export default function OnboardingDietType({ user }: { user: User | null }) {
       setError(`Failed to save your diet preference: ${err.message}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('user_profile')
+      .select('first_name, diet_type')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching profile:', error.message);
+    } else if (data) {
+      setFirstName(data.first_name || '');
+      setSelectedDiet(data.diet_type);
+    } else {
+      // Handle case where profile might not exist yet
+      // Possibly redirect to profile creation or show a default state
+      router.push('/profile/index'); 
     }
   };
 

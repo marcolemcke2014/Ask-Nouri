@@ -347,15 +347,18 @@ export default function Results() {
       {/* Footer */}
       <footer className="py-4 px-4">
         <div className="max-w-sm mx-auto">
-          <Button 
-            variant="primary"
-            size="lg"
-            fullWidth
-            className="rounded-full shadow-md"
-            onClick={() => router.push('/scan')}
+          <button 
+            className="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded mt-4"
+            onClick={() => router.push('/scan/index')}
+          >
+            Analyze Another Menu
+          </button>
+          <button 
+            className="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded mt-4 w-full rounded-full shadow-md"
+            onClick={() => router.push('/scan/index')}
           >
             Scan Another Menu
-          </Button>
+          </button>
         </div>
       </footer>
     </div>

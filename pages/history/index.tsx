@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabase';
 import logger from '../../lib/logger';
+import { ScanLine, User } from 'lucide-react';
 
 interface User {
   id: string;
@@ -35,7 +36,7 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
       
       if (!session?.user) {
         logger.log('AUTH', 'No authenticated user found, redirecting to login');
-        router.push('/login');
+        router.push('/auth/login');
       } else {
         logger.log('AUTH', `User authenticated: ${session.user.id}`);
       }
@@ -122,6 +123,11 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
     return 60 + Math.floor(Math.random() * 36);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
+
   if (!user) {
     logger.log('SCAN-HISTORY', 'Rendering blocked: No authenticated user');
     return null; // Don't render if not authenticated
@@ -138,30 +144,20 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
           <h1 className="text-2xl font-semibold text-gray-900">NutriFlow</h1>
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => {
-                logger.log('SCAN-HISTORY', 'User navigating to home');
-                router.push('/scan');
-              }}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
+              onClick={() => router.push('/scan/index')}
             >
-              Home
+              <ScanLine size={16} />
             </button>
             <button
-              onClick={() => {
-                logger.log('SCAN-HISTORY', 'User navigating to profile');
-                router.push('/profile');
-              }}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
+              onClick={() => router.push('/profile/index')}
             >
-              Profile
+              <User size={16} />
             </button>
             <button
-              onClick={() => {
-                logger.log('AUTH', 'User signing out');
-                supabase.auth.signOut();
-                router.push('/login');
-              }}
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+              onClick={handleLogout}
             >
               Sign Out
             </button>
@@ -267,6 +263,14 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
           </div>
         )}
       </main>
+
+      <button 
+        className="text-white bg-green-600 hover:bg-green-700 rounded-full w-16 h-16 flex items-center justify-center shadow-lg transition duration-150 ease-in-out fixed bottom-20 right-1/2 transform translate-x-1/2 z-20"
+        onClick={() => router.push('/scan/index')}
+        aria-label="New Scan"
+      >
+        <ScanLine size={20} />
+      </button>
     </div>
   );
 } 

@@ -9,6 +9,7 @@ import { User } from '@supabase/supabase-js';
 import { CheckCircle2 } from 'lucide-react'; // Using lucide-react for icons
 
 export default function PaymentSuccessPage() {
+  console.log('>>> [PaymentSuccess Page] Component rendering initiated.');
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [firstName, setFirstName] = useState<string>('');

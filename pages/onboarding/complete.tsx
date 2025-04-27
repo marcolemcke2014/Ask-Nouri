@@ -23,7 +23,7 @@ export default function OnboardingComplete({ user }: { user: User | null }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
         console.log('[ONBOARDING UI] No user session found, redirecting to login');
-        router.push('/login');
+        router.push('/auth/login');
         return;
       }
 
@@ -105,10 +105,16 @@ export default function OnboardingComplete({ user }: { user: User | null }) {
     }
   };
 
-  const navigateToProfile = () => {
-    console.log('[ROUTE] Navigating to profile page');
-    router.push('/profile');
+  const handleContinue = () => {
+    // Navigate to the main dashboard or profile page
+    router.push('/profile/index');
   };
+
+  // Optionally, redirect user after a short delay or keep them here
+  // Example: redirect to profile page after 3 seconds
+  const timer = setTimeout(() => {
+    router.push('/profile/index');
+  }, 3000);
 
   if (!user) {
     return null; // Don't render if not authenticated
@@ -169,7 +175,7 @@ export default function OnboardingComplete({ user }: { user: User | null }) {
         )}
 
         <button
-          onClick={navigateToProfile}
+          onClick={handleContinue}
           disabled={isLoading}
           className={`w-full py-3 px-4 rounded-lg font-medium text-white
             ${isLoading 

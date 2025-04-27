@@ -22,8 +22,23 @@ export default function AuthCallback() {
         if (session) {
           console.log('User authenticated successfully:', session.user.id);
           
-          // Redirect to scan page instead of dashboard
-          router.push('/scan');
+          const { data: profile, error: profileError } = await supabase
+            .from('user_profile')
+            .select('onboarding_complete')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileError && profileError.code !== 'PGRST116') { // Ignore 'no rows found'
+            throw profileError;
+          }
+
+          if (profile?.onboarding_complete) {
+            router.push('/scan/index'); // Update scan path
+          } else {
+            // Redirect to onboarding if profile exists but onboarding isn't complete, or if profile doesn't exist yet
+            console.warn('Profile exists but onboarding is not complete. Redirecting to onboarding.');
+            router.push('/onboarding');
+          }
         } else {
           // Handle case where there's no session (might be an error or the auth process was canceled)
           console.warn('No session found in callback. Auth might have been canceled by the user.');
@@ -31,7 +46,7 @@ export default function AuthCallback() {
           
           // After a delay, redirect back to login
           setTimeout(() => {
-            router.push('/login');
+            router.push('/auth/login'); // Update login path
           }, 3000);
         }
       } catch (error: any) {
@@ -40,7 +55,7 @@ export default function AuthCallback() {
         
         // After a delay, redirect back to login
         setTimeout(() => {
-          router.push('/login');
+          router.push('/auth/login'); // Update login path
         }, 3000);
       }
     };

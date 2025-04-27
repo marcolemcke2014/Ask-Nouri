@@ -20,7 +20,7 @@ export default function EditProfile({ user }: { user: User | null }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
         console.log('[PROFILE] No user session found, redirecting to login');
-        router.push('/login');
+        router.push('/auth/login');
       }
     };
     
@@ -31,6 +31,15 @@ export default function EditProfile({ user }: { user: User | null }) {
 
   const handleBack = () => {
     router.push('/profile');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+    router.push('/profile/index');
   };
 
   if (!user) {

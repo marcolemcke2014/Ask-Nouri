@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import ScanScreen from '../../components/screens/ScanScreen';
 import { supabase } from '../../lib/supabase';
+import { User, History } from 'lucide-react';
 
 // Define user type
 interface User {
@@ -22,7 +23,7 @@ export default function ScanPage() {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session?.user) {
-        router.push('/login');
+        router.push('/auth/login');
       } else {
         setUser(data.session.user as User);
       }
@@ -49,24 +50,11 @@ export default function ScanPage() {
         <header className="flex justify-between items-center mb-10">
           <h1 className="text-2xl font-bold">NutriFlow</h1>
           <button
-            onClick={() => router.push('/profile')}
+            onClick={() => router.push('/profile/index')}
             className="p-2 rounded-full bg-white/10 hover:bg-white/20"
             aria-label="Profile"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
+            <User size={20} />
           </button>
         </header>
 
@@ -96,7 +84,7 @@ export default function ScanPage() {
             </button>
             
             <button
-              onClick={() => router.push('/history')}
+              onClick={() => router.push('/history/index')}
               className="w-full bg-white/20 hover:bg-white/30 text-white font-medium py-4 px-6 rounded-xl transition"
             >
               View Scan History
@@ -129,7 +117,7 @@ export default function ScanPage() {
             </button>
             
             <button
-              onClick={() => router.push('/results')}
+              onClick={() => router.push('/results/index')}
               className="flex flex-col items-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -139,12 +127,10 @@ export default function ScanPage() {
             </button>
             
             <button
-              onClick={() => router.push('/profile')}
-              className="flex flex-col items-center"
+              onClick={() => router.push('/profile/index')}
+              className={`flex flex-col items-center justify-center w-full pt-2 pb-1 ${router.pathname === '/profile' ? 'text-green-600' : 'text-gray-500'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+              <User size={20} />
               <span className="text-xs mt-1">Profile</span>
             </button>
           </nav>
