@@ -15,9 +15,10 @@ const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-re
 // ---
 
 const HEALTH_CONDITIONS = [
-  'Diabetes', 'Kidney Issues', 'High Blood Pressure', 'High Cholesterol',
-  'Celiac Disease', 'IBS / IBD', 'BERD / Acid Reflux', 'Bloating',
-  'None of these', 'Other'
+  'Diabetes', 'Kidney Disease', 'IBS / IBD', // Row 1
+  'High Blood Pressure', 'High Cholesterol',   // Row 2
+  'Celiac Disease', 'BERD / Acid Reflux',    // Row 3
+  'Bloating', 'None of these', 'Other'       // Row 4
 ];
 
 const FOOD_AVOIDANCES = [
@@ -25,7 +26,7 @@ const FOOD_AVOIDANCES = [
     'Sugar', 'Alcohol', 'Legumes', 'Corn', 'Eggs', 'Red Meat', 'Other'
 ];
 
-const SERIOUS_CONDITIONS = ['Diabetes', 'Kidney Issues', 'High Blood Pressure', 'High Cholesterol'];
+const SERIOUS_CONDITIONS = ['Diabetes', 'Kidney Disease', 'High Blood Pressure', 'High Cholesterol'];
 
 // Helper function to parse 'Other: ...' text
 const parseOtherText = (item: string): string => {
@@ -196,7 +197,7 @@ export default function OnboardingHealthCheck() {
             </div>
         )}
 
-        {/* Health Conditions Section - Removed justify-center */}
+        {/* Health Conditions Section - Array order dictates layout */}
         <div className="flex flex-wrap gap-2 mb-4">
           {HEALTH_CONDITIONS.map((condition) => (
             <div key={condition} className="flex items-center space-x-2">
