@@ -1,60 +1,48 @@
+'use client';
+
 import React from 'react';
 
 interface SelectionCardProps {
   id: string;
   title: string;
   description?: string;
+  icon?: React.ReactNode;
   selected: boolean;
-  onSelect: () => void;
+  onSelect: (id: string) => void;
+  className?: string;
 }
 
 const SelectionCard: React.FC<SelectionCardProps> = ({
   id,
   title,
   description,
+  icon,
   selected,
   onSelect,
+  className = ''
 }) => {
+  const baseStyle = "block w-full p-4 border rounded-lg text-left transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0A4923]";
+  const inactiveStyle = "bg-off-white/10 border-off-white/20 hover:bg-off-white/25 text-off-white";
+  const activeStyle = "bg-green-100 border-green-300 ring-2 ring-green-400 text-green-900";
+
   return (
-    <div 
-      onClick={onSelect}
-      className={`p-4 rounded-lg border-2 mb-3 cursor-pointer transition-all
-        ${selected 
-          ? 'border-blue-500 bg-blue-50' 
-          : 'border-gray-200 hover:border-gray-300 bg-white'
-        }`}
+    <button
+      type="button"
+      onClick={() => onSelect(id)}
+      className={`${baseStyle} ${selected ? activeStyle : inactiveStyle} ${className}`}
     >
       <div className="flex items-center">
-        <div className="flex-1">
-          <h3 className="font-medium text-gray-900">{title}</h3>
+        {icon && <div className="mr-3 flex-shrink-0">{icon}</div>}
+        <div className="flex-grow">
+          <h3 className={`text-base font-semibold ${selected ? '' : ''}`}>{title}</h3>
           {description && (
-            <p className="text-sm text-gray-500 mt-1">{description}</p>
-          )}
-        </div>
-        <div 
-          className={`w-5 h-5 rounded-full border flex items-center justify-center
-            ${selected 
-              ? 'border-blue-500 bg-blue-500' 
-              : 'border-gray-300'
-            }`}
-        >
-          {selected && (
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              fill="white" 
-              className="w-3 h-3"
-            >
-              <path 
-                fillRule="evenodd" 
-                d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" 
-                clipRule="evenodd" 
-              />
-            </svg>
+            <p className={`text-sm mt-1 ${selected ? 'text-green-800' : 'text-off-white/80'}`}>
+              {description}
+            </p>
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 

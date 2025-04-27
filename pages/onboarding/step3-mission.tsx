@@ -2,25 +2,34 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
 import { supabase } from '../../lib/supabase';
 import { User } from '@supabase/supabase-js';
-// TODO: Import or create GoalCard component
-// TODO: Import icons (Dumbbell, Zap, Brain, Leaf, Heart, HelpCircle)
+import OnboardingLayout from '../../components/onboarding/OnboardingLayout'; // Import layout
+// Assuming SelectionCard can be adapted or use similar styling
+import SelectionCard from '../../components/SelectionCard'; 
+import { Dumbbell, Zap, Brain, Leaf, Heart, HelpCircle } from 'lucide-react'; // Import icons
+
+// --- Styles (Matching auth pages) ---
+const inputStyle = "w-full p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-gray-800 bg-white placeholder-gray-500"; // Text input style
+const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
+const skipButtonStyle = "text-sm text-green-200 hover:text-green-100 text-center w-full";
+const errorBoxStyle = "mb-3 p-2.5 bg-red-100 border border-red-300 text-red-800 rounded-md text-sm text-center";
+// ---
 
 interface GoalOption {
   id: string;
   title: string;
-  icon?: React.ComponentType<{ className?: string }>; // Placeholder for icon component
+  icon: React.ComponentType<{ className?: string }>; // Use imported icons
 }
 
+// Map IDs to actual icons
 const GOAL_OPTIONS: GoalOption[] = [
-  { id: 'build_muscle', title: 'Build Muscle', icon: undefined }, // Replace undefined with actual icon component
-  { id: 'lose_weight', title: 'Lose Weight', icon: undefined },
-  { id: 'boost_energy', title: 'Boost Energy', icon: undefined },
-  { id: 'improve_gut_health', title: 'Improve Gut Health', icon: undefined },
-  { id: 'manage_health_conditions', title: 'Manage Health Conditions', icon: undefined },
-  { id: 'other', title: 'Other', icon: undefined },
+  { id: 'build_muscle', title: 'Build Muscle', icon: Dumbbell }, 
+  { id: 'lose_weight', title: 'Lose Weight', icon: Zap },
+  { id: 'boost_energy', title: 'Boost Energy', icon: Brain },
+  { id: 'improve_gut_health', title: 'Improve Gut Health', icon: Leaf },
+  { id: 'manage_health_conditions', title: 'Manage Health Conditions', icon: Heart },
+  { id: 'other', title: 'Other', icon: HelpCircle },
 ];
 
 export default function OnboardingMission() {
@@ -28,40 +37,67 @@ export default function OnboardingMission() {
   const [user, setUser] = useState<User | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [otherGoalText, setOtherGoalText] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading
   const [error, setError] = useState<string>('');
 
-  // Fetch user session
+  // Fetch user session and pre-fill
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        // TODO: Pre-fill form if data exists?
-      } else {
-        console.error('Onboarding: No user session found, redirecting.');
-        router.replace('/auth/login');
+    const fetchUserAndGoal = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+          // Fetch existing goal
+          const { data: goalData, error: goalError } = await supabase
+              .from('user_goals_and_diets')
+              .select('primary_goal')
+              .eq('user_id', session.user.id)
+              .maybeSingle();
+              
+          if (goalError) {
+              console.error('[Onboarding Mission] Error fetching primary goal:', goalError);
+          } else if (goalData?.primary_goal) {
+              const existingGoal = goalData.primary_goal;
+              // Check if it's one of the predefined IDs or custom text
+              const isPredefined = GOAL_OPTIONS.some(opt => opt.id === existingGoal);
+              if (isPredefined) {
+                  setSelectedGoal(existingGoal);
+              } else {
+                  setSelectedGoal('other');
+                  setOtherGoalText(existingGoal); // Pre-fill the text field
+              }
+          }
+        } else {
+          console.error('[Onboarding Mission] No user session found, redirecting.');
+          router.replace('/auth/login');
+        }
+      } catch (fetchError) {
+        console.error('[Onboarding Mission] Error in initial data fetch:', fetchError);
+        setError('Could not load step. Please refresh.');
+      } finally {
+        setIsLoading(false); // Stop loading
       }
     };
-    fetchUser();
+    fetchUserAndGoal();
   }, [router]);
 
   const handleSelectGoal = (goalId: string) => {
     setSelectedGoal(goalId);
     setError('');
     if (goalId !== 'other') {
-        setOtherGoalText(''); // Clear other text if a predefined goal is selected
+        setOtherGoalText('');
     }
   };
 
   const handleSkip = () => {
     console.log('[Onboarding Mission] Skipping step.');
-    router.push('/onboarding/step4-health-check'); // Navigate to the next step directly
+    router.push('/onboarding/step4-health-check');
   };
 
   const handleNext = async () => {
     if (!user) {
-      setError('User session not found. Please log in again.');
+      console.error('[Onboarding Mission] handleNext called without user.');
+      setError('User session not found.');
       return;
     }
     if (!selectedGoal) {
@@ -111,6 +147,7 @@ export default function OnboardingMission() {
         }
 
         if (upsertError) {
+            console.error('[Onboarding Mission] Supabase upsert error:', upsertError);
             throw upsertError;
         }
 
@@ -125,57 +162,51 @@ export default function OnboardingMission() {
     }
   };
 
-  // Placeholder simple styles - Adapt using existing UI components/Tailwind
-  const cardBaseStyle = "block w-full p-5 border rounded-lg text-left transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0A4923]";
-  const cardInactiveStyle = "bg-off-white/20 border-off-white/30 hover:bg-off-white/30 text-off-white";
-  const cardActiveStyle = "bg-green-200 border-green-400 ring-2 ring-green-500 text-green-900";
-  const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
-  const inputStyle = "w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-gray-800 bg-white placeholder-gray-500 mt-2";
+  if (isLoading && !user) {
+      return <div className="min-h-screen flex justify-center items-center bg-gradient-to-b from-[#14532D] to-[#0A4923]"><p className="text-white">Loading...</p></div>;
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif] text-off-white p-4">
-      <Head>
-        <title>Onboarding: Your Mission - NutriFlow</title>
-      </Head>
-
-      {/* TODO: Add Progress Indicator (e.g., Dots: Step 2 of 6) */}
-
-      <main className="w-full max-w-[500px] bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-6 sm:p-8 mt-10">
-        <h1 className="text-xl sm:text-2xl font-medium text-center mb-8">
+    <OnboardingLayout title="Your Mission" currentStep={2} totalSteps={6}>
+        <h1 className="text-xl sm:text-2xl font-medium text-center mb-8 text-off-white">
           What's your priority right now?
         </h1>
 
-        <div className="space-y-3 mb-6">
-          {GOAL_OPTIONS.map((goal) => (
-            <div key={goal.id}>
-                <button
-                    type="button"
-                    onClick={() => handleSelectGoal(goal.id)}
-                    className={`${cardBaseStyle} ${selectedGoal === goal.id ? cardActiveStyle : cardInactiveStyle}`}
-                >
-                    <div className="flex items-center">
-                        {/* TODO: Add goal.icon rendering here */}
-                        <span className={`text-base font-medium ${selectedGoal === goal.id ? '' : 'ml-0' /* Adjust margin if icon present */}`}>{goal.title}</span>
-                    </div>
-                </button>
-                {/* Show text input if 'Other' is selected */} 
-                {goal.id === 'other' && selectedGoal === 'other' && (
-                    <input 
-                        type="text"
-                        value={otherGoalText}
-                        onChange={(e) => setOtherGoalText(e.target.value)}
-                        placeholder="What's on your mind?"
-                        className={inputStyle}
-                    />
-                )}
-            </div>
-          ))}
-        </div>
-
-        {/* Error Message */}
+        {/* Display Error Box */} 
         {error && (
-          <p className="text-red-300 text-sm text-center mb-4">{error}</p>
+            <div className={errorBoxStyle}>
+              {error}
+            </div>
         )}
+
+        <div className="space-y-3 mb-6">
+          {GOAL_OPTIONS.map((goal) => {
+             const Icon = goal.icon; // Get the component type
+             return (
+                <div key={goal.id}>
+                    {/* Using SelectionCard - assumes it takes similar props */}
+                    <SelectionCard
+                        id={goal.id} 
+                        title={goal.title}
+                        icon={Icon ? <Icon className={`w-6 h-6 mr-3 ${selectedGoal === goal.id ? 'text-green-700' : 'text-green-200'}`} /> : null}
+                        selected={selectedGoal === goal.id}
+                        onSelect={handleSelectGoal}
+                        // Add description prop if SelectionCard supports it
+                    />
+                    {/* Show text input if 'Other' is selected */} 
+                    {goal.id === 'other' && selectedGoal === 'other' && (
+                        <input 
+                            type="text"
+                            value={otherGoalText}
+                            onChange={(e) => setOtherGoalText(e.target.value)}
+                            placeholder="What's on your mind?"
+                            className={`${inputStyle} mt-2`}
+                        />
+                    )}
+                </div>
+             );
+          })}
+        </div>
 
         {/* CTA Button */}
         <div className="space-y-3">
@@ -191,12 +222,11 @@ export default function OnboardingMission() {
             <button 
                 type="button" 
                 onClick={handleSkip}
-                className="text-sm text-green-200 hover:text-green-100 text-center w-full"
+                className={skipButtonStyle}
             >
                 Not sure? Skip for now
             </button>
         </div>
-      </main>
-    </div>
+    </OnboardingLayout>
   );
 } 

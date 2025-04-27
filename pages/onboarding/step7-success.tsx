@@ -1,62 +1,61 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
-import { CheckCircle } from 'lucide-react'; // Assuming lucide-react for icons
+import { CheckCircle } from 'lucide-react';
+import OnboardingLayout from '../../components/onboarding/OnboardingLayout'; // Import layout
 
 export default function OnboardingSuccess() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Optional loading state for button
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleNavigate = () => {
+    console.log('[Onboarding Success] Navigating to scan page...');
     setIsLoading(true);
-    // Navigate to the main scan page or dashboard
-    router.push('/scan'); 
-    // Alternatively: router.push('/dashboard'); if that exists
+    try {
+        router.push('/scan/index');
+    } catch (navError) {
+        console.error('[Onboarding Success] Navigation failed:', navError);
+        setIsLoading(false); // Stop loading if navigation fails
+        // Optionally set an error state to display to the user
+    }
   };
 
   // Placeholder styles
   const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
 
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif] text-off-white p-4">
-      <Head>
-        <title>Onboarding Complete! - NutriFlow</title>
-      </Head>
+    // Using layout, but setting currentStep > totalSteps effectively hides progress or shows all filled
+    <OnboardingLayout title="Onboarding Complete!" currentStep={7} totalSteps={6}> 
+        {/* Content is centered by layout's main tag, adding text-center here */}
+        <div className="text-center">
+            {/* Success Icon */}
+            <div className="mb-6 flex justify-center">
+               <CheckCircle className="w-16 h-16 text-green-300" strokeWidth={1.5} />
+            </div>
 
-      {/* TODO: Add Progress Indicator (Step 6 of 6 - All done!) */}
+            {/* Title */}
+            <h1 className="text-xl sm:text-2xl font-medium mb-4 text-off-white">
+              All set! Let's find your perfect meals 🔥
+            </h1>
 
-      <main className="w-full max-w-[450px] bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-6 sm:p-8 text-center">
-        
-        {/* Success Icon */}
-        <div className="mb-6 flex justify-center">
-           <CheckCircle className="w-16 h-16 text-green-300" strokeWidth={1.5} />
+            {/* Body Text */}
+            <p className="text-off-white/90 text-sm mb-8">
+              Based on your profile, we've prepared the best meal suggestions for you. Let's eat smarter!
+            </p>
+
+            {/* CTA Button */}
+            <div className="pt-4">
+              <button 
+                type="button" 
+                onClick={handleNavigate}
+                disabled={isLoading}
+                className={buttonStyle}
+              >
+                {isLoading ? 'Loading...' : 'Scan Menus'}
+              </button>
+            </div>
         </div>
-
-        {/* Title */}
-        <h1 className="text-xl sm:text-2xl font-medium mb-4">
-          All set! Let's find your perfect meals 🔥
-        </h1>
-
-        {/* Body Text */}
-        <p className="text-off-white/90 text-sm mb-8">
-          Based on your profile, we've prepared the best meal suggestions for you. Let's eat smarter!
-        </p>
-
-        {/* CTA Button */}
-        <div className="pt-4">
-          <button 
-            type="button" 
-            onClick={handleNavigate}
-            disabled={isLoading}
-            className={buttonStyle}
-          >
-            {isLoading ? 'Loading...' : 'Scan Menus'}
-          </button>
-        </div>
-      </main>
-    </div>
+    </OnboardingLayout>
   );
 } 

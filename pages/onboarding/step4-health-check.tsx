@@ -2,10 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
 import { supabase } from '../../lib/supabase';
 import { User } from '@supabase/supabase-js';
-// TODO: Import or create PillButton component
+import OnboardingLayout from '../../components/onboarding/OnboardingLayout'; // Import layout
+import PillButton from '../../components/onboarding/PillButton'; // Import PillButton
+
+// --- Styles (Matching auth pages) ---
+const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
+const inputStyle = "w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-gray-800 bg-white placeholder-gray-500 text-sm"; // Input for 'Other'
+const errorBoxStyle = "mb-3 p-2.5 bg-red-100 border border-red-300 text-red-800 rounded-md text-sm text-center";
+// ---
 
 const HEALTH_CONDITIONS = [
   'Diabetes', 'Kidney Issues', 'High Blood Pressure', 'High Cholesterol',
@@ -20,6 +26,14 @@ const FOOD_AVOIDANCES = [
 
 const SERIOUS_CONDITIONS = ['Diabetes', 'Kidney Issues', 'High Blood Pressure', 'High Cholesterol'];
 
+// Helper function to parse 'Other: ...' text
+const parseOtherText = (item: string): string => {
+    if (item.startsWith('Other: ')) {
+        return item.substring(7); // Length of "Other: "
+    }
+    return '';
+};
+
 export default function OnboardingHealthCheck() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -27,22 +41,59 @@ export default function OnboardingHealthCheck() {
   const [otherConditionText, setOtherConditionText] = useState<string>('');
   const [selectedAvoidances, setSelectedAvoidances] = useState<string[]>([]);
   const [otherAvoidanceText, setOtherAvoidanceText] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading
   const [error, setError] = useState<string>('');
 
-  // Fetch user session
+  // Fetch user session and pre-fill
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        // TODO: Pre-fill selections?
-      } else {
-        console.error('Onboarding: No user session found, redirecting.');
-        router.replace('/auth/login');
+    const fetchUserAndData = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+          // Fetch existing profile data
+          const { data: profile, error: profileError } = await supabase
+              .from('user_profile')
+              .select('health_conditions, food_avoidances')
+              .eq('id', session.user.id)
+              .maybeSingle();
+
+          if (profileError) {
+              console.error('[Onboarding Health Check] Error fetching profile:', profileError);
+          } else if (profile) {
+              // Pre-fill health conditions
+              if (profile.health_conditions && Array.isArray(profile.health_conditions)) {
+                  const conditions = profile.health_conditions;
+                  setSelectedConditions(conditions.filter(c => !c.startsWith('Other: ')));
+                  const otherCond = conditions.find(c => c.startsWith('Other: '));
+                  if (otherCond) {
+                      setSelectedConditions(prev => [...prev, 'Other']);
+                      setOtherConditionText(parseOtherText(otherCond));
+                  }
+              }
+              // Pre-fill food avoidances
+              if (profile.food_avoidances && Array.isArray(profile.food_avoidances)) {
+                   const avoidances = profile.food_avoidances;
+                   setSelectedAvoidances(avoidances.filter(a => !a.startsWith('Other: ')));
+                   const otherAvoid = avoidances.find(a => a.startsWith('Other: '));
+                   if (otherAvoid) {
+                       setSelectedAvoidances(prev => [...prev, 'Other']);
+                       setOtherAvoidanceText(parseOtherText(otherAvoid));
+                   }
+              }
+          }
+        } else {
+          console.error('[Onboarding Health Check] No user session found, redirecting.');
+          router.replace('/auth/login');
+        }
+      } catch (fetchError) {
+        console.error('[Onboarding Health Check] Error in initial data fetch:', fetchError);
+        setError('Could not load step. Please refresh.');
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchUser();
+    fetchUserAndData();
   }, [router]);
 
   const handleConditionToggle = (condition: string) => {
@@ -50,12 +101,12 @@ export default function OnboardingHealthCheck() {
     setSelectedConditions(prev => {
         let newState = [...prev];
         if (condition === 'None of these') {
-            return prev.includes(condition) ? [] : ['None of these']; // Select only 'None' or deselect it
+            return prev.includes(condition) ? [] : ['None of these'];
         } else {
-            newState = newState.filter(item => item !== 'None of these'); // Remove 'None' if selecting something else
+            newState = newState.filter(item => item !== 'None of these');
             if (newState.includes(condition)) {
                 newState = newState.filter(item => item !== condition);
-                if (condition === 'Other') setOtherConditionText(''); // Clear text if 'Other' deselected
+                if (condition === 'Other') setOtherConditionText('');
             } else {
                 newState.push(condition);
             }
@@ -69,7 +120,7 @@ export default function OnboardingHealthCheck() {
     setSelectedAvoidances(prev => {
       const newState = [...prev];
       if (newState.includes(avoidance)) {
-        if (avoidance === 'Other') setOtherAvoidanceText(''); // Clear text if 'Other' deselected
+        if (avoidance === 'Other') setOtherAvoidanceText('');
         return newState.filter(item => item !== avoidance);
       } else {
         newState.push(avoidance);
@@ -82,45 +133,42 @@ export default function OnboardingHealthCheck() {
 
   const handleNext = async () => {
     if (!user) {
-      setError('User session not found. Please log in again.');
+      console.error('[Onboarding Health Check] handleNext called without user.');
+      setError('User session not found.');
       return;
     }
-    // Basic validation for 'Other' fields
     if (selectedConditions.includes('Other') && !otherConditionText.trim()) {
-        setError('Please specify the other health condition.');
+        setError('Please specify other health condition.');
         return;
     }
     if (selectedAvoidances.includes('Other') && !otherAvoidanceText.trim()) {
-        setError('Please specify the other food to avoid.');
+        setError('Please specify other food to avoid.');
         return;
     }
 
     setError('');
     setIsLoading(true);
 
-    // Prepare arrays for DB, including the 'Other' text if applicable
     const conditionsToSave = selectedConditions.map(c => c === 'Other' ? `Other: ${otherConditionText.trim()}` : c);
     const avoidancesToSave = selectedAvoidances.map(a => a === 'Other' ? `Other: ${otherAvoidanceText.trim()}` : a);
 
     const updateData = {
-      health_conditions: conditionsToSave.length > 0 ? conditionsToSave : null, // Store null if empty
-      food_avoidances: avoidancesToSave.length > 0 ? avoidancesToSave : null, // Store null if empty
+      health_conditions: conditionsToSave.length > 0 ? conditionsToSave : null,
+      food_avoidances: avoidancesToSave.length > 0 ? avoidancesToSave : null,
       updated_at: new Date().toISOString(),
     };
 
     try {
-      console.log('[Onboarding Health Check] Updating profile for user:', user.id, updateData);
-      const { error: updateError } = await supabase
-        .from('user_profile')
-        .update(updateData)
-        .eq('id', user.id);
+      console.log('[Onboarding Health Check] Updating profile for user:', user.id);
+      const { error: updateError } = await supabase.from('user_profile').update(updateData).eq('id', user.id);
 
       if (updateError) {
+        console.error('[Onboarding Health Check] Supabase update error:', updateError);
         throw updateError;
       }
 
       console.log('[Onboarding Health Check] Profile updated successfully.');
-      router.push('/onboarding/step5-eating-style'); // Navigate to the next step
+      router.push('/onboarding/step5-eating-style');
 
     } catch (err: any) {
       console.error('[Onboarding Health Check] Update failed:', err);
@@ -130,51 +178,46 @@ export default function OnboardingHealthCheck() {
     }
   };
 
-  // Placeholder styles
-  const pillBaseStyle = "px-4 py-2 border rounded-full text-sm cursor-pointer transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0A4923]";
-  const pillInactiveStyle = "bg-off-white/20 border-off-white/30 hover:bg-off-white/30 text-off-white";
-  const pillActiveStyle = "bg-green-200 border-green-400 ring-2 ring-green-500 text-green-900";
-  const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
-  const inputStyle = "w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-gray-800 bg-white placeholder-gray-500 text-sm";
+  if (isLoading && !user) {
+      return <div className="min-h-screen flex justify-center items-center bg-gradient-to-b from-[#14532D] to-[#0A4923]"><p className="text-white">Loading...</p></div>;
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif] text-off-white p-4">
-      <Head>
-        <title>Onboarding: Health Check - NutriFlow</title>
-      </Head>
-
-      {/* TODO: Add Progress Indicator (Step 3 of 6) */}
-
-      <main className="w-full max-w-[600px] bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-6 sm:p-8 mt-10">
-        <h1 className="text-xl sm:text-2xl font-medium text-center mb-6">
+    <OnboardingLayout title="Health Check" currentStep={3} totalSteps={6}>
+        <h1 className="text-xl sm:text-2xl font-medium text-center mb-6 text-off-white">
           Any health conditions we should consider?
         </h1>
 
-        {/* Health Conditions Section */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        {/* Display Error Box */} 
+        {error && (
+            <div className={errorBoxStyle}>
+              {error}
+            </div>
+        )}
+
+        {/* Health Conditions Section - Use PillButton */}
+        <div className="flex flex-wrap gap-2 mb-4 justify-center">
           {HEALTH_CONDITIONS.map((condition) => (
-            <div key={condition}>
-              <button
-                type="button"
+            <div key={condition} className="flex items-center space-x-2">
+              <PillButton
+                text={condition}
+                isSelected={selectedConditions.includes(condition)}
                 onClick={() => handleConditionToggle(condition)}
-                className={`${pillBaseStyle} ${selectedConditions.includes(condition) ? pillActiveStyle : pillInactiveStyle}`}
-              >
-                {condition}
-              </button>
+              />
               {condition === 'Other' && selectedConditions.includes('Other') && (
                  <input 
                     type="text"
                     value={otherConditionText}
                     onChange={(e) => setOtherConditionText(e.target.value)}
-                    placeholder="Please specify condition..."
-                    className={`${inputStyle} mt-1 w-48`}
+                    placeholder="Please specify..."
+                    className={`${inputStyle} w-48`}
                  />
               )}
             </div>
           ))}
         </div>
 
-        {/* Serious Condition Note */} 
+        {/* Serious Condition Note */}
         {showSeriousConditionNote && (
             <p className="text-sm text-green-200 text-center bg-green-800/30 rounded p-2 mb-4">
                 We'll make sure your meals are safe and supportive for your condition.
@@ -183,37 +226,30 @@ export default function OnboardingHealthCheck() {
 
         <hr className="border-off-white/30 my-6" />
 
-        {/* Food Avoidances Section */}
-        <h2 className="text-lg font-medium text-center mb-4">
+        {/* Food Avoidances Section - Use PillButton */}
+        <h2 className="text-lg font-medium text-center mb-4 text-off-white">
           Do you avoid any of these foods?
         </h2>
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {FOOD_AVOIDANCES.map((avoidance) => (
-             <div key={avoidance}>
-                <button
-                    type="button"
+             <div key={avoidance} className="flex items-center space-x-2">
+                <PillButton
+                    text={avoidance}
+                    isSelected={selectedAvoidances.includes(avoidance)}
                     onClick={() => handleAvoidanceToggle(avoidance)}
-                    className={`${pillBaseStyle} ${selectedAvoidances.includes(avoidance) ? pillActiveStyle : pillInactiveStyle}`}
-                >
-                    {avoidance}
-                </button>
+                />
                 {avoidance === 'Other' && selectedAvoidances.includes('Other') && (
                     <input 
                         type="text"
                         value={otherAvoidanceText}
                         onChange={(e) => setOtherAvoidanceText(e.target.value)}
-                        placeholder="Please specify food..."
-                        className={`${inputStyle} mt-1 w-48`}
+                        placeholder="Please specify..."
+                        className={`${inputStyle} w-48`}
                     />
                 )}
             </div>
           ))}
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <p className="text-red-300 text-sm text-center mb-4">{error}</p>
-        )}
 
         {/* CTA Button */}
         <div className="pt-4">
@@ -226,7 +262,6 @@ export default function OnboardingHealthCheck() {
             {isLoading ? 'Saving...' : 'Next'}
           </button>
         </div>
-      </main>
-    </div>
+    </OnboardingLayout>
   );
 } 
