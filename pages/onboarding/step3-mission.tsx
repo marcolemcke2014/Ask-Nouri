@@ -9,13 +9,13 @@ import OnboardingLayout from '../../components/onboarding/OnboardingLayout'; // 
 import SelectionCard from '../../components/SelectionCard'; 
 import { Dumbbell, Zap, Brain, Leaf, Heart, HelpCircle } from 'lucide-react'; // Import icons
 
-// --- Styles (Matching Input.tsx component) ---
-// Style for the transformed "Other" input
-const otherInputStyle = "w-full h-auto p-4 rounded-lg border border-[#84F7AC] bg-off-white/25 backdrop-blur-sm text-off-white text-base font-semibold focus:outline-none focus:ring-2 focus:ring-[#84F7AC] focus:bg-off-white/30 transition-all font-['Poppins',sans-serif]"; 
-const otherInputPlaceholderStyle = "placeholder-off-white/50";
+// --- Styles ---
+// Updated style for the transformed "Other" input to match active SelectionCard
+const otherInputStyle = "w-full h-auto p-4 rounded-lg border border-[#84F7AC] bg-green-100 backdrop-blur-sm text-green-900 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-[#84F7AC] transition-all font-['Poppins',sans-serif]"; 
+const otherInputPlaceholderStyle = "placeholder-green-700/60"; // Adjusted placeholder color
 const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
 const skipButtonStyle = "text-sm text-green-200 hover:text-green-100 text-center w-full";
-const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center"; // Adjusted error style
+const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center";
 // ---
 
 interface GoalOption {
@@ -196,13 +196,12 @@ export default function OnboardingMission() {
              if (goal.id === 'other' && selectedGoal === 'other') {
                return (
                  <div key="other-input">
-                   {/* Input replaces the card when 'Other' is selected */}
                    <input 
-                      ref={otherInputRef} // Assign ref
+                      ref={otherInputRef} 
                       type="text"
                       value={otherGoalText}
                       onChange={(e) => setOtherGoalText(e.target.value)}
-                      placeholder="What's on your mind?" // Use actual title as placeholder?
+                      placeholder="What's on your mind?"
                       className={`${otherInputStyle} ${otherInputPlaceholderStyle}`}
                    />
                  </div>
