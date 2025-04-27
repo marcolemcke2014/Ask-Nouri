@@ -13,11 +13,19 @@ export default function PaymentSuccessPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [firstName, setFirstName] = useState<string>('');
-  const [planName, setPlanName] = useState<string>('');
+  const [planName, setPlanName] = useState<string>(router.query.planId as string || 'Selected Plan');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
+    if (router.isReady && router.query.planId && planName === 'Selected Plan') {
+        const urlPlan = router.query.planId as string;
+        if (urlPlan === 'Weekly Plan' || urlPlan === 'Annual Plan' || urlPlan === 'Free Plan') {
+            setPlanName(urlPlan);
+            console.log(`[PaymentSuccess] Plan name set from URL: ${urlPlan}`);
+        }
+    }
+
     const fetchUserData = async () => {
       setIsLoading(true);
       setError('');
@@ -55,12 +63,18 @@ export default function PaymentSuccessPage() {
         // 3. Update state
         setFirstName(profileData?.first_name || 'there'); // Use fallback "there"
         
-        // Map plan_type ID to a user-friendly name
-        const userPlan = profileData?.plan_type; // e.g., 'Weekly Plan' from DB
-        if (userPlan === 'Weekly Plan' || userPlan === 'Annual Plan' || userPlan === 'Free Plan') { // UPDATED conditions
-          setPlanName(userPlan); // Use the value directly from DB
+        // Plan name is now primarily set from URL param, this fetch can act as confirmation/fallback
+        const profilePlan = profileData?.plan_type;
+        if (!planName || planName === 'Selected Plan') { // Only update if not already set from URL
+             if (profilePlan === 'Weekly Plan' || profilePlan === 'Annual Plan' || profilePlan === 'Free Plan') {
+                 setPlanName(profilePlan);
+                 console.log(`[PaymentSuccess] Plan name confirmed from profile: ${profilePlan}`);
+             } else {
+                 // Keep default 'Selected Plan' if profile is also missing/invalid
+                 console.log('[PaymentSuccess] Plan name could not be confirmed from profile, using default.');
+             }
         } else {
-          setPlanName('Selected Plan'); // UPDATED fallback
+             console.log(`[PaymentSuccess] Plan name already set from URL (${planName}), profile fetch value (${profilePlan}) ignored for display.`);
         }
         
       } catch (err: any) {
@@ -75,12 +89,12 @@ export default function PaymentSuccessPage() {
     };
 
     fetchUserData();
-  }, []);
+  }, [router.isReady, router.query]);
 
   const handleContinue = () => {
     if (user?.id) {
-      // Navigate to the first step of onboarding, passing the user ID
-      router.push(`/onboarding/step1?user_id=${user.id}`);
+      // Navigate to the first step of the NEW onboarding flow
+      router.push(`/onboarding/step2-basics`); // Updated path
     } else {
       // Fallback if user ID somehow missing
       setError('Could not proceed. User information is missing.');

@@ -232,7 +232,7 @@ export default async function handler(
       priceId: stripePriceId,
       quantity: 1,
       customerId: stripeCustomerId,
-      success_url: `${siteUrl}/auth/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${siteUrl}/auth/payment-success?session_id={CHECKOUT_SESSION_ID}&planId=${encodeURIComponent(planId)}`,
       cancel_url: `${siteUrl}/auth/choose-plan`,
       client_reference_id: userId
     });
@@ -242,7 +242,7 @@ export default async function handler(
         mode: 'subscription',
         line_items: [{ price: stripePriceId, quantity: 1 }],
         customer: stripeCustomerId,
-        success_url: `${siteUrl}/auth/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${siteUrl}/auth/payment-success?session_id={CHECKOUT_SESSION_ID}&planId=${encodeURIComponent(planId)}`,
         cancel_url: `${siteUrl}/auth/choose-plan`,
         client_reference_id: userId,
         subscription_data: {
