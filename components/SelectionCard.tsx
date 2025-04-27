@@ -23,7 +23,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
 }) => {
   const baseStyle = "block w-full p-4 border rounded-lg text-left transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0A4923]";
   const inactiveStyle = "bg-off-white/10 border-off-white/20 text-off-white/80";
-  const activeStyle = "bg-green-100 border-green-300 text-green-900";
+  const activeStyle = "bg-green-100 border-[#84F7AC] text-green-900";
 
   return (
     <button
