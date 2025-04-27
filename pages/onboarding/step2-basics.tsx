@@ -6,17 +6,17 @@ import { supabase } from '../../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 
-// --- Styles (Matching auth pages more closely) ---
-const inputBaseStyle = "w-full h-12 px-4 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-sm";
-const inputTextStyle = "text-gray-900 bg-white placeholder-gray-400";
-const inputSelectStyle = "text-gray-900 bg-white";
-const labelStyle = "block text-sm font-light text-off-white mb-1.5";
+// --- Styles (Matching Input.tsx component) ---
+const labelStyle = "block text-xs font-normal text-off-white/90 mb-1.5"; // Updated to match Input label
+const inputStyle = "w-full h-12 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]"; // Copied from Input
+const inputPlaceholderStyle = "placeholder-gray-400/80"; // Added specific placeholder style
+const selectStyle = `${inputStyle} appearance-none`; // Base input style for select, remove default arrow
 const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
 const unitToggleContainerStyle = "flex space-x-1 bg-white/10 p-1 rounded-full";
 const unitToggleStyle = "px-3 py-1 text-xs rounded-full cursor-pointer transition-colors";
 const activeUnitStyle = "bg-green-200 text-green-800 font-medium";
 const inactiveUnitStyle = "bg-gray-500 text-gray-100 hover:bg-gray-600";
-const errorBoxStyle = "mb-3 p-2.5 bg-red-100 border border-red-300 text-red-800 rounded-md text-sm text-center";
+const errorBoxStyle = "mt-1 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center"; // Adjusted error style
 // ---
 
 export default function OnboardingBasics() {
@@ -158,13 +158,6 @@ export default function OnboardingBasics() {
           First, some quick basics 📋
         </h1>
         
-        {/* Display Error Box */} 
-        {error && (
-            <div className={errorBoxStyle}>
-              {error}
-            </div>
-        )}
-
         <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-4">
           {/* Date of Birth */}
           <div>
@@ -174,9 +167,8 @@ export default function OnboardingBasics() {
               id="dob"
               value={dob}
               onChange={handleDobChange}
-              className={`${inputBaseStyle} ${inputTextStyle}`}
+              className={`${inputStyle} ${inputPlaceholderStyle}`}
               max={new Date().toISOString().split("T")[0]}
-              placeholder="DD.MM.YYYY"
               required
             />
           </div>
@@ -190,7 +182,7 @@ export default function OnboardingBasics() {
                     id="height"
                     value={height}
                     onChange={handleHeightChange}
-                    className={`${inputBaseStyle} ${inputTextStyle} flex-grow`}
+                    className={`${inputStyle} ${inputPlaceholderStyle} flex-grow`}
                     placeholder={heightUnit === 'cm' ? 'e.g., 175' : 'e.g., 69'}
                     step={heightUnit === 'cm' ? 1 : 0.1}
                     min="1"
@@ -212,7 +204,7 @@ export default function OnboardingBasics() {
                     id="weight"
                     value={weight}
                     onChange={handleWeightChange}
-                    className={`${inputBaseStyle} ${inputTextStyle} flex-grow`}
+                    className={`${inputStyle} ${inputPlaceholderStyle} flex-grow`}
                     placeholder={weightUnit === 'kg' ? 'e.g., 70' : 'e.g., 154'}
                     step={weightUnit === 'kg' ? 0.1 : 0.1}
                     min="1"
@@ -226,13 +218,13 @@ export default function OnboardingBasics() {
           </div>
 
           {/* Gender */}
-          <div>
+          <div className="relative">
             <label htmlFor="gender" className={labelStyle}>Gender</label>
             <select
               id="gender"
               value={gender}
               onChange={handleGenderChange}
-              className={`${inputBaseStyle} ${inputSelectStyle}`}
+              className={selectStyle} // Use select-specific style
               required
             >
               <option value="" disabled>Select...</option>
@@ -241,7 +233,18 @@ export default function OnboardingBasics() {
               <option value="Non-binary">Non-binary</option>
               <option value="Prefer not to say">Prefer not to say</option>
             </select>
+             {/* Simple dropdown arrow overlay */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            </div>
           </div>
+          
+          {/* Error Message Box */}
+          {error && (
+            <div className={errorBoxStyle}>
+              {error}
+            </div>
+          )}
 
           {/* CTA Button */}
           <div className="pt-4">

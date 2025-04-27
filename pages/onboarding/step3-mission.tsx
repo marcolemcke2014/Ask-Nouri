@@ -9,11 +9,12 @@ import OnboardingLayout from '../../components/onboarding/OnboardingLayout'; // 
 import SelectionCard from '../../components/SelectionCard'; 
 import { Dumbbell, Zap, Brain, Leaf, Heart, HelpCircle } from 'lucide-react'; // Import icons
 
-// --- Styles (Matching auth pages) ---
-const inputStyle = "w-full h-12 px-4 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-sm text-gray-900 bg-white placeholder-gray-400"; // Input for 'Other'
-const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"; // font-normal
+// --- Styles (Matching Input.tsx component) ---
+const inputStyle = "w-full h-12 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]"; // For 'Other' input
+const inputPlaceholderStyle = "placeholder-gray-400/80";
+const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
 const skipButtonStyle = "text-sm text-green-200 hover:text-green-100 text-center w-full";
-const errorBoxStyle = "mb-3 p-2.5 bg-red-100 border border-red-300 text-red-800 rounded-md text-sm text-center";
+const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center"; // Adjusted error style
 // ---
 
 interface GoalOption {
@@ -200,7 +201,7 @@ export default function OnboardingMission() {
                             value={otherGoalText}
                             onChange={(e) => setOtherGoalText(e.target.value)}
                             placeholder="What's on your mind?"
-                            className={`${inputStyle} mt-2`}
+                            className={`${inputStyle} ${inputPlaceholderStyle} mt-2`}
                         />
                     )}
                 </div>

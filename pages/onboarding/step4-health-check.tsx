@@ -7,10 +7,11 @@ import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout'; // Import layout
 import PillButton from '../../components/onboarding/PillButton'; // Import PillButton
 
-// --- Styles (Matching auth pages) ---
+// --- Styles (Matching Input.tsx component) ---
 const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
-const inputStyle = "h-10 px-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-sm text-gray-900 bg-white placeholder-gray-400";
-const errorBoxStyle = "mb-3 p-2.5 bg-red-100 border border-red-300 text-red-800 rounded-md text-sm text-center";
+const inputStyle = "h-10 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]"; // Inline Input style
+const inputPlaceholderStyle = "placeholder-gray-400/80";
+const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center"; // Adjusted error style
 // ---
 
 const HEALTH_CONDITIONS = [
@@ -210,7 +211,7 @@ export default function OnboardingHealthCheck() {
                     value={otherConditionText}
                     onChange={(e) => setOtherConditionText(e.target.value)}
                     placeholder="Please specify..."
-                    className={`${inputStyle} w-48`}
+                    className={`${inputStyle} ${inputPlaceholderStyle} w-48`}
                  />
               )}
             </div>
@@ -244,7 +245,7 @@ export default function OnboardingHealthCheck() {
                         value={otherAvoidanceText}
                         onChange={(e) => setOtherAvoidanceText(e.target.value)}
                         placeholder="Please specify..."
-                        className={`${inputStyle} w-48`}
+                        className={`${inputStyle} ${inputPlaceholderStyle} w-48`}
                     />
                 )}
             </div>
