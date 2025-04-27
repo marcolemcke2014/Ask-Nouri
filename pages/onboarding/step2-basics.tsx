@@ -6,12 +6,12 @@ import { supabase } from '../../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 
-// --- Styles (Matching auth pages) ---
-const inputBaseStyle = "w-full p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500";
-const inputTextStyle = "text-gray-800 bg-white placeholder-gray-500"; // Style for text inputs
-const inputSelectStyle = "text-gray-800 bg-white"; // Style for select
-const labelStyle = "block text-sm font-medium text-off-white mb-1";
-const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
+// --- Styles (Matching auth pages more closely) ---
+const inputBaseStyle = "w-full h-12 px-4 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-sm";
+const inputTextStyle = "text-gray-900 bg-white placeholder-gray-400";
+const inputSelectStyle = "text-gray-900 bg-white";
+const labelStyle = "block text-sm font-light text-off-white mb-1.5";
+const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
 const unitToggleContainerStyle = "flex space-x-1 bg-white/10 p-1 rounded-full";
 const unitToggleStyle = "px-3 py-1 text-xs rounded-full cursor-pointer transition-colors";
 const activeUnitStyle = "bg-green-200 text-green-800 font-medium";
@@ -154,7 +154,7 @@ export default function OnboardingBasics() {
 
   return (
     <OnboardingLayout title="Quick Basics" currentStep={1} totalSteps={6}>
-        <h1 className="text-xl sm:text-2xl font-medium text-center mb-6 text-off-white">
+        <h1 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
           First, some quick basics 📋
         </h1>
         
@@ -165,7 +165,7 @@ export default function OnboardingBasics() {
             </div>
         )}
 
-        <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
+        <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-4">
           {/* Date of Birth */}
           <div>
             <label htmlFor="dob" className={labelStyle}>Date of Birth</label>
@@ -176,6 +176,7 @@ export default function OnboardingBasics() {
               onChange={handleDobChange}
               className={`${inputBaseStyle} ${inputTextStyle}`}
               max={new Date().toISOString().split("T")[0]}
+              placeholder="DD.MM.YYYY"
               required
             />
           </div>

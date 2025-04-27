@@ -35,7 +35,7 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         ))}
       </div>
 
-      <main className="w-full max-w-[600px] bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-6 sm:p-8 mt-4">
+      <main className="w-full max-w-sm bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5 mt-4">
         {children}
       </main>
     </div>

@@ -8,8 +8,8 @@ import OnboardingLayout from '../../components/onboarding/OnboardingLayout'; // 
 import PillButton from '../../components/onboarding/PillButton'; // Import PillButton
 
 // --- Styles (Matching auth pages) ---
-const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
-const inputStyle = "w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-gray-800 bg-white placeholder-gray-500 text-sm"; // Input for 'Other'
+const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
+const inputStyle = "h-10 px-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-sm text-gray-900 bg-white placeholder-gray-400";
 const errorBoxStyle = "mb-3 p-2.5 bg-red-100 border border-red-300 text-red-800 rounded-md text-sm text-center";
 // ---
 
@@ -184,7 +184,7 @@ export default function OnboardingHealthCheck() {
 
   return (
     <OnboardingLayout title="Health Check" currentStep={3} totalSteps={6}>
-        <h1 className="text-xl sm:text-2xl font-medium text-center mb-6 text-off-white">
+        <h1 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
           Any health conditions we should consider?
         </h1>
 
@@ -227,7 +227,7 @@ export default function OnboardingHealthCheck() {
         <hr className="border-off-white/30 my-6" />
 
         {/* Food Avoidances Section - Use PillButton */}
-        <h2 className="text-lg font-medium text-center mb-4 text-off-white">
+        <h2 className="text-lg font-light text-center mb-4 text-off-white">
           Do you avoid any of these foods?
         </h2>
         <div className="flex flex-wrap gap-2 mb-6 justify-center">

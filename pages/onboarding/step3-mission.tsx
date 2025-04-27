@@ -10,8 +10,8 @@ import SelectionCard from '../../components/SelectionCard';
 import { Dumbbell, Zap, Brain, Leaf, Heart, HelpCircle } from 'lucide-react'; // Import icons
 
 // --- Styles (Matching auth pages) ---
-const inputStyle = "w-full p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-gray-800 bg-white placeholder-gray-500"; // Text input style
-const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
+const inputStyle = "w-full h-12 px-4 border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-sm text-gray-900 bg-white placeholder-gray-400"; // Input for 'Other'
+const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"; // font-normal
 const skipButtonStyle = "text-sm text-green-200 hover:text-green-100 text-center w-full";
 const errorBoxStyle = "mb-3 p-2.5 bg-red-100 border border-red-300 text-red-800 rounded-md text-sm text-center";
 // ---
@@ -168,7 +168,7 @@ export default function OnboardingMission() {
 
   return (
     <OnboardingLayout title="Your Mission" currentStep={2} totalSteps={6}>
-        <h1 className="text-xl sm:text-2xl font-medium text-center mb-8 text-off-white">
+        <h1 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
           What's your priority right now?
         </h1>
 
@@ -188,7 +188,7 @@ export default function OnboardingMission() {
                     <SelectionCard
                         id={goal.id} 
                         title={goal.title}
-                        icon={Icon ? <Icon className={`w-6 h-6 mr-3 ${selectedGoal === goal.id ? 'text-green-700' : 'text-green-200'}`} /> : null}
+                        icon={Icon ? <Icon className={`w-5 h-5 mr-3 ${selectedGoal === goal.id ? 'text-green-700' : 'text-green-200'}`} /> : null}
                         selected={selectedGoal === goal.id}
                         onSelect={handleSelectGoal}
                         // Add description prop if SelectionCard supports it
