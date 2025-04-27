@@ -84,13 +84,32 @@ This style guide documents the UI/UX patterns observed in the authentication (`l
 
 - **Label:**
     - **Style:** `block text-xs font-normal text-off-white/90 mb-1.5`
-- **Input (Text, Email, Password, Date, Number, Textarea):**
+- **Standard Input (Text, Email, Password, etc.):**
     - **Base:** `w-full h-12 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 text-sm font-['Poppins',sans-serif] transition-all`
     - **Placeholder:** `placeholder-gray-400/80`
     - **Focus:** `focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white`
-    - **Textarea:** Uses `p-3.5` padding, height determined by `rows` attribute.
-    - **Select:** Base style + `appearance-none` (custom arrow overlay used).
-- **Error State:** Displayed below input (`text-xs text-red-200`) or in a separate error box (`p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 text-xs rounded-lg`)
+- **Textarea:**
+    - **Base:** `w-full p-3.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 text-sm font-['Poppins',sans-serif] transition-all` (Style like Input)
+    - **Placeholder:** `placeholder-gray-400/80`
+    - **Focus:** `focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white`
+    - **Sizing:** Height controlled by `rows` attribute.
+- **Select:**
+    - **Base:** Base Input style + `appearance-none`.
+    - **Arrow:** Custom SVG overlay used for dropdown indicator.
+- **Modular Date Input (e.g., Date of Birth):**
+    - **Structure:** Uses 3 separate, horizontally stacked (`flex space-x-2`) number inputs.
+    - **Individual Fields (DD, MM):** `w-16 text-center px-1` based on base input style.
+    - **Individual Field (YYYY):** `flex-grow` based on base input style.
+    - **Behavior:** Each field takes numeric input, placeholders `DD`, `MM`, `YYYY`. Combined into `YYYY-MM-DD` string in code.
+- **Numeric Stepper Input (e.g., Height, Weight):**
+    - **Structure:** `flex items-center justify-between` container with base input styles (`h-12 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80`).
+    - **Controls:** `[-]` and `[+]` buttons (`lucide-react` icons, `p-1 rounded-full text-gray-600 hover:bg-black/10 active:bg-black/20`).
+    - **Display:** Clickable `<span>` showing value + unit (`text-sm text-gray-900 cursor-pointer`).
+    - **Manual Input:** Clicking display reveals a temporary `<input type="number">` (`w-20 text-center px-1 mx-2` based on input style but **without focus ring**). Saves on blur or Enter.
+    - **Unit Toggle:** Separate component (`flex space-x-1 bg-white/10 p-1 rounded-full ml-2`) with active (`bg-green-200 text-green-800 font-medium`) and inactive states.
+- **Error State:**
+    - **General:** Separate box (`mt-1 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center`).
+    - **Input-Specific (Auth):** Displayed below input (`text-xs text-red-200`).
 
 ### Cards/Containers
 
@@ -113,6 +132,6 @@ This style guide documents the UI/UX patterns observed in the authentication (`l
 - **Labels:** `<label>` elements are generally used with `htmlFor` attributes linking them to input `id`s.
 - **Focus States:** Inputs and buttons have visible focus states (`focus:ring-2 focus:ring-green-600`).
 - **Semantic HTML:** Basic semantic elements (`main`, `h1`, `button`, `form`) are used.
-- **ARIA:** `aria-label` is used for icon-only buttons (e.g., back button).
+- **ARIA:** `aria-label` is used for icon-only buttons and stepper controls.
 
 *(Further A11y improvements could include more robust error association using `aria-describedby` or `aria-invalid`.)* 
