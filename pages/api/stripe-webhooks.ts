@@ -174,35 +174,77 @@ export default async function handler(
           return res.status(400).json({ error: 'Missing user ID in session' });
         }
 
-        // Determine plan type (Added check for metadata existence)
+        // NEW: Fetch the subscription to get the price ID
         let planType = 'unknown';
-        if (session.metadata && session.metadata.planId) {
-          planType = session.metadata.planId; // Assume metadata now contains 'Weekly Plan' or 'Annual Plan'
+        let priceId = null;
+        if (subscriptionId) {
+          try {
+            console.log(`[Stripe Webhook DEBUG] Fetching subscription details for: ${subscriptionId}`);
+            const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+              expand: ['items.data.price'] // Expand price details
+            });
+            priceId = subscription.items.data[0]?.price?.id;
+            console.log(`[Stripe Webhook DEBUG] Subscription fetched. Price ID: ${priceId}`);
+
+            // Map priceId to planType
+            if (priceId === process.env.STRIPE_WEEKLY_PRICE_ID) {
+              planType = 'Weekly Plan';
+              console.log(`[Stripe Webhook DEBUG] Matched Weekly Plan for price ID: ${priceId}`);
+            } else if (priceId === process.env.STRIPE_ANNUALLY_PRICE_ID) {
+              planType = 'Annual Plan';
+              console.log(`[Stripe Webhook DEBUG] Matched Annual Plan for price ID: ${priceId}`);
+            } else {
+              console.warn(`[Stripe Webhook] Unrecognized price ID: ${priceId}. Expected Weekly: ${process.env.STRIPE_WEEKLY_PRICE_ID} or Annual: ${process.env.STRIPE_ANNUALLY_PRICE_ID}`);
+            }
+          } catch (subError) {
+            console.error(`[Stripe Webhook] Error fetching subscription ${subscriptionId}:`, subError);
+            // Proceed without planType if subscription fetch fails, but log error
+          }
+        } else {
+          console.warn('[Stripe Webhook] No subscription ID found in checkout session, cannot determine plan type.');
         }
-        console.log(`[Stripe Webhook DEBUG] Determined planType from session metadata: ${planType}`); // UPDATED log
 
         // Update user profile
-        const updateData = {
+        const baseUpdateData = {
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
-          subscription_status: 'active_paid',
-          ...(planType !== 'unknown' && { plan_type: planType }),
+          subscription_status: 'active',
           subscription_updated_at: new Date().toISOString(),
         };
-        console.log(`[Stripe Webhook DEBUG] Attempting Supabase update for userId: ${userId} with data:`, updateData);
-        
-        const { error: updateError } = await supabaseAdmin
-          .from('user_profile')
-          .update(updateData)
-          .eq('id', userId);
 
-        if (updateError) {
-          console.error(`[Stripe Webhook] Supabase update failed: ${updateError.message}`, updateError);
-          console.log(`[Stripe Webhook DEBUG] Sending 500 response (Supabase update failed).`);
-          return res.status(500).json({ error: 'Database update failed' });
+        // Conditionally add plan_type only if it was successfully determined
+        const updateData = planType !== 'unknown'
+          ? { ...baseUpdateData, plan_type: planType }
+          : baseUpdateData;
+
+        if (planType === 'unknown') {
+          console.log('[Stripe Webhook DEBUG] Plan type is unknown, will not update plan_type field.');
         }
         
-        console.log(`[Stripe Webhook DEBUG] Supabase update successful for userId: ${userId}`);
+        console.log(`[Stripe Webhook DEBUG] Attempting Supabase update for userId: ${userId} with data:`, updateData);
+
+        try { // Wrap Supabase update in its own try/catch
+          const { error: updateError } = await supabaseAdmin
+            .from('user_profile')
+            .update(updateData)
+            .eq('id', userId);
+
+          if (updateError) {
+            throw updateError; // Throw to be caught by the catch block below
+          }
+
+          console.log(`[Stripe Webhook DEBUG] Supabase update successful for userId: ${userId}`);
+
+        } catch (dbError) { // IMPROVED catch block
+            const error = dbError as Error;
+            console.error(`[Stripe Webhook] Supabase update failed for userId ${userId}:`, error); // Log the actual error object
+            console.error(`[Stripe Webhook DEBUG] Update data attempted:`, updateData); // Log the data we tried to update
+            console.log(`[Stripe Webhook DEBUG] Sending 500 response (Supabase update failed).`);
+            return res.status(500).json({
+              error: 'Database update failed',
+              details: error.message // Include specific error message in response
+            });
+        }
         break;
       }
 
