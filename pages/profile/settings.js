@@ -1,99 +1,73 @@
 import React from 'react';
-import AppShell from '../../components/layout/AppShell';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
+// Assuming user context is handled higher up or via session check
+import { LogOut } from 'lucide-react';
+import { supabase } from '../../lib/supabase'; // Import supabase for logout
 
-export default function SettingsPage() {
-  const settingsGroups = [
-    {
-      title: 'Preferences',
-      settings: [
-        { name: 'Dark Mode', type: 'toggle', value: false },
-        { name: 'Enable Notifications', type: 'toggle', value: true },
-        { name: 'Default OCR Engine', type: 'select', value: 'Google Vision', options: ['Google Vision', 'MediaPipe'] }
-      ]
-    },
-    {
-      title: 'Dietary Settings',
-      settings: [
-        { name: 'Dietary Restrictions', type: 'multiselect', value: ['Low Sodium', 'High Protein'] },
-        { name: 'Calories Target', type: 'range', value: 2000, min: 1200, max: 3000 },
-        { name: 'Allergies', type: 'tags', value: [] }
-      ]
-    },
-    {
-      title: 'Account',
-      settings: [
-        { name: 'Email', type: 'text', value: 'user@example.com' },
-        { name: 'Password', type: 'password', value: '********' },
-        { name: 'Delete Account', type: 'danger-button', value: 'Delete' }
-      ]
-    }
-  ];
+// --- Styles from STYLE_GUIDE.md ---
+const cardStyle = "bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5";
+const buttonPrimaryStyle = "h-12 px-6 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
+// ---
+
+const SettingsPage = () => {
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.push('/profile/index'); // Go back to profile index
+  };
+
+  const handleLogout = async () => {
+    console.log('[Settings] User signing out...');
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
+
+  // Add useEffect for auth check if necessary, similar to edit.tsx
 
   return (
-    <AppShell title="Settings">
-      <div className="container mx-auto p-4 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-6">Settings</h1>
-        
-        <div className="space-y-6">
-          {settingsGroups.map((group, index) => (
-            <div key={index} className="bg-white p-5 rounded-lg shadow-sm">
-              <h2 className="text-lg font-semibold mb-4">{group.title}</h2>
-              
-              <div className="space-y-4">
-                {group.settings.map((setting, idx) => (
-                  <div key={idx} className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{setting.name}</p>
-                      {setting.description && (
-                        <p className="text-gray-500 text-sm">{setting.description}</p>
-                      )}
-                    </div>
-                    
-                    {setting.type === 'toggle' && (
-                      <div className={`w-12 h-6 rounded-full transition-colors ${
-                        setting.value ? 'bg-green-500' : 'bg-gray-300'
-                      }`}>
-                        <div className={`w-5 h-5 bg-white rounded-full transform transition-transform translate-y-[2px] ${
-                          setting.value ? 'translate-x-7' : 'translate-x-1'
-                        }`} />
-                      </div>
-                    )}
-                    
-                    {setting.type === 'select' && (
-                      <select className="border rounded-lg px-3 py-2">
-                        {setting.options?.map((option, optIdx) => (
-                          <option key={optIdx} selected={option === setting.value}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                    
-                    {setting.type === 'text' && (
-                      <div className="text-gray-600">{setting.value}</div>
-                    )}
-                    
-                    {setting.type === 'password' && (
-                      <button className="text-blue-600 text-sm">Change</button>
-                    )}
-                    
-                    {setting.type === 'danger-button' && (
-                      <button className="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-sm">
-                        {setting.value}
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
+     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif] text-off-white">
+      <Head>
+        <title>Settings - NutriFlow</title>
+      </Head>
+      
+       {/* Header */}
+       <header className="sticky top-0 z-10 bg-[#14532D]/80 backdrop-blur-sm border-b border-off-white/15">
+        <div className="max-w-4xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex justify-between items-center">
+          <h1 className="text-xl font-light text-off-white">Settings</h1>
+           <button
+              onClick={handleLogout}
+              className="p-1.5 rounded-full text-off-white/80 hover:bg-white/10 transition-colors"
+              aria-label="Sign Out"
+            >
+              <LogOut size={20} />
+          </button>
+        </div>
+      </header>
+      
+      {/* Using OnboardingLayout just for the centered card effect */}
+      <div className="flex-grow flex items-center justify-center p-4">
+          <main className={`w-full max-w-md ${cardStyle} text-center`}>
+            <h2 className="text-xl font-light text-off-white mb-6">Settings</h2>
+            
+            <div className="p-8 mb-8">
+                <p className="text-off-white/80 mb-4">
+                 Settings page is under construction.
+                </p>
+                <p className="text-off-white/70 text-sm mb-6">
+                  More options will be available soon.
+                </p>
+                <button
+                  onClick={handleBack}
+                  className={buttonPrimaryStyle + " mx-auto"} // Center button
+                >
+                  Back to Profile
+                </button>
             </div>
-          ))}
-        </div>
-        
-        <div className="mt-6 text-center text-gray-500 text-sm">
-          <p>NutriFlow v1.0.0</p>
-          <p>© 2023 NutriFlow. All rights reserved.</p>
-        </div>
+          </main>
       </div>
-    </AppShell>
+    </div>
   );
-} 
+};
+
+export default SettingsPage; 

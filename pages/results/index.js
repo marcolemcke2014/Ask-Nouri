@@ -199,6 +199,13 @@ const RecommendationCard = ({ recommendation }) => {
   );
 };
 
+// --- Styles from STYLE_GUIDE.md ---
+const buttonPrimaryStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm";
+const buttonSecondaryStyle = "w-full h-12 rounded-lg bg-off-white/20 border border-off-white/30 hover:bg-off-white/30 text-off-white font-normal flex items-center justify-center shadow-md text-sm transition-colors";
+const cardStyle = "bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5"; 
+const linkStyle = "text-xs text-[#84F7AC] hover:underline transition-colors"; // From login page
+// ---
+
 export default function Results() {
   const router = useRouter();
   const [data, setData] = useState(null);
@@ -315,18 +322,21 @@ export default function Results() {
   const healthiestDish = data?.dishes?.find(dish => dish.category === "Healthiest");
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "hsl(164.2, 85.7%, 16.5%)" }}>
-      <main className="max-w-sm mx-auto px-4 py-4 flex flex-col gap-y-3">
-        {/* Header with Last Scan info */}
+    // Apply background and font
+    <div className="min-h-screen bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif] text-off-white">
+      <main className="max-w-md mx-auto px-4 py-6 sm:py-10 flex flex-col gap-y-4"> {/* Use guide max-width & padding */}
+        {/* Header */}
         <header className="flex justify-between items-center mb-2">
-          <h1 className="text-xl font-bold text-white">Your Last Scan</h1>
-          <a href="/scan/history" className="text-green-300 text-sm">View History</a>
+          {/* Use guide font style */}
+          <h1 className="text-xl sm:text-2xl font-light text-off-white">Your Last Scan</h1>
+          {/* Use guide link style */}
+          <a href="/history" className={linkStyle}>View History</a>
         </header>
         
-        {/* White rounded container */}
-        <Card className="bg-white rounded-2xl overflow-hidden p-4 shadow-md">
+        {/* Apply guide card style to the main container card */}
+        <div className={cardStyle}>
+          {/* Keep internal structure, but note components inside aren't fully styled */}
           <div className="flex flex-col gap-y-4">
-            {/* Restaurant card */}
             <RestaurantCard 
               restaurantName={data?.restaurantName || 'Restaurant'} 
               location={data?.location || 'Location'} 
@@ -334,27 +344,25 @@ export default function Results() {
               score={data?.averageMenuScore || '--'}
               menuImage={data?.scannedMenuImage}
             />
-            
-            {/* Dish Card with category passed in */}
             {healthiestDish && <DishCard dish={healthiestDish} category="Healthiest" />}
-            
-            {/* Today's Recommendation */}
             <RecommendationCard recommendation={data?.recommendation || 'Focus on nutritionally balanced meals today.'} />
           </div>
-        </Card>
+        </div>
       </main>
       
-      {/* Footer */}
-      <footer className="py-4 px-4">
-        <div className="max-w-sm mx-auto">
+      {/* Footer - Update button styles */}
+      <footer className="sticky bottom-0 left-0 right-0 bg-[#0A4923]/80 backdrop-blur-sm border-t border-off-white/15 py-4 px-4 z-50">
+        <div className="max-w-md mx-auto space-y-3"> {/* Use guide max-width */}
+          {/* Using secondary style for Analyze Another - adjust if needed */}
           <button 
-            className="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded mt-4"
+            className={buttonSecondaryStyle} 
             onClick={() => router.push('/scan/index')}
           >
             Analyze Another Menu
           </button>
+          {/* Using primary style for Scan Another */}
           <button 
-            className="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded mt-4 w-full rounded-full shadow-md"
+            className={buttonPrimaryStyle}
             onClick={() => router.push('/scan/index')}
           >
             Scan Another Menu

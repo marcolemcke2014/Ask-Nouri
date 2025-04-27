@@ -132,7 +132,7 @@ export default function PaymentSuccessPage() {
         </div>
 
         {/* Headline */}
-        <h1 className="text-xl sm:text-2xl font-medium text-off-white mb-3">
+        <h1 className="text-xl sm:text-2xl font-light text-off-white mb-3">
           Welcome, {firstName}!
         </h1>
 
@@ -157,7 +157,7 @@ export default function PaymentSuccessPage() {
         <button
           onClick={handleContinue}
           disabled={!user?.id} // Disable if user ID isn't confirmed
-          className={`w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm ${
+          className={`w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm ${
              !user?.id ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >

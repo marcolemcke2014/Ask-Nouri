@@ -342,7 +342,7 @@ export default function ChoosePlan() {
           <button
             onClick={handleContinue}
             disabled={isLoading || selectedPlan === ''}
-            className={`w-full h-12 rounded-lg bg-[#34A853] text-off-white font-medium hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-sm text-sm ${
+            className={`w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-sm text-sm ${
               isLoading ? 'opacity-70 cursor-not-allowed' : ''
             }`}
           >

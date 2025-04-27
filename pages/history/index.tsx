@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabase';
 import logger from '../../lib/logger';
-import { ScanLine, User } from 'lucide-react';
+import { ScanLine, User, LogOut, PlusCircle, AlertTriangle, Info } from 'lucide-react';
 
 interface User {
   id: string;
@@ -18,8 +20,17 @@ interface Scan {
   location?: string;
 }
 
-export default function ScanHistoryPage({ user }: { user: User | null }) {
+// --- Styles from STYLE_GUIDE.md ---
+const cardStyle = "bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5 mb-4";
+const buttonPrimaryStyle = "w-16 h-16 rounded-full bg-[#34A853] text-off-white hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-lg fixed bottom-6 right-1/2 transform translate-x-1/2 z-20";
+const linkStyle = "text-sm font-medium text-[#84F7AC] hover:underline";
+const emptyStateCardStyle = "bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-8 text-center";
+const errorBoxStyle = "mt-4 p-4 bg-red-700/20 border border-red-500/30 text-red-200 rounded-lg text-sm";
+// ---
+
+export default function ScanHistoryPage() {
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [scans, setScans] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +50,7 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
         router.push('/auth/login');
       } else {
         logger.log('AUTH', `User authenticated: ${session.user.id}`);
+        setUser(session.user as User);
       }
     };
     
@@ -50,6 +62,7 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
     const fetchScanHistory = async () => {
       if (!user) {
         logger.log('SCAN-HISTORY', 'Skipping fetch - no authenticated user');
+        setLoading(false);
         return;
       }
       
@@ -124,6 +137,7 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
   };
 
   const handleLogout = async () => {
+    logger.log('AUTH', 'User signing out from history page');
     await supabase.auth.signOut();
     router.push('/auth/login');
   };
@@ -134,142 +148,98 @@ export default function ScanHistoryPage({ user }: { user: User | null }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif] text-off-white">
       <Head>
-        <title>Your Recent Scans - NutriFlow</title>
+        <title>Your Scan History - NutriFlow</title>
       </Head>
       
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-900">NutriFlow</h1>
+      <header className="sticky top-0 z-10 bg-[#14532D]/80 backdrop-blur-sm border-b border-off-white/15">
+        <div className="max-w-4xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex justify-between items-center">
+          <h1 className="text-xl font-light text-off-white">Scan History</h1>
           <div className="flex items-center space-x-4">
             <button
-              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
-              onClick={() => router.push('/scan/index')}
-            >
-              <ScanLine size={16} />
-            </button>
-            <button
-              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
               onClick={() => router.push('/profile/index')}
+              className="p-1.5 rounded-full text-off-white/80 hover:bg-white/10 transition-colors"
+              aria-label="Profile"
             >
-              <User size={16} />
+              <User size={20} />
             </button>
             <button
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
               onClick={handleLogout}
+              className="p-1.5 rounded-full text-off-white/80 hover:bg-white/10 transition-colors"
+              aria-label="Sign Out"
             >
-              Sign Out
+              <LogOut size={20} />
             </button>
           </div>
         </div>
       </header>
       
-      <main className="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Recent Scans</h2>
-        
-        {loading ? (
-          <div className="py-12 flex flex-col items-center justify-center">
-            <div className="w-10 h-10 border-t-2 border-b-2 border-green-500 rounded-full animate-spin mb-4"></div>
-            <p className="text-gray-500">Loading your scan history...</p>
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <div className="text-red-600 mb-2">Oops! Something went wrong.</div>
-            <p className="text-red-500 text-sm">{error}</p>
-            <button 
-              onClick={() => {
-                logger.log('SCAN-HISTORY', 'User retrying scan history fetch');
-                window.location.reload();
-              }}
-              className="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        ) : scans.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-8 text-center">
-            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">No scans yet</h3>
-            <p className="text-gray-500 mb-6">Start scanning restaurant menus to get nutritional insights</p>
-            <button
-              onClick={() => {
-                logger.log('SCAN-HISTORY', 'New user navigating to scan page');
-                router.push('/scan');
-              }}
-              className="px-5 py-3 bg-green-500 text-white rounded-full font-medium hover:bg-green-600 transition-colors"
-            >
-              Scan Your First Menu
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-6">
+      <main className="flex-grow max-w-md mx-auto px-4 py-6 sm:px-6 lg:px-8 w-full">
+        <div className="space-y-4">
+            {error && (
+                <div className={errorBoxStyle}>
+                  <Info size={18} className="inline-block mr-2"/> {error}
+                </div>
+            )} 
+
+            {!loading && scans.length === 0 && !error && (
+              <div className={emptyStateCardStyle}>
+                <ScanLine size={40} className="mx-auto mb-4 text-green-300"/>
+                <h3 className="text-lg font-medium text-off-white mb-2">No scans yet</h3>
+                <p className="text-sm text-off-white/80 mb-6">Start scanning restaurant menus to get nutritional insights.</p>
+                <button
+                  onClick={() => router.push('/scan/index')}
+                  className="px-5 py-2 bg-[#34A853] text-off-white rounded-full font-normal text-sm hover:bg-[#2c9247] transition-colors"
+                >
+                  Scan Your First Menu
+                </button>
+              </div>
+            )}
+
             {scans.map((scan) => {
               const healthScore = getPlaceholderHealthScore();
               
               return (
-                <div key={scan.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="p-6">
-                    <div className="flex justify-between items-start">
+                <div key={scan.id} className={cardStyle}>
+                    <div className="flex justify-between items-start mb-2">
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-1">
-                          {scan.restaurant_name || 'Unnamed Restaurant'}
+                        <h3 className="text-lg font-medium text-off-white mb-1">
+                          {scan.restaurant_name || 'Unnamed Scan'}
                         </h3>
-                        <p className="text-gray-500 text-sm mb-3">
+                        <p className="text-xs text-off-white/70">
                           {scan.location || 'Unknown Location'} • {formatDate(scan.scanned_at)}
                         </p>
                       </div>
-                      <div className="flex items-center">
-                        <div className={`text-lg font-bold ${
-                          healthScore >= 80 ? 'text-green-500' : 
-                          healthScore >= 70 ? 'text-yellow-500' : 
-                          'text-orange-500'
-                        }`}>
-                          {healthScore}/100
-                        </div>
+                      <div className={`text-lg font-semibold px-2 py-0.5 rounded ${ 
+                        healthScore >= 80 ? 'text-green-300' : 
+                        healthScore >= 60 ? 'text-yellow-300' : 
+                        'text-orange-400' 
+                      }`}>
+                        {healthScore}<span className="text-xs">/100</span>
                       </div>
                     </div>
                     
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <div className="text-sm text-gray-700">
-                        {truncateText(scan.menu_raw_text || 'No menu text available')}
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 flex justify-between items-center">
-                      <div className="flex items-center space-x-1">
-                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span className="text-xs text-green-700 font-medium">NutriScore™</span>
-                      </div>
+                    <div className="mt-3 flex justify-end items-center">
                       <button
-                        onClick={() => {
-                          logger.log('SCAN-HISTORY', `User viewing scan details for ID: ${scan.id}`);
-                          router.push(`/scan/${scan.id}`);
-                        }}
-                        className="text-sm font-medium text-green-600 hover:text-green-800"
+                        onClick={() => router.push(`/scan/${scan.id}`)}
+                        className={linkStyle}
                       >
                         See Details →
                       </button>
                     </div>
-                  </div>
                 </div>
               );
             })}
-          </div>
-        )}
+         </div>
       </main>
 
       <button 
-        className="text-white bg-green-600 hover:bg-green-700 rounded-full w-16 h-16 flex items-center justify-center shadow-lg transition duration-150 ease-in-out fixed bottom-20 right-1/2 transform translate-x-1/2 z-20"
+        className={buttonPrimaryStyle} 
         onClick={() => router.push('/scan/index')}
         aria-label="New Scan"
       >
-        <ScanLine size={20} />
+        <PlusCircle size={24} />
       </button>
     </div>
   );
