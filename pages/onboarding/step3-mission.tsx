@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabase';
 import { User } from '@supabase/supabase-js';
@@ -10,8 +10,9 @@ import SelectionCard from '../../components/SelectionCard';
 import { Dumbbell, Zap, Brain, Leaf, Heart, HelpCircle } from 'lucide-react'; // Import icons
 
 // --- Styles (Matching Input.tsx component) ---
-const inputStyle = "w-full h-12 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]"; // For 'Other' input
-const inputPlaceholderStyle = "placeholder-gray-400/80";
+// Style for the transformed "Other" input
+const otherInputStyle = "w-full h-auto p-4 rounded-lg border border-[#84F7AC] bg-off-white/25 backdrop-blur-sm text-off-white text-base font-semibold focus:outline-none focus:ring-2 focus:ring-[#84F7AC] focus:bg-off-white/30 transition-all font-['Poppins',sans-serif]"; 
+const otherInputPlaceholderStyle = "placeholder-off-white/50";
 const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
 const skipButtonStyle = "text-sm text-green-200 hover:text-green-100 text-center w-full";
 const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center"; // Adjusted error style
@@ -40,6 +41,7 @@ export default function OnboardingMission() {
   const [otherGoalText, setOtherGoalText] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading
   const [error, setError] = useState<string>('');
+  const otherInputRef = useRef<HTMLInputElement>(null); // Ref for focus
 
   // Fetch user session and pre-fill
   useEffect(() => {
@@ -81,6 +83,13 @@ export default function OnboardingMission() {
     };
     fetchUserAndGoal();
   }, [router]);
+
+  // Focus the 'Other' input when it appears
+  useEffect(() => {
+    if (selectedGoal === 'other' && otherInputRef.current) {
+      otherInputRef.current.focus();
+    }
+  }, [selectedGoal]);
 
   const handleSelectGoal = (goalId: string) => {
     setSelectedGoal(goalId);
@@ -183,29 +192,35 @@ export default function OnboardingMission() {
         <div className="space-y-3 mb-6">
           {GOAL_OPTIONS.map((goal) => {
              const Icon = goal.icon; // Get the component type
-             return (
-                <div key={goal.id}>
-                    {/* Using SelectionCard - assumes it takes similar props */}
-                    <SelectionCard
-                        id={goal.id} 
-                        title={goal.title}
-                        icon={Icon ? <Icon className={`w-5 h-5 mr-3 ${selectedGoal === goal.id ? 'text-green-700' : 'text-green-200'}`} /> : null}
-                        selected={selectedGoal === goal.id}
-                        onSelect={handleSelectGoal}
-                        // Add description prop if SelectionCard supports it
-                    />
-                    {/* Show text input if 'Other' is selected */} 
-                    {goal.id === 'other' && selectedGoal === 'other' && (
-                        <input 
-                            type="text"
-                            value={otherGoalText}
-                            onChange={(e) => setOtherGoalText(e.target.value)}
-                            placeholder="What's on your mind?"
-                            className={`${inputStyle} ${inputPlaceholderStyle} mt-2`}
-                        />
-                    )}
-                </div>
-             );
+             // Conditional Rendering for "Other"
+             if (goal.id === 'other' && selectedGoal === 'other') {
+               return (
+                 <div key="other-input">
+                   {/* Input replaces the card when 'Other' is selected */}
+                   <input 
+                      ref={otherInputRef} // Assign ref
+                      type="text"
+                      value={otherGoalText}
+                      onChange={(e) => setOtherGoalText(e.target.value)}
+                      placeholder="What's on your mind?" // Use actual title as placeholder?
+                      className={`${otherInputStyle} ${otherInputPlaceholderStyle}`}
+                   />
+                 </div>
+               );
+             } else {
+               // Render SelectionCard for all other goals OR if 'Other' is not selected
+               return (
+                  <div key={goal.id}>
+                      <SelectionCard
+                          id={goal.id} 
+                          title={goal.title}
+                          icon={Icon ? <Icon className={`w-5 h-5 mr-3 ${selectedGoal === goal.id ? 'text-green-700' : 'text-green-200'}`} /> : null}
+                          selected={selectedGoal === goal.id}
+                          onSelect={handleSelectGoal}
+                      />
+                  </div>
+               );
+             }
           })}
         </div>
 
@@ -214,7 +229,7 @@ export default function OnboardingMission() {
             <button 
               type="button" 
               onClick={handleNext}
-              disabled={isLoading || !selectedGoal}
+              disabled={isLoading || !selectedGoal || (selectedGoal === 'other' && !otherGoalText.trim())} // Update disabled state
               className={buttonStyle}
             >
               {isLoading ? 'Saving...' : 'Next'}
