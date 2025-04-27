@@ -311,8 +311,8 @@ export default function OnboardingBasics() {
                         value={height}
                         onChange={handleManualHeightChange}
                         onBlur={handleHeightBlur}
-                        onKeyDown={(e) => e.key === 'Enter' && handleHeightBlur()} // Save on Enter
-                        className={`${inputStyle} w-20 text-center px-1 mx-2`}
+                        onKeyDown={(e) => e.key === 'Enter' && handleHeightBlur()}
+                        className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '')} w-20 text-center px-1 mx-2`}
                         step={heightUnit === 'cm' ? 1 : 0.1}
                         min="1"
                     />
@@ -348,7 +348,7 @@ export default function OnboardingBasics() {
                             onChange={handleManualWeightChange}
                             onBlur={handleWeightBlur}
                             onKeyDown={(e) => e.key === 'Enter' && handleWeightBlur()}
-                            className={`${inputStyle} w-20 text-center px-1 mx-2`}
+                            className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '')} w-20 text-center px-1 mx-2`}
                             step={0.1}
                             min="1"
                         />
