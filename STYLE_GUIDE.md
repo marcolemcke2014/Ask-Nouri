@@ -107,6 +107,15 @@ This style guide documents the UI/UX patterns observed in the authentication (`l
     - **Display:** Clickable `<span>` showing value + unit (`text-sm text-gray-900 cursor-pointer`).
     - **Manual Input:** Clicking display reveals a temporary `<input type="number">` (`w-20 text-center px-1 mx-2` based on input style but **without focus ring**). Saves on blur or Enter.
     - **Unit Toggle:** Separate component (`flex space-x-1 bg-white/10 p-1 rounded-full ml-2`) with active (`bg-green-200 text-green-800 font-medium`) and inactive states.
+- **"Other" Input (Transformed Selection):**
+    - **Use Case:** Appears when an "Other" `SelectionCard` is chosen, replacing the card.
+    - **Style:** `w-full h-auto p-4 rounded-lg border border-[#84F7AC] bg-green-100 backdrop-blur-sm text-green-900 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-[#84F7AC] transition-all font-['Poppins',sans-serif]` (Matches active `SelectionCard` appearance).
+    - **Placeholder:** `placeholder-green-700/60`.
+- **"Other" Input (Inline Pill):**
+    - **Use Case:** Appears next to an "Other" `PillButton` when selected.
+    - **Style:** `h-10 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]` (Standard input style, potentially sized with `w-48`).
+    - **Placeholder:** `placeholder-gray-400/80`.
+
 - **Error State:**
     - **General:** Separate box (`mt-1 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center`).
     - **Input-Specific (Auth):** Displayed below input (`text-xs text-red-200`).
@@ -115,23 +124,11 @@ This style guide documents the UI/UX patterns observed in the authentication (`l
 
 - **Main Content Card (Login, Signup, Onboarding):**
     - **Style:** `w-full max-w-[WIDTH] bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5` (Max-width varies slightly)
-- **Plan Selection Card (Choose Plan):**
-    - **Base:** `relative backdrop-blur-xl rounded-lg border transition-all duration-200 cursor-pointer overflow-hidden p-4`
-    - **Inactive:** `border-off-white/15 hover:border-off-white/40 bg-off-white/20 hover:bg-off-white/30 hover:translate-y-[-1px] hover:shadow-md`
-    - **Active:** `border-[#84F7AC] bg-off-white/25`
+- **Plan/Goal Selection Card (`SelectionCard.tsx`):**
+    - **Base:** `block w-full p-4 border rounded-lg text-left transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0A4923]`
+    - **Inactive:** `bg-off-white/10 border-off-white/20 text-off-white/80 focus:ring-green-300` (Title `font-light`, Icon `text-off-white/80`)
+    - **Active:** `bg-green-100 border-[#84F7AC] text-green-900 focus:ring-[#84F7AC]` (Title `font-semibold`, Icon `text-green-700`)
 
 ## 4. Page-Specific Guidelines
 
-- **`login.tsx`:** Centered layout, Logo -> Card [Heading -> Error (Optional) -> Form (Inputs + Submit Button) -> Divider -> Social Login -> Links (Signup, Forgot Password)]. `max-w-[325px]` card.
-- **`signup.tsx`:** Centered layout, Card [Heading -> Error (Optional) -> Form (Inputs + Checkbox + Submit Button) -> Divider -> Social Login -> Link (Login)]. `max-w-[370px]` card.
-- **`choose-plan.tsx`:** Centered layout, Back Button + Heading -> Sub-heading -> Plan Selection Cards (Vertical `space-y-4`) -> Promo Code -> Error (Optional) -> CTA Button -> Disclaimers. `max-w-md` content area.
-- **`payment-success.tsx`:** Centered layout (both axes), Card [Icon -> Heading -> Text -> Error (Optional) -> CTA Button]. `max-w-[400px]` card.
-
-## 5. Accessibility (A11y) Notes
-
-- **Labels:** `<label>` elements are generally used with `htmlFor` attributes linking them to input `id`s.
-- **Focus States:** Inputs and buttons have visible focus states (`focus:ring-2 focus:ring-green-600`).
-- **Semantic HTML:** Basic semantic elements (`main`, `h1`, `button`, `form`) are used.
-- **ARIA:** `aria-label` is used for icon-only buttons and stepper controls.
-
-*(Further A11y improvements could include more robust error association using `aria-describedby` or `aria-invalid`.)* 
+- **`

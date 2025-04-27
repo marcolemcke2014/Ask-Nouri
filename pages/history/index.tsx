@@ -21,7 +21,7 @@ interface Scan {
 }
 
 // --- Styles from STYLE_GUIDE.md ---
-const cardStyle = "bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5 mb-4";
+const historyItemCardStyle = "block w-full p-4 border rounded-lg text-left transition-colors duration-150 bg-off-white/10 border-off-white/20 text-off-white/80 hover:bg-off-white/20";
 const buttonPrimaryStyle = "w-16 h-16 rounded-full bg-[#34A853] text-off-white hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-lg fixed bottom-6 right-1/2 transform translate-x-1/2 z-20";
 const linkStyle = "text-sm font-medium text-[#84F7AC] hover:underline";
 const emptyStateCardStyle = "bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-8 text-center";
@@ -201,7 +201,7 @@ export default function ScanHistoryPage() {
               const healthScore = getPlaceholderHealthScore();
               
               return (
-                <div key={scan.id} className={cardStyle}>
+                <div key={scan.id} className={historyItemCardStyle}>
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="text-lg font-medium text-off-white mb-1">

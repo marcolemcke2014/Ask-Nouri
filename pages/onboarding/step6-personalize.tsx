@@ -129,9 +129,9 @@ export default function OnboardingPersonalize() {
 
   return (
     <OnboardingLayout title="Personalize" currentStep={5} totalSteps={6}>
-        <h1 className="text-xl sm:text-2xl font-light text-center mb-8 text-off-white">
+        <h2 className="text-xl sm:text-2xl font-light text-center mb-8 text-off-white">
           Almost there! Let's personalize a little more ✨
-        </h1>
+        </h2>
 
         {/* Display Error Box */} 
         {error && (

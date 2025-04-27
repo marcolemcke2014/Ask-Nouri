@@ -145,9 +145,9 @@ export default function OnboardingEatingStyle() {
 
   return (
     <OnboardingLayout title="Eating Style" currentStep={4} totalSteps={6}>
-        <h1 className="text-xl sm:text-2xl font-light text-center mb-4 text-off-white">
+        <h2 className="text-xl sm:text-2xl font-light text-center mb-4 text-off-white">
           Do you follow a specific eating style?
-        </h1>
+        </h2>
         <p className="text-sm text-center text-green-200 mb-6">
            (Optional — you can always update later.)
         </p>
@@ -160,7 +160,7 @@ export default function OnboardingEatingStyle() {
         )}
 
         {/* Use PillButton */}
-        <div className="flex flex-wrap gap-2 mb-6 justify-center">
+        <div className="flex flex-wrap gap-2 mb-6">
           {EATING_STYLES.map((style) => (
              <div key={style} className="flex items-center space-x-2">
                 <PillButton

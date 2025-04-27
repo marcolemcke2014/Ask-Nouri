@@ -185,9 +185,9 @@ export default function OnboardingHealthCheck() {
 
   return (
     <OnboardingLayout title="Health Check" currentStep={3} totalSteps={6}>
-        <h1 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
+        <h2 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
           Any health conditions we should consider?
-        </h1>
+        </h2>
 
         {/* Display Error Box */} 
         {error && (
@@ -196,8 +196,8 @@ export default function OnboardingHealthCheck() {
             </div>
         )}
 
-        {/* Health Conditions Section - Use PillButton */}
-        <div className="flex flex-wrap gap-2 mb-4 justify-center">
+        {/* Health Conditions Section - Removed justify-center */}
+        <div className="flex flex-wrap gap-2 mb-4">
           {HEALTH_CONDITIONS.map((condition) => (
             <div key={condition} className="flex items-center space-x-2">
               <PillButton
@@ -227,11 +227,11 @@ export default function OnboardingHealthCheck() {
 
         <hr className="border-off-white/30 my-6" />
 
-        {/* Food Avoidances Section - Use PillButton */}
-        <h2 className="text-lg font-light text-center mb-4 text-off-white">
+        {/* Food Avoidances Section - Removed justify-center */}
+        <h3 className="text-lg font-light text-center mb-4 text-off-white">
           Do you avoid any of these foods?
-        </h2>
-        <div className="flex flex-wrap gap-2 mb-6 justify-center">
+        </h3>
+        <div className="flex flex-wrap gap-2 mb-6">
           {FOOD_AVOIDANCES.map((avoidance) => (
              <div key={avoidance} className="flex items-center space-x-2">
                 <PillButton

@@ -178,9 +178,9 @@ export default function OnboardingMission() {
 
   return (
     <OnboardingLayout title="Your Mission" currentStep={2} totalSteps={6}>
-        <h1 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
+        <h2 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
           What's your priority right now?
-        </h1>
+        </h2>
 
         {/* Display Error Box */} 
         {error && (

@@ -52,7 +52,7 @@ interface UserGoals {
 // --- Styles from STYLE_GUIDE.md ---
 const cardStyle = "bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5"; 
 const buttonSecondaryStyle = "px-4 py-2 border border-off-white/30 text-off-white/80 rounded-lg text-sm hover:bg-off-white/10 transition-colors";
-const featureCardStyle = "border border-off-white/15 rounded-lg p-4 hover:bg-off-white/10 cursor-pointer transition-colors";
+const featureCardStyle = "block w-full p-4 border rounded-lg text-left transition-colors duration-150 bg-off-white/10 border-off-white/20 text-off-white/80 hover:bg-off-white/20";
 const errorBoxStyle = "mt-4 p-4 bg-red-700/20 border border-red-500/30 text-red-200 rounded-lg text-sm";
 // ---
 

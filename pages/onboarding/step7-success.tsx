@@ -33,9 +33,9 @@ export default function OnboardingSuccess() {
                <CheckCircle className="w-16 h-16 text-green-300" strokeWidth={1.5} />
             </div>
             {/* Adjusted title style */}
-            <h1 className="text-xl sm:text-2xl font-light mb-4 text-off-white">
-              All set! Let's find your perfect meals ��
-            </h1>
+            <h2 className="text-xl sm:text-2xl font-light mb-4 text-off-white">
+              All set! Let's find your perfect meals 🔥
+            </h2>
             <p className="text-off-white/90 text-sm mb-8">
               Based on your profile, we've prepared the best meal suggestions for you. Let's eat smarter!
             </p>

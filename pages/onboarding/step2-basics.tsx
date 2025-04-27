@@ -257,9 +257,9 @@ export default function OnboardingBasics() {
 
   return (
     <OnboardingLayout title="Quick Basics" currentStep={1} totalSteps={6}>
-        <h1 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
+        <h2 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
           Tell us a little about you ✨
-        </h1>
+        </h2>
         
         <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
           {/* Date of Birth - Modular Inputs */}
