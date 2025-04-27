@@ -209,7 +209,7 @@ export default async function handler(
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
           subscription_status: 'active',
-          subscription_updated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         };
 
         // Conditionally add plan_type only if it was successfully determined
@@ -273,7 +273,7 @@ export default async function handler(
         // Update user profile (simplified, assuming renewal date isn't critical here)
         const updateData = {
             subscription_status: 'active_paid',
-            subscription_updated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           };
         console.log(`[Stripe Webhook DEBUG] Attempting Supabase update for userId: ${userId} with data:`, updateData);
         const { error: updateError } = await supabaseAdmin
@@ -314,7 +314,7 @@ export default async function handler(
            .from('user_profile')
            .update({
              subscription_status: 'past_due',
-             subscription_updated_at: new Date().toISOString(),
+             updated_at: new Date().toISOString(),
            })
            .eq('id', userId);
 
@@ -350,7 +350,7 @@ export default async function handler(
            .from('user_profile')
            .update({
              subscription_status: 'canceled',
-             subscription_updated_at: new Date().toISOString(),
+             updated_at: new Date().toISOString(),
            })
            .eq('id', userId);
 
@@ -417,7 +417,7 @@ export default async function handler(
            .update({
              subscription_status: subscriptionStatus,
              plan_type: planType,
-             subscription_updated_at: new Date().toISOString(),
+             updated_at: new Date().toISOString(),
            })
            .eq('id', userId);
 
