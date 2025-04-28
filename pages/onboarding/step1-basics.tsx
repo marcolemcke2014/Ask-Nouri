@@ -306,33 +306,33 @@ export default function OnboardingBasics() {
           <div>
             <label className={labelStyle}>Date of Birth</label>
             <div className="flex flex-nowrap items-center space-x-1.5">
-              <input
-                  type="number" inputMode="numeric" pattern="[0-9]*"
-                  id="dobDay"
-                  value={dobDay}
-                  onChange={(e) => handleDobPartChange('day', e.target.value)}
-                  placeholder="DD" maxLength={2}
+                <input
+                    type="number" inputMode="numeric" pattern="[0-9]*"
+                    id="dobDay"
+                    value={dobDay}
+                    onChange={(e) => handleDobPartChange('day', e.target.value)}
+                    placeholder="DD" maxLength={2}
                   className={`${smallInputStyle} ${inputPlaceholderStyle} flex-shrink`}
-                  required
-              />
-              <input
-                  type="number" inputMode="numeric" pattern="[0-9]*"
-                  id="dobMonth"
-                  value={dobMonth}
-                  onChange={(e) => handleDobPartChange('month', e.target.value)}
-                  placeholder="MM" maxLength={2}
+                    required
+                />
+                <input
+                    type="number" inputMode="numeric" pattern="[0-9]*"
+                    id="dobMonth"
+                    value={dobMonth}
+                    onChange={(e) => handleDobPartChange('month', e.target.value)}
+                    placeholder="MM" maxLength={2}
                   className={`${smallInputStyle} ${inputPlaceholderStyle} flex-shrink`}
-                  required
-              />
-               <input
-                  type="number" inputMode="numeric" pattern="[0-9]*"
-                  id="dobYear"
-                  value={dobYear}
-                  onChange={(e) => handleDobPartChange('year', e.target.value)}
-                  placeholder="YYYY" maxLength={4}
-                  className={`${inputStyle} ${inputPlaceholderStyle} flex-grow`}
-                  required
-              />
+                    required
+                />
+                 <input
+                    type="number" inputMode="numeric" pattern="[0-9]*"
+                    id="dobYear"
+                    value={dobYear}
+                    onChange={(e) => handleDobPartChange('year', e.target.value)}
+                    placeholder="YYYY" maxLength={4}
+                    className={`${inputStyle} ${inputPlaceholderStyle} flex-grow`}
+                    required
+                />
             </div>
           </div>
 
@@ -345,21 +345,21 @@ export default function OnboardingBasics() {
                 </button>
                 <div className="flex-grow text-center mx-2">
                    {isEditingHeight ? (
-                     <input
-                         ref={heightInputRef}
-                         type="number"
-                         value={height}
-                         onChange={handleManualHeightChange}
-                         onBlur={handleHeightBlur}
-                         onKeyDown={(e) => e.key === 'Enter' && handleHeightBlur()}
+                    <input
+                        ref={heightInputRef}
+                        type="number"
+                        value={height}
+                        onChange={handleManualHeightChange}
+                        onBlur={handleHeightBlur}
+                        onKeyDown={(e) => e.key === 'Enter' && handleHeightBlur()}
                          className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '').replace('focus:bg-white', '')} w-full max-w-[80px] text-center px-1`}
-                         step={heightUnit === 'cm' ? 1 : 0.1}
-                         min="1"
-                     />
-                    ) : (
-                      <span onClick={() => setIsEditingHeight(true)} className={numberDisplayText}>
-                        {height || '--'} {heightUnit}
-                     </span>
+                        step={heightUnit === 'cm' ? 1 : 0.1}
+                        min="1"
+                    />
+                   ) : (
+                     <span onClick={() => setIsEditingHeight(true)} className={numberDisplayText}>
+                       {height || '--'} {heightUnit}
+                    </span>
                     )}
                 </div>
                 <button type="button" onClick={() => handleHeightChange(1)} className={plusMinusButton} aria-label="Increase height">
@@ -437,14 +437,14 @@ export default function OnboardingBasics() {
           <div>
              <label className="block text-base sm:text-lg font-light text-center mb-6 text-off-white">Best describe your daily routine:</label> 
              <div className="space-y-2">
-                 {/* Row 1 - Using smaller gap-2 */}
-                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-                 {/* Row 2 - Using smaller gap-2 */}
-                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_2.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-                 {/* Row 3 - Using smaller gap-2 */}
-                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_3.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-                 {/* Row 4 - Using smaller gap-2 */}
-                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_4.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 1 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 2 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_2.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 3 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_3.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 4 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_4.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
             </div>
           </div>
           
