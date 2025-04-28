@@ -133,6 +133,10 @@ export default function OnboardingHealthCheck() {
 
   const showSeriousConditionNote = selectedConditions.some(cond => SERIOUS_CONDITIONS.includes(cond));
 
+  const handleBack = () => {
+    router.push('/onboarding/step3-mission');
+  };
+
   const handleNext = async () => {
     if (!user) {
       console.error('[Onboarding Health Check] handleNext called without user.');
@@ -185,7 +189,13 @@ export default function OnboardingHealthCheck() {
   }
 
   return (
-    <OnboardingLayout title="Health Check" currentStep={3} totalSteps={6}>
+    <OnboardingLayout 
+      title="Health Check" 
+      currentStep={3} 
+      totalSteps={6}
+      showBackButton={true} 
+      onBack={handleBack}
+    >
         <h2 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
           Any health conditions we should consider?
         </h2>
@@ -197,8 +207,8 @@ export default function OnboardingHealthCheck() {
             </div>
         )}
 
-        {/* Health Conditions Section - Array order dictates layout */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        {/* Health Conditions Section - Added justify-center */}
+        <div className="flex flex-wrap gap-2 mb-4 justify-center">
           {HEALTH_CONDITIONS.map((condition) => (
             <div key={condition} className="flex items-center space-x-2">
               <PillButton
@@ -228,11 +238,11 @@ export default function OnboardingHealthCheck() {
 
         <hr className="border-off-white/30 my-6" />
 
-        {/* Food Avoidances Section - Removed justify-center */}
-        <h3 className="text-lg font-light text-center mb-4 text-off-white">
+        {/* Food Avoidances Section - Changed back to h2, Added justify-center */}
+        <h2 className="text-lg font-light text-center mb-4 text-off-white">
           Do you avoid any of these foods?
-        </h3>
-        <div className="flex flex-wrap gap-2 mb-6">
+        </h2>
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {FOOD_AVOIDANCES.map((avoidance) => (
              <div key={avoidance} className="flex items-center space-x-2">
                 <PillButton

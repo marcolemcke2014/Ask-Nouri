@@ -2,19 +2,24 @@
 
 import React from 'react';
 import Head from 'next/head';
+import { ChevronLeft } from 'lucide-react'; // Import icon for back button
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
   title: string;       // For the Head title
   currentStep: number; // e.g., 1
   totalSteps: number;  // e.g., 6 (Basics to Personalize)
+  showBackButton?: boolean; // Optional prop to show back button
+  onBack?: () => void;      // Optional handler for back button click
 }
 
 const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({ 
   children, 
   title, 
   currentStep,
-  totalSteps 
+  totalSteps,
+  showBackButton = false, // Default to false
+  onBack = () => {},       // Default empty handler
 }) => {
 
   return (
@@ -23,16 +28,28 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         <title>{title} - NutriFlow Onboarding</title>
       </Head>
 
-      {/* Progress Indicator (Simple Dots) */}
-      <div className="flex justify-center space-x-2 my-4">
-        {Array.from({ length: totalSteps }).map((_, index) => (
-          <div
-            key={index}
-            className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-              index + 1 <= currentStep ? 'bg-green-300' : 'bg-white/30'
-            }`}
-          />
-        ))}
+      {/* Header Area with optional Back Button and Progress */}
+      <div className="w-full max-w-md relative h-10 mb-2"> {/* Container for positioning */}
+        {showBackButton && (
+          <button 
+            onClick={onBack}
+            className="absolute left-0 top-1/2 -translate-y-1/2 text-off-white p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors"
+            aria-label="Go back"
+          >
+            <ChevronLeft size={24} strokeWidth={2.5} />
+          </button>
+        )}
+        {/* Progress Indicator */} 
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center space-x-2">
+          {Array.from({ length: totalSteps }).map((_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-2 rounded-full transition-colors duration-300 ${
+                index + 1 <= currentStep ? 'bg-green-300' : 'bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
       </div>
 
       <main className="w-full max-w-sm bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5 mt-4">

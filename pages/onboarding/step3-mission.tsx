@@ -99,6 +99,10 @@ export default function OnboardingMission() {
     }
   };
 
+  const handleBack = () => {
+      router.push('/onboarding/step2-basics');
+  };
+
   const handleSkip = () => {
     console.log('[Onboarding Mission] Skipping step.');
     router.push('/onboarding/step4-health-check');
@@ -177,7 +181,13 @@ export default function OnboardingMission() {
   }
 
   return (
-    <OnboardingLayout title="Your Mission" currentStep={2} totalSteps={6}>
+    <OnboardingLayout 
+      title="Your Mission" 
+      currentStep={2} 
+      totalSteps={6}
+      showBackButton={true}
+      onBack={handleBack}
+    >
         <h2 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
           What's your priority right now?
         </h2>
