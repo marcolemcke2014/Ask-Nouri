@@ -22,8 +22,8 @@ const HEALTH_CONDITIONS = [
 ];
 
 const FOOD_AVOIDANCES = [
-    'Gluten', 'Dairy', 'Shellfish', 'Soy', 'Wheat', 'Nuts', 'Histamine',
-    'Sugar', 'Alcohol', 'Legumes', 'Corn', 'Eggs', 'Red Meat',
+    'Gluten', 'Dairy', 'Shellfish', 'Soy', 'Nuts', 'Histamine', 'Sugar', // Row 1 (approx)
+    'Wheat', 'Alcohol', 'Legumes', 'Corn', 'Eggs', 'Red Meat', // Row 2 (approx)
     'None', 'Other'
 ];
 

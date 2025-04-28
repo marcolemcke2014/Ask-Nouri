@@ -165,7 +165,7 @@ export default function OnboardingEatingStyle() {
       onBack={handleBack}
     >
         <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
-          Is there a specific diet you want to follow?
+          Any diet you're aiming for?
         </h2>
         
         {error && (
@@ -198,9 +198,10 @@ export default function OnboardingEatingStyle() {
         <hr className="border-off-white/30 my-6" />
         
         <div>
-            <label htmlFor="dislikes" className={labelStyle}>Any foods or ingredients you strongly dislike?</label>
+            <h2 id="dislikes-label" className="text-lg sm:text-xl font-light text-center mb-4 text-off-white">Any foods or ingredients you strongly dislike?</h2>
             <textarea
               id="dislikes"
+              aria-labelledby="dislikes-label"
               rows={3}
               value={foodDislikes}
               onChange={(e) => setFoodDislikes(e.target.value)}
