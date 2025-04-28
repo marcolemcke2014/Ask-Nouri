@@ -221,23 +221,23 @@ export default function OnboardingHealthCheck() {
             </div>
         )}
 
-        {/* Health Conditions Section - Added justify-center */}
+        {/* Health Conditions Section */}
         <div className="flex flex-wrap gap-2 mb-4 justify-center">
           {HEALTH_CONDITIONS.map((condition) => (
-            <div key={condition} className="flex items-center space-x-2">
+            <div key={condition} className="flex flex-wrap items-center gap-2">
               <PillButton
                 text={condition}
                 isSelected={selectedConditions.includes(condition)}
                 onClick={() => handleConditionToggle(condition)}
               />
               {condition === 'Other' && selectedConditions.includes('Other') && (
-                 <input 
-                    type="text"
-                    value={otherConditionText}
-                    onChange={(e) => setOtherConditionText(e.target.value)}
-                    placeholder="Please specify..."
-                    className={`${inputStyle} ${inputPlaceholderStyle} w-48`}
-                 />
+                <input 
+                  type="text"
+                  value={otherConditionText}
+                  onChange={(e) => setOtherConditionText(e.target.value)}
+                  placeholder="Please specify..."
+                  className={`${inputStyle} ${inputPlaceholderStyle} flex-shrink min-w-[100px] max-w-xs`}
+                />
               )}
             </div>
           ))}
@@ -258,21 +258,21 @@ export default function OnboardingHealthCheck() {
         </h3>
         <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {FOOD_AVOIDANCES.map((avoidance) => (
-             <div key={avoidance} className="flex items-center space-x-2">
-                <PillButton
-                    text={avoidance}
-                    isSelected={selectedAvoidances.includes(avoidance)}
-                    onClick={() => handleAvoidanceToggle(avoidance)}
+            <div key={avoidance} className="flex flex-wrap items-center gap-2">
+              <PillButton
+                text={avoidance}
+                isSelected={selectedAvoidances.includes(avoidance)}
+                onClick={() => handleAvoidanceToggle(avoidance)}
+              />
+              {avoidance === 'Other' && selectedAvoidances.includes('Other') && (
+                <input 
+                  type="text"
+                  value={otherAvoidanceText}
+                  onChange={(e) => setOtherAvoidanceText(e.target.value)}
+                  placeholder="Please specify..."
+                  className={`${inputStyle} ${inputPlaceholderStyle} flex-shrink min-w-[100px] max-w-xs`}
                 />
-                {avoidance === 'Other' && selectedAvoidances.includes('Other') && (
-                    <input 
-                        type="text"
-                        value={otherAvoidanceText}
-                        onChange={(e) => setOtherAvoidanceText(e.target.value)}
-                        placeholder="Please specify..."
-                        className={`${inputStyle} ${inputPlaceholderStyle} w-48`}
-                    />
-                )}
+              )}
             </div>
           ))}
         </div>

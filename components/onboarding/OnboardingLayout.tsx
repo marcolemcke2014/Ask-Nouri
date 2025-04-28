@@ -26,6 +26,7 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif] text-off-white p-4">
       <Head>
         <title>{title} - NutriFlow Onboarding</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
 
       {/* Container to control max-width for both header and card */}

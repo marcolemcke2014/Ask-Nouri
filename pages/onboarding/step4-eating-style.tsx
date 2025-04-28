@@ -191,18 +191,10 @@ export default function OnboardingEatingStyle() {
               {error}
             </div>
         )}
-        {showSuccessMessage && (
-             <div className={successBoxStyle}>
-                <CheckCircle size={18} className="mr-2 flex-shrink-0"/>
-                <span>
-                    Setup's complete{firstName ? `, ${firstName}` : ''}! <br />Ready to scan your first menu?
-                </span>
-            </div>
-        )}
-
-        <div className="flex flex-wrap gap-2 mb-6 justify-center">
+       
+        <div className={`flex flex-wrap gap-2 mb-6 justify-center ${showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}`}>
           {EATING_STYLES.map((style) => (
-             <div key={style} className="flex items-center space-x-2">
+             <div key={style} className="flex flex-wrap items-center gap-2">
                 <PillButton
                     text={style}
                     isSelected={selectedStyles.includes(style)}
@@ -214,16 +206,16 @@ export default function OnboardingEatingStyle() {
                         value={otherStyleText}
                         onChange={(e) => setOtherStyleText(e.target.value)}
                         placeholder="Please specify..."
-                        className={`${inputStyle} ${inputPlaceholderStyle} w-48`}
+                        className={`${inputStyle} ${inputPlaceholderStyle} flex-shrink min-w-[100px] max-w-xs`}
                     />
                 )}
             </div>
           ))}
         </div>
         
-        <hr className="border-off-white/30 my-6" />
+        <hr className={`border-off-white/30 my-6 ${showSuccessMessage ? 'opacity-50' : ''}`} />
         
-        <div>
+        <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
             <label htmlFor="dislikes" className="block text-base sm:text-lg font-light text-center mb-6 text-off-white">Any foods or ingredients you dislike?</label>
             <textarea
               id="dislikes"
@@ -234,6 +226,15 @@ export default function OnboardingEatingStyle() {
               className={`${textareaStyle} ${textareaPlaceholderStyle}`}
             />
         </div>
+
+        {showSuccessMessage && (
+             <div className={successBoxStyle}>
+                <CheckCircle size={18} className="mr-2 flex-shrink-0"/>
+                <span>
+                    Setup's complete{firstName ? `, ${firstName}` : ''}! <br />Ready to scan your first menu?
+                </span>
+            </div>
+        )}
 
         <div className="pt-6">
           <button 

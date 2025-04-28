@@ -302,85 +302,85 @@ export default function OnboardingBasics() {
         </h2>
         
         <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
-          {/* Date of Birth - Modular Inputs */}
+          {/* Date of Birth - Add flex-wrap */}
           <div>
             <label className={labelStyle}>Date of Birth</label>
-            <div className="flex space-x-2">
-                <input
-                    type="number" inputMode="numeric" pattern="[0-9]*"
-                    id="dobDay"
-                    value={dobDay}
-                    onChange={(e) => handleDobPartChange('day', e.target.value)}
-                    placeholder="DD" maxLength={2}
-                    className={`${smallInputStyle} ${inputPlaceholderStyle}`}
-                    required
-                />
-                <input
-                    type="number" inputMode="numeric" pattern="[0-9]*"
-                    id="dobMonth"
-                    value={dobMonth}
-                    onChange={(e) => handleDobPartChange('month', e.target.value)}
-                    placeholder="MM" maxLength={2}
-                    className={`${smallInputStyle} ${inputPlaceholderStyle}`}
-                    required
-                />
-                 <input
-                    type="number" inputMode="numeric" pattern="[0-9]*"
-                    id="dobYear"
-                    value={dobYear}
-                    onChange={(e) => handleDobPartChange('year', e.target.value)}
-                    placeholder="YYYY" maxLength={4}
-                    className={`${inputStyle} ${inputPlaceholderStyle} flex-grow`}
-                    required
-                />
+            <div className="flex flex-wrap sm:flex-nowrap space-x-2">
+              <input
+                  type="number" inputMode="numeric" pattern="[0-9]*"
+                  id="dobDay"
+                  value={dobDay}
+                  onChange={(e) => handleDobPartChange('day', e.target.value)}
+                  placeholder="DD" maxLength={2}
+                  className={`${smallInputStyle} ${inputPlaceholderStyle}`}
+                  required
+              />
+              <input
+                  type="number" inputMode="numeric" pattern="[0-9]*"
+                  id="dobMonth"
+                  value={dobMonth}
+                  onChange={(e) => handleDobPartChange('month', e.target.value)}
+                  placeholder="MM" maxLength={2}
+                  className={`${smallInputStyle} ${inputPlaceholderStyle}`}
+                  required
+              />
+               <input
+                  type="number" inputMode="numeric" pattern="[0-9]*"
+                  id="dobYear"
+                  value={dobYear}
+                  onChange={(e) => handleDobPartChange('year', e.target.value)}
+                  placeholder="YYYY" maxLength={4}
+                  className={`${inputStyle} ${inputPlaceholderStyle} flex-grow`}
+                  required
+              />
             </div>
           </div>
 
-          {/* Height - Plus/Minus Controls */}
+          {/* Height - Adjust flex properties */}
           <div>
              <label htmlFor="heightDisplay" className={labelStyle}>Height</label>
              <div className={numberDisplayContainerStyle}>
                 <button type="button" onClick={() => handleHeightChange(-1)} className={plusMinusButton} aria-label="Decrease height">
                     <Minus size={18}/>
                 </button>
-                {
-                  isEditingHeight ? (
-                    <input
-                        ref={heightInputRef}
-                        type="number"
-                        value={height}
-                        onChange={handleManualHeightChange}
-                        onBlur={handleHeightBlur}
-                        onKeyDown={(e) => e.key === 'Enter' && handleHeightBlur()}
-                        className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '').replace('focus:bg-white', '')} w-20 text-center px-1 mx-2`}
-                        step={heightUnit === 'cm' ? 1 : 0.1}
-                        min="1"
-                    />
-                   ) : (
-                     <span onClick={() => setIsEditingHeight(true)} className={numberDisplayText}>
-                       {height || '--'} {heightUnit}
-                    </span>
-                   )
-                }
+                <div className="flex-grow text-center mx-2">
+                   {isEditingHeight ? (
+                     <input
+                         ref={heightInputRef}
+                         type="number"
+                         value={height}
+                         onChange={handleManualHeightChange}
+                         onBlur={handleHeightBlur}
+                         onKeyDown={(e) => e.key === 'Enter' && handleHeightBlur()}
+                         className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '').replace('focus:bg-white', '')} w-full max-w-[80px] text-center px-1`}
+                         step={heightUnit === 'cm' ? 1 : 0.1}
+                         min="1"
+                     />
+                    ) : (
+                      <span onClick={() => setIsEditingHeight(true)} className={numberDisplayText}>
+                        {height || '--'} {heightUnit}
+                     </span>
+                    )}
+                </div>
                 <button type="button" onClick={() => handleHeightChange(1)} className={plusMinusButton} aria-label="Increase height">
                     <Plus size={18}/>
                 </button>
-                <div className={unitToggleContainerStyle}>
+                <div className={`${unitToggleContainerStyle} flex-shrink-0`}>
                    <button type="button" onClick={() => handleHeightUnitChange('cm')} className={`${unitToggleStyle} ${heightUnit === 'cm' ? activeUnitStyle : inactiveUnitStyle}`}>cm</button>
                    <button type="button" onClick={() => handleHeightUnitChange('inches')} className={`${unitToggleStyle} ${heightUnit === 'inches' ? activeUnitStyle : inactiveUnitStyle}`}>in</button>
                 </div>
              </div>
           </div>
 
-          {/* Weight - Plus/Minus Controls */}
+          {/* Weight - Adjust flex properties */}
            <div>
              <label htmlFor="weightDisplay" className={labelStyle}>Weight</label>
              <div className={numberDisplayContainerStyle}>
                 <button type="button" onClick={() => handleWeightChange(-0.5)} className={plusMinusButton} aria-label="Decrease weight">
                      <Minus size={18}/>
                  </button>
-                {
-                    isEditingWeight ? (
+                <div className="flex-grow text-center mx-2">
+                   {isEditingWeight ? (
                          <input
                             ref={weightInputRef}
                             type="number"
@@ -388,7 +388,7 @@ export default function OnboardingBasics() {
                             onChange={handleManualWeightChange}
                             onBlur={handleWeightBlur}
                             onKeyDown={(e) => e.key === 'Enter' && handleWeightBlur()}
-                            className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '').replace('focus:bg-white', '')} w-20 text-center px-1 mx-2`}
+                            className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '').replace('focus:bg-white', '')} w-full max-w-[80px] text-center px-1`}
                             step={0.1}
                             min="1"
                         />
@@ -396,12 +396,12 @@ export default function OnboardingBasics() {
                          <span onClick={() => setIsEditingWeight(true)} className={numberDisplayText}>
                            {weight || '--'} {weightUnit}
                         </span>
-                    )
-                 }
+                    )}
+                </div>
                 <button type="button" onClick={() => handleWeightChange(0.5)} className={plusMinusButton} aria-label="Increase weight">
                      <Plus size={18}/>
                  </button>
-                 <div className={unitToggleContainerStyle}>
+                 <div className={`${unitToggleContainerStyle} flex-shrink-0`}>
                    <button type="button" onClick={() => handleWeightUnitChange('kg')} className={`${unitToggleStyle} ${weightUnit === 'kg' ? activeUnitStyle : inactiveUnitStyle}`}>kg</button>
                    <button type="button" onClick={() => handleWeightUnitChange('lbs')} className={`${unitToggleStyle} ${weightUnit === 'lbs' ? activeUnitStyle : inactiveUnitStyle}`}>lbs</button>
                 </div>
