@@ -15,15 +15,16 @@ const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-re
 // ---
 
 const HEALTH_CONDITIONS = [
-  'Diabetes', 'Kidney Disease', 'IBS / IBD', // Row 1
-  'High Blood Pressure', 'High Cholesterol',   // Row 2
-  'Celiac Disease', 'BERD / Acid Reflux',    // Row 3
-  'Bloating', 'None of these', 'Other'       // Row 4
+  'Diabetes', 'Kidney Disease', 'IBS / IBD',
+  'High Blood Pressure', 'High Cholesterol',
+  'Celiac Disease', 'BERD / Acid Reflux',
+  'Bloating', 'None of these', 'Other'
 ];
 
 const FOOD_AVOIDANCES = [
     'Gluten', 'Dairy', 'Shellfish', 'Soy', 'Wheat', 'Nuts', 'Histamine',
-    'Sugar', 'Alcohol', 'Legumes', 'Corn', 'Eggs', 'Red Meat', 'Other'
+    'Sugar', 'Alcohol', 'Legumes', 'Corn', 'Eggs', 'Red Meat',
+    'None', 'Other'
 ];
 
 const SERIOUS_CONDITIONS = ['Diabetes', 'Kidney Disease', 'High Blood Pressure', 'High Cholesterol'];
@@ -120,13 +121,18 @@ export default function OnboardingHealthCheck() {
   const handleAvoidanceToggle = (avoidance: string) => {
     setError('');
     setSelectedAvoidances(prev => {
-      const newState = [...prev];
-      if (newState.includes(avoidance)) {
-        if (avoidance === 'Other') setOtherAvoidanceText('');
-        return newState.filter(item => item !== avoidance);
+      let newState = [...prev];
+      if (avoidance === 'None') {
+          return prev.includes(avoidance) ? [] : ['None'];
       } else {
-        newState.push(avoidance);
-        return newState;
+          newState = newState.filter(item => item !== 'None');
+          if (newState.includes(avoidance)) {
+              newState = newState.filter(item => item !== avoidance);
+              if (avoidance === 'Other') setOtherAvoidanceText(''); 
+          } else {
+              newState.push(avoidance);
+          }
+          return newState;
       }
     });
   };
@@ -142,6 +148,14 @@ export default function OnboardingHealthCheck() {
       console.error('[Onboarding Health Check] handleNext called without user.');
       setError('User session not found.');
       return;
+    }
+    if (selectedConditions.length === 0) {
+        setError('Please select applicable health conditions or \'None of these\'.');
+        return;
+    }
+    if (selectedAvoidances.length === 0) {
+        setError('Please select foods to avoid or \'None\'.');
+        return;
     }
     if (selectedConditions.includes('Other') && !otherConditionText.trim()) {
         setError('Please specify other health condition.');
@@ -197,7 +211,7 @@ export default function OnboardingHealthCheck() {
       onBack={handleBack}
     >
         <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
-          Any health conditions we should consider?
+          Any health conditions to consider?
         </h2>
 
         {/* Display Error Box */} 
@@ -240,7 +254,7 @@ export default function OnboardingHealthCheck() {
 
         {/* Changed back to h3 and adjusted size */}
         <h3 className="text-base sm:text-lg font-light text-center mb-4 text-off-white">
-          Do you avoid any of these foods?
+          Should we avoid any of these foods?
         </h3>
         <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {FOOD_AVOIDANCES.map((avoidance) => (

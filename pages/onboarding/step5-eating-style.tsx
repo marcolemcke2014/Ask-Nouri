@@ -7,17 +7,21 @@ import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import PillButton from '../../components/onboarding/PillButton';
 
-// --- Styles (Matching Input.tsx component) ---
+// --- Styles ---
+const labelStyle = "block text-xs font-normal text-off-white/90 mb-1.5";
+const textareaStyle = "w-full p-3.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]"; 
+const textareaPlaceholderStyle = "placeholder-gray-400/80";
 const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
-const inputStyle = "h-10 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]"; // Inline Input style
+const inputStyle = "h-10 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]";
 const inputPlaceholderStyle = "placeholder-gray-400/80";
-const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center"; // Adjusted error style
+const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center";
 // ---
 
+// Updated EATING_STYLES order
 const EATING_STYLES = [
     'Balanced', 'High Protein', 'Low Carb', 'Keto', 'Vegan', 'Vegetarian',
     'Pescatarian', 'Paleo', 'Halal', 'Kosher', 'Raw Food', 'Carnivore',
-    'Other', 'No strict rules'
+    'No strict rules', 'Other' // Moved Other to end
 ];
 
 // Helper function to parse 'Other: ...' text (same as in health-check)
@@ -33,25 +37,27 @@ export default function OnboardingEatingStyle() {
   const [user, setUser] = useState<User | null>(null);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [otherStyleText, setOtherStyleText] = useState<string>('');
+  const [foodDislikes, setFoodDislikes] = useState<string>(''); // Added state for dislikes
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
 
+  // Fetch user session and pre-fill
   useEffect(() => {
     const fetchUserAndData = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setUser(session.user);
-          const { data: goalData, error: goalError } = await supabase
-              .from('user_goals_and_diets')
-              .select('eating_styles')
-              .eq('user_id', session.user.id)
-              .maybeSingle();
+          // Fetch existing styles AND dislikes
+          const [goalsResult, profileResult] = await Promise.all([
+              supabase.from('user_goals_and_diets').select('eating_styles').eq('user_id', session.user.id).maybeSingle(),
+              supabase.from('user_profile').select('food_dislikes').eq('id', session.user.id).maybeSingle()
+          ]);
 
-          if (goalError) {
-              console.error('[Onboarding Eating Style] Error fetching eating styles:', goalError);
-          } else if (goalData?.eating_styles && Array.isArray(goalData.eating_styles)) {
-              const styles = goalData.eating_styles;
+          if (goalsResult.error) {
+              console.error('[Onboarding Eating Style] Error fetching eating styles:', goalsResult.error);
+          } else if (goalsResult.data?.eating_styles && Array.isArray(goalsResult.data.eating_styles)) {
+              const styles = goalsResult.data.eating_styles;
               setSelectedStyles(styles.filter(s => !s.startsWith('Other: ')));
               const otherStyle = styles.find(s => s.startsWith('Other: '));
               if (otherStyle) {
@@ -59,6 +65,13 @@ export default function OnboardingEatingStyle() {
                   setOtherStyleText(parseOtherText(otherStyle));
               }
           }
+          
+          if (profileResult.error) {
+              console.error('[Onboarding Eating Style] Error fetching food dislikes:', profileResult.error);
+          } else if (profileResult.data?.food_dislikes) {
+              setFoodDislikes(profileResult.data.food_dislikes);
+          }
+
         } else {
           console.error('[Onboarding Eating Style] No user session found, redirecting.');
           router.replace('/auth/login');
@@ -101,43 +114,39 @@ export default function OnboardingEatingStyle() {
     if (selectedStyles.includes('Other') && !otherStyleText.trim()) { setError('Please specify other eating style.'); return; }
     setError('');
     setIsLoading(true);
+    
     const stylesToSave = selectedStyles.map(s => s === 'Other' ? `Other: ${otherStyleText.trim()}` : s);
-    const updateData = {
+    const goalsUpdateData = {
       eating_styles: stylesToSave.length > 0 ? stylesToSave : null,
       updated_at: new Date().toISOString(),
     };
+    const profileUpdateData = {
+        food_dislikes: foodDislikes.trim() || null, // Save dislikes to user_profile
+        updated_at: new Date().toISOString(),
+    };
+
     try {
-      console.log('[Onboarding Eating Style] Updating goals for user:', user.id);
-      const { data: existingData, error: fetchError } = await supabase.from('user_goals_and_diets').select('user_id').eq('user_id', user.id).maybeSingle();
-      if (fetchError) {
-          console.error('[Onboarding Eating Style] Error checking existing goals record:', fetchError);
-          throw fetchError;
+      console.log('[Onboarding Eating Style] Updating data for user:', user.id);
+      // Perform upsert for goals and update for profile
+      const [goalsUpsertResult, profileUpdateResult] = await Promise.all([
+          supabase.from('user_goals_and_diets').upsert({ user_id: user.id, ...goalsUpdateData }, { onConflict: 'user_id' }),
+          supabase.from('user_profile').update(profileUpdateData).eq('id', user.id)
+      ]);
+
+      if (goalsUpsertResult.error) {
+          console.error('[Onboarding Eating Style] Supabase goals upsert error:', goalsUpsertResult.error);
+          throw goalsUpsertResult.error; 
       }
-      let upsertError;
-      if (existingData) {
-          console.log('[Onboarding Eating Style] Updating existing goals record.');
-          const { error } = await supabase.from('user_goals_and_diets').update(updateData).eq('user_id', user.id);
-          upsertError = error;
-      } else {
-          console.log('[Onboarding Eating Style] Inserting new goals record.');
-          const { data: goalData } = await supabase.from('user_goals_and_diets').select('primary_goal').eq('user_id', user.id).maybeSingle(); // Fetch existing goal if inserting
-          const { error } = await supabase.from('user_goals_and_diets').insert({ 
-              user_id: user.id, 
-              primary_goal: goalData?.primary_goal, 
-              ...updateData, 
-              created_at: new Date().toISOString() 
-          });
-          upsertError = error;
+      if (profileUpdateResult.error) {
+           console.error('[Onboarding Eating Style] Supabase profile update error:', profileUpdateResult.error);
+          throw profileUpdateResult.error; 
       }
-      if (upsertError) { 
-          console.error('[Onboarding Eating Style] Supabase upsert error:', upsertError);
-          throw upsertError; 
-      }
-      console.log('[Onboarding Eating Style] Goals/Diets updated successfully.');
+
+      console.log('[Onboarding Eating Style] Data updated successfully.');
       router.push('/onboarding/step6-personalize');
     } catch (err: any) {
       console.error('[Onboarding Eating Style] Update failed:', err);
-      setError(err.message || 'Failed to save eating style.');
+      setError(err.message || 'Failed to save preferences.');
     } finally {
       setIsLoading(false);
     }
@@ -155,22 +164,17 @@ export default function OnboardingEatingStyle() {
       showBackButton={true}
       onBack={handleBack}
     >
-        <h2 className="text-lg sm:text-xl font-light text-center mb-4 text-off-white">
-          Do you follow a specific eating style?
+        <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
+          Is there a specific diet you want to follow?
         </h2>
-        <p className="text-sm text-center text-green-200 mb-6">
-           (Optional — you can always update later.)
-        </p>
         
-        {/* Display Error Box */} 
         {error && (
             <div className={errorBoxStyle}>
               {error}
             </div>
         )}
 
-        {/* Use PillButton */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {EATING_STYLES.map((style) => (
              <div key={style} className="flex items-center space-x-2">
                 <PillButton
@@ -190,9 +194,22 @@ export default function OnboardingEatingStyle() {
             </div>
           ))}
         </div>
+        
+        <hr className="border-off-white/30 my-6" />
+        
+        <div>
+            <label htmlFor="dislikes" className={labelStyle}>Any foods or ingredients you strongly dislike?</label>
+            <textarea
+              id="dislikes"
+              rows={3}
+              value={foodDislikes}
+              onChange={(e) => setFoodDislikes(e.target.value)}
+              placeholder="e.g., cilantro, mushrooms, very spicy food..."
+              className={`${textareaStyle} ${textareaPlaceholderStyle}`}
+            />
+        </div>
 
-        {/* CTA Button */}
-        <div className="pt-4">
+        <div className="pt-6">
           <button 
             type="button" 
             onClick={handleNext}
