@@ -28,6 +28,8 @@ const FOOD_AVOIDANCES = [
 ];
 
 const SERIOUS_CONDITIONS = ['Diabetes', 'Kidney Disease', 'High Blood Pressure', 'High Cholesterol'];
+// Define avoidances that might warrant the safety note
+const POTENTIALLY_DANGEROUS_AVOIDANCES = ['Nuts', 'Shellfish']; // Add others like Celiac/Gluten if needed
 
 // Helper function to parse 'Other: ...' text
 const parseOtherText = (item: string): string => {
@@ -137,7 +139,10 @@ export default function OnboardingHealthCheck() {
     });
   };
 
-  const showSeriousConditionNote = selectedConditions.some(cond => SERIOUS_CONDITIONS.includes(cond));
+  // Updated logic for showing the safety note
+  const showSafetyNote = 
+      selectedConditions.some(cond => SERIOUS_CONDITIONS.includes(cond)) ||
+      selectedAvoidances.some(avoid => POTENTIALLY_DANGEROUS_AVOIDANCES.includes(avoid));
 
   const handleBack = () => {
     router.push('/onboarding/step2-mission');
@@ -243,13 +248,6 @@ export default function OnboardingHealthCheck() {
           ))}
         </div>
 
-        {/* Serious Condition Note */}
-        {showSeriousConditionNote && (
-            <p className="text-sm text-green-200 text-center bg-green-800/30 rounded p-2 mb-4">
-                We'll make sure your meals are safe and supportive for your condition.
-            </p>
-        )}
-
         <hr className="border-off-white/30 my-6" />
 
         {/* Reduced h3 font size */}
@@ -276,6 +274,13 @@ export default function OnboardingHealthCheck() {
             </div>
           ))}
         </div>
+
+        {/* Safety Note Moved Here - Above Button */}
+        {showSafetyNote && (
+            <p className="text-sm text-green-200 text-center bg-green-800/30 rounded p-2 mb-4">
+                We'll make sure your meals are safe and supportive for your condition.
+            </p>
+        )}
 
         {/* CTA Button */}
         <div className="pt-4">

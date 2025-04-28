@@ -16,7 +16,7 @@ const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-nor
 const inputStyle = "h-10 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]";
 const inputPlaceholderStyle = "placeholder-gray-400/80";
 const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center";
-const successBoxStyle = "mb-4 p-3 bg-green-800/30 border border-green-500/30 text-green-200 rounded-lg text-sm text-center flex items-center justify-center space-x-2";
+const successBoxStyle = "p-3 bg-green-800/30 border border-green-500/30 text-green-200 rounded-lg text-sm text-center flex items-center justify-center space-x-2";
 // ---
 
 // Updated EATING_STYLES order
@@ -228,7 +228,7 @@ export default function OnboardingEatingStyle() {
         </div>
 
         {showSuccessMessage && (
-             <div className={successBoxStyle}>
+             <div className={`${successBoxStyle} mt-6`}>
                 <CheckCircle size={18} className="mr-2 flex-shrink-0"/>
                 <span>
                     Setup's complete{firstName ? `, ${firstName}` : ''}! <br />Ready to scan your first menu?

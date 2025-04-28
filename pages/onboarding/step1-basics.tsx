@@ -302,17 +302,17 @@ export default function OnboardingBasics() {
         </h2>
         
         <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
-          {/* Date of Birth - Add flex-wrap */}
+          {/* Date of Birth - Force no-wrap, allow shrinking */}
           <div>
             <label className={labelStyle}>Date of Birth</label>
-            <div className="flex flex-wrap sm:flex-nowrap space-x-2">
+            <div className="flex flex-nowrap items-center space-x-1.5">
               <input
                   type="number" inputMode="numeric" pattern="[0-9]*"
                   id="dobDay"
                   value={dobDay}
                   onChange={(e) => handleDobPartChange('day', e.target.value)}
                   placeholder="DD" maxLength={2}
-                  className={`${smallInputStyle} ${inputPlaceholderStyle}`}
+                  className={`${smallInputStyle} ${inputPlaceholderStyle} flex-shrink`}
                   required
               />
               <input
@@ -321,7 +321,7 @@ export default function OnboardingBasics() {
                   value={dobMonth}
                   onChange={(e) => handleDobPartChange('month', e.target.value)}
                   placeholder="MM" maxLength={2}
-                  className={`${smallInputStyle} ${inputPlaceholderStyle}`}
+                  className={`${smallInputStyle} ${inputPlaceholderStyle} flex-shrink`}
                   required
               />
                <input
