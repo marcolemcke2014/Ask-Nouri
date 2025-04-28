@@ -194,7 +194,9 @@ export default function OnboardingEatingStyle() {
         {showSuccessMessage && (
              <div className={successBoxStyle}>
                 <CheckCircle size={18} className="mr-2 flex-shrink-0"/>
-                <span>{firstName ? `${firstName}, everything` : 'Everything'} is set up! Let's start scanning.</span>
+                <span>
+                    Setup's complete{firstName ? `, ${firstName}` : ''}! <br />Ready to scan your first menu?
+                </span>
             </div>
         )}
 
@@ -237,10 +239,10 @@ export default function OnboardingEatingStyle() {
           <button 
             type="button" 
             onClick={handleFinishSetup}
-            disabled={isLoading || selectedStyles.length === 0 || (selectedStyles.includes('Other') && !otherStyleText.trim())}
+            disabled={isLoading || !showSuccessMessage}
             className={buttonStyle}
           >
-            {isLoading ? 'Saving...' : 'Finish Setup'}
+            {isLoading ? 'Saving...' : (showSuccessMessage ? 'Start Scanning' : 'Finish Setup')}
           </button>
         </div>
     </OnboardingLayout>
