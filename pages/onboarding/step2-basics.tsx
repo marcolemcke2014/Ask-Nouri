@@ -26,10 +26,10 @@ const inactiveUnitStyle = "bg-gray-500 text-gray-100 hover:bg-gray-600";
 
 // Updated and grouped DAILY_HABITS
 const HABITS_ROW_1 = ['Mostly Sitting', 'Moderately Active', 'Very Sporty'];
-const HABITS_ROW_2 = ['Busy & Rushed', 'Flexible Schedule', 'Structured Routine'];
+const HABITS_ROW_2 = ['Often Rushed', 'Flexible Schedule', 'Structured Routine'];
 const HABITS_ROW_3 = ['Irregular Eating', 'Often Stressed', 'Low Energy'];
-const HABITS_ROW_4 = ['Eat Out Often', 'Night Owl / Shift Worker'];
-const ALL_HABITS = [...HABITS_ROW_1, ...HABITS_ROW_2, ...HABITS_ROW_3, ...HABITS_ROW_4]; // Keep for validation/reference if needed
+const HABITS_ROW_4 = ['Eat Out Often', 'Night Owl / Shift Worker', 'None'];
+const ALL_HABITS = [...HABITS_ROW_1, ...HABITS_ROW_2, ...HABITS_ROW_3, ...HABITS_ROW_4];
 
 // Helper to format date parts
 const formatTwoDigits = (num: number | '') => num === '' ? '' : String(num).padStart(2, '0');
@@ -191,14 +191,27 @@ export default function OnboardingBasics() {
       setGender(e.target.value);
       setError('');
   };
-  // New handler for multi-select habits
+  // Updated handler for multi-select habits to include "None"
   const handleHabitToggle = (habit: string) => {
     setError('');
-    setSelectedHabits(prev => 
-        prev.includes(habit) 
-            ? prev.filter(h => h !== habit) 
-            : [...prev, habit]
-    );
+    setSelectedHabits(prev => {
+      let newState = [...prev];
+      if (habit === 'None') {
+          // Selecting 'None' deselects everything else and selects only 'None',
+          // or deselects 'None' if it was already the only one selected.
+          return prev.length === 1 && prev[0] === 'None' ? [] : ['None'];
+      } else {
+          // Remove 'None' if selecting something specific
+          newState = newState.filter(h => h !== 'None'); 
+          // Toggle the selected habit
+          if (newState.includes(habit)) {
+              newState = newState.filter(h => h !== habit); 
+          } else {
+              newState.push(habit);
+          }
+          return newState;
+      }
+    });
   };
   // --- End Input Handlers ---
 
@@ -416,54 +429,18 @@ export default function OnboardingBasics() {
             </div>
           </div>
 
-          {/* Updated Daily Habits Section with Rows */}
+          {/* Updated Daily Habits Section */}
           <div>
-             <label className={labelStyle}>Which best describes your daily habits? (Select all that apply)</label>
-             <div className="space-y-2 mt-1"> {/* Vertical space between rows */} 
-                {/* Row 1 */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                    {HABITS_ROW_1.map((habit) => (
-                        <PillButton
-                            key={habit}
-                            text={habit}
-                            isSelected={selectedHabits.includes(habit)}
-                            onClick={() => handleHabitToggle(habit)}
-                        />
-                    ))}
-                </div>
+             <label className={labelStyle}>Which best describes your daily habits?</label> 
+             <div className="space-y-2 mt-1">
+                 {/* Row 1 */}
+                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
                  {/* Row 2 */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                    {HABITS_ROW_2.map((habit) => (
-                        <PillButton
-                            key={habit}
-                            text={habit}
-                            isSelected={selectedHabits.includes(habit)}
-                            onClick={() => handleHabitToggle(habit)}
-                        />
-                    ))}
-                </div>
+                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_2.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
                  {/* Row 3 */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                    {HABITS_ROW_3.map((habit) => (
-                        <PillButton
-                            key={habit}
-                            text={habit}
-                            isSelected={selectedHabits.includes(habit)}
-                            onClick={() => handleHabitToggle(habit)}
-                        />
-                    ))}
-                </div>
+                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_3.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
                  {/* Row 4 */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                    {HABITS_ROW_4.map((habit) => (
-                        <PillButton
-                            key={habit}
-                            text={habit}
-                            isSelected={selectedHabits.includes(habit)}
-                            onClick={() => handleHabitToggle(habit)}
-                        />
-                    ))}
-                </div>
+                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_4.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
             </div>
           </div>
           
