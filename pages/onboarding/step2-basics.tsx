@@ -18,15 +18,15 @@ const smallInputStyle = `${inputStyle} w-16 text-center px-1`; // For DOB fields
 const numberDisplayContainerStyle = "flex items-center justify-between w-full h-12 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm";
 const numberDisplayText = "text-sm text-gray-900 font-['Poppins',sans-serif] cursor-pointer";
 const plusMinusButton = "p-1 rounded-full text-gray-600 hover:bg-black/10 active:bg-black/20 transition-colors";
-const unitToggleContainerStyle = "flex space-x-1 bg-white/10 p-0.5 rounded-full ml-2";
-const unitToggleStyle = "px-2.5 py-0.5 text-xs rounded-full cursor-pointer transition-colors";
+const unitToggleContainerStyle = "flex space-x-1 bg-white/10 p-1 rounded-full ml-2";
+const unitToggleStyle = "px-3 py-1 text-xs rounded-full cursor-pointer transition-colors";
 const activeUnitStyle = "bg-green-200 text-green-800 font-medium";
 const inactiveUnitStyle = "bg-gray-500 text-gray-100 hover:bg-gray-600";
 // ---
 
 // Updated and grouped DAILY_HABITS
 const HABITS_ROW_1 = ['Mostly Sitting', 'Moderately Active', 'Very Sporty'];
-const HABITS_ROW_2 = ['Often Rushed', 'Flexible Schedule', 'Structured Routine'];
+const HABITS_ROW_2 = ['Often Rushed', 'Flexible Schedule'];
 const HABITS_ROW_3 = ['Irregular Eating', 'Often Stressed', 'Low Energy'];
 const HABITS_ROW_4 = ['Eat Out Often', 'Night Owl / Shift Worker', 'None'];
 const ALL_HABITS = [...HABITS_ROW_1, ...HABITS_ROW_2, ...HABITS_ROW_3, ...HABITS_ROW_4];
@@ -431,7 +431,7 @@ export default function OnboardingBasics() {
 
           {/* Updated Daily Habits Section */}
           <div>
-             <label className={labelStyle}>Which best describes your daily habits?</label> 
+             <label className="block text-lg sm:text-xl font-light text-center mb-4 text-off-white">Which best describes your daily habits?</label> 
              <div className="space-y-2 mt-1">
                  {/* Row 1 */}
                  <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
