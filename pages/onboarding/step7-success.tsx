@@ -25,15 +25,25 @@ export default function OnboardingSuccess() {
     }
   };
 
+  const handleBack = () => {
+    router.push('/onboarding/step6-personalize'); // Go back to the last actual step
+  };
+
   return (
     // Using layout, currentStep > totalSteps hides progress dots
-    <OnboardingLayout title="Onboarding Complete!" currentStep={7} totalSteps={6}> 
+    <OnboardingLayout 
+      title="Onboarding Complete!" 
+      currentStep={7} // Keep > totalSteps to hide dots
+      totalSteps={6} 
+      showBackButton={true} // Add prop
+      onBack={handleBack}     // Add handler
+    > 
         <div className="text-center">
             <div className="mb-6 flex justify-center">
                <CheckCircle className="w-16 h-16 text-green-300" strokeWidth={1.5} />
             </div>
-            {/* Adjusted title style */}
-            <h2 className="text-xl sm:text-2xl font-light mb-4 text-off-white">
+            {/* Changed text size */}
+            <h2 className="text-lg sm:text-xl font-light mb-4 text-off-white">
               All set! Let's find your perfect meals 🔥
             </h2>
             <p className="text-off-white/90 text-sm mb-8">

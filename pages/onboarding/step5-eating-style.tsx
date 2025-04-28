@@ -92,6 +92,10 @@ export default function OnboardingEatingStyle() {
     });
   };
 
+  const handleBack = () => {
+    router.push('/onboarding/step4-health-check');
+  };
+
   const handleNext = async () => {
     if (!user) { console.error('[Onboarding Eating Style] handleNext called without user.'); setError('User session not found.'); return; }
     if (selectedStyles.includes('Other') && !otherStyleText.trim()) { setError('Please specify other eating style.'); return; }
@@ -144,8 +148,14 @@ export default function OnboardingEatingStyle() {
   }
 
   return (
-    <OnboardingLayout title="Eating Style" currentStep={4} totalSteps={6}>
-        <h2 className="text-xl sm:text-2xl font-light text-center mb-4 text-off-white">
+    <OnboardingLayout 
+      title="Eating Style" 
+      currentStep={4} 
+      totalSteps={6}
+      showBackButton={true}
+      onBack={handleBack}
+    >
+        <h2 className="text-lg sm:text-xl font-light text-center mb-4 text-off-white">
           Do you follow a specific eating style?
         </h2>
         <p className="text-sm text-center text-green-200 mb-6">

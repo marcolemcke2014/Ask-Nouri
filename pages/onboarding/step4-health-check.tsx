@@ -196,7 +196,7 @@ export default function OnboardingHealthCheck() {
       showBackButton={true} 
       onBack={handleBack}
     >
-        <h2 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
+        <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
           Any health conditions we should consider?
         </h2>
 
@@ -238,10 +238,10 @@ export default function OnboardingHealthCheck() {
 
         <hr className="border-off-white/30 my-6" />
 
-        {/* Food Avoidances Section - Changed back to h2, Added justify-center */}
-        <h2 className="text-lg font-light text-center mb-4 text-off-white">
+        {/* Changed back to h3 and adjusted size */}
+        <h3 className="text-base sm:text-lg font-light text-center mb-4 text-off-white">
           Do you avoid any of these foods?
-        </h2>
+        </h3>
         <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {FOOD_AVOIDANCES.map((avoidance) => (
              <div key={avoidance} className="flex items-center space-x-2">

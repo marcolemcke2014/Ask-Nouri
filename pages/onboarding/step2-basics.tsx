@@ -257,7 +257,7 @@ export default function OnboardingBasics() {
 
   return (
     <OnboardingLayout title="Quick Basics" currentStep={1} totalSteps={6}>
-        <h2 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
+        <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
           Tell us a little about you ✨
         </h2>
         

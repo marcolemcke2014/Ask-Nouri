@@ -77,6 +77,10 @@ export default function OnboardingPersonalize() {
     setActivityLevel(level);
   };
 
+  const handleBack = () => {
+    router.push('/onboarding/step5-eating-style');
+  };
+
   const handleFinish = async () => {
     if (!user) {
       console.error('[Onboarding Personalize] handleFinish called without user.');
@@ -128,8 +132,14 @@ export default function OnboardingPersonalize() {
   }
 
   return (
-    <OnboardingLayout title="Personalize" currentStep={5} totalSteps={6}>
-        <h2 className="text-xl sm:text-2xl font-light text-center mb-8 text-off-white">
+    <OnboardingLayout 
+      title="Personalize" 
+      currentStep={5} 
+      totalSteps={6}
+      showBackButton={true}
+      onBack={handleBack}
+    >
+        <h2 className="text-lg sm:text-xl font-light text-center mb-8 text-off-white">
           Almost there! Let's personalize a little more ✨
         </h2>
 
