@@ -297,7 +297,7 @@ export default function OnboardingBasics() {
 
   return (
     <OnboardingLayout title="Quick Basics" currentStep={1} totalSteps={4}>
-        <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
+        <h2 className="text-base sm:text-lg font-light text-center mb-6 text-off-white">
           Tell us a little about you:
         </h2>
         
@@ -435,7 +435,7 @@ export default function OnboardingBasics() {
 
           {/* Daily Habits Section */}
           <div>
-             <label className="block text-lg sm:text-xl font-light text-center mb-4 text-off-white">Best describe your daily routine:</label> 
+             <label className="block text-base sm:text-lg font-light text-center mb-4 text-off-white">Best describe your daily routine:</label> 
              <div className="space-y-2 mt-1">
                  {/* Row 1 */}
                  <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>

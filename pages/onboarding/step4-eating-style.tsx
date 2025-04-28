@@ -112,7 +112,7 @@ export default function OnboardingEatingStyle() {
   };
 
   const handleBack = () => {
-    router.push('/onboarding/step4-health-check');
+    router.push('/onboarding/step3-health-check');
   };
 
   const handleFinishSetup = async () => {
@@ -189,7 +189,7 @@ export default function OnboardingEatingStyle() {
       showBackButton={true}
       onBack={handleBack}
     >
-        <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
+        <h2 className="text-base sm:text-lg font-light text-center mb-6 text-off-white">
           Any diet you're aiming for?
         </h2>
         
@@ -226,10 +226,10 @@ export default function OnboardingEatingStyle() {
           ))}
         </div>
         
-        <hr className={`border-off-white/30 my-6 ${showSuccessMessage ? 'opacity-50' : ''}`} />
+        <hr className="border-off-white/30 my-6" />
         
         <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
-            <h2 id="dislikes-label" className="text-lg sm:text-xl font-light text-center mb-4 text-off-white">Any foods or ingredients you strongly dislike?</h2>
+            <h2 id="dislikes-label" className="text-base sm:text-lg font-light text-center mb-4 text-off-white">Any foods or ingredients you dislike?</h2>
             <textarea
               id="dislikes"
               aria-labelledby="dislikes-label"
