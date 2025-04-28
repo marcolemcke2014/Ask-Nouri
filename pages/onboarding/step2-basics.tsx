@@ -22,6 +22,7 @@ const unitToggleContainerStyle = "flex space-x-1 bg-white/10 p-0.5 rounded-full 
 const unitToggleStyle = "px-2.5 py-0.5 text-xs rounded-full cursor-pointer transition-colors";
 const activeUnitStyle = "bg-green-200 text-green-800 font-medium";
 const inactiveUnitStyle = "bg-gray-500 text-gray-100 hover:bg-gray-600";
+const selectStyle = "w-full h-12 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]";
 // ---
 
 // Updated and grouped DAILY_HABITS
@@ -351,7 +352,7 @@ export default function OnboardingBasics() {
                         onChange={handleManualHeightChange}
                         onBlur={handleHeightBlur}
                         onKeyDown={(e) => e.key === 'Enter' && handleHeightBlur()}
-                        className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '')} w-20 text-center px-1 mx-2`}
+                        className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '').replace('focus:bg-white', '')} w-20 text-center px-1 mx-2`}
                         step={heightUnit === 'cm' ? 1 : 0.1}
                         min="1"
                     />
@@ -387,7 +388,7 @@ export default function OnboardingBasics() {
                             onChange={handleManualWeightChange}
                             onBlur={handleWeightBlur}
                             onKeyDown={(e) => e.key === 'Enter' && handleWeightBlur()}
-                            className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '')} w-20 text-center px-1 mx-2`}
+                            className={`${inputStyle.replace('focus:ring-2 focus:ring-green-600', '').replace('focus:bg-white', '')} w-20 text-center px-1 mx-2`}
                             step={0.1}
                             min="1"
                         />
@@ -414,7 +415,7 @@ export default function OnboardingBasics() {
               id="gender"
               value={gender}
               onChange={handleGenderChange}
-              className={inputStyle}
+              className={`${selectStyle} bg-off-white/80`}
               required
             >
               <option value="" disabled>Select...</option>
@@ -423,8 +424,8 @@ export default function OnboardingBasics() {
               <option value="Non-binary">Non-binary</option>
               <option value="Prefer not to say">Prefer not to say</option>
             </select>
-             {/* Simple dropdown arrow overlay */}
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            {/* Custom dropdown arrow overlay - Added z-10 */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 z-10">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
             </div>
           </div>
