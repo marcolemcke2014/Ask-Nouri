@@ -94,7 +94,7 @@ export default function PaymentSuccessPage() {
   const handleContinue = () => {
     if (user?.id) {
       // Navigate to the first step of the NEW onboarding flow
-      router.push(`/onboarding/step2-basics`); // Updated path
+      router.push(`/onboarding/step1-basics`); // Updated path
     } else {
       // Fallback if user ID somehow missing
       setError('Could not proceed. User information is missing.');

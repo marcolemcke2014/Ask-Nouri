@@ -140,7 +140,7 @@ export default function OnboardingHealthCheck() {
   const showSeriousConditionNote = selectedConditions.some(cond => SERIOUS_CONDITIONS.includes(cond));
 
   const handleBack = () => {
-    router.push('/onboarding/step3-mission');
+    router.push('/onboarding/step2-mission');
   };
 
   const handleNext = async () => {
@@ -188,7 +188,7 @@ export default function OnboardingHealthCheck() {
       }
 
       console.log('[Onboarding Health Check] Profile updated successfully.');
-      router.push('/onboarding/step5-eating-style');
+      router.push('/onboarding/step4-eating-style');
 
     } catch (err: any) {
       console.error('[Onboarding Health Check] Update failed:', err);
@@ -205,8 +205,8 @@ export default function OnboardingHealthCheck() {
   return (
     <OnboardingLayout 
       title="Health Check" 
-      currentStep={3} 
-      totalSteps={6}
+      currentStep={3}
+      totalSteps={4}
       showBackButton={true} 
       onBack={handleBack}
     >

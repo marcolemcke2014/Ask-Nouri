@@ -100,12 +100,12 @@ export default function OnboardingMission() {
   };
 
   const handleBack = () => {
-      router.push('/onboarding/step2-basics');
+      router.push('/onboarding/step1-basics');
   };
 
   const handleSkip = () => {
     console.log('[Onboarding Mission] Skipping step.');
-    router.push('/onboarding/step4-health-check');
+    router.push('/onboarding/step3-health-check');
   };
 
   const handleNext = async () => {
@@ -166,7 +166,7 @@ export default function OnboardingMission() {
         }
 
         console.log('[Onboarding Mission] Goal saved successfully.');
-        router.push('/onboarding/step4-health-check'); // Navigate to the next step
+        router.push('/onboarding/step3-health-check');
 
     } catch (err: any) {
         console.error('[Onboarding Mission] Save failed:', err);
@@ -183,8 +183,8 @@ export default function OnboardingMission() {
   return (
     <OnboardingLayout 
       title="Your Mission" 
-      currentStep={2} 
-      totalSteps={6}
+      currentStep={2}
+      totalSteps={4}
       showBackButton={true}
       onBack={handleBack}
     >

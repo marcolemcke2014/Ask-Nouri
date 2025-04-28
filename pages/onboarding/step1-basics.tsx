@@ -282,7 +282,7 @@ export default function OnboardingBasics() {
         throw updateError;
       }
       console.log('[Onboarding Basics] Profile updated successfully.');
-      router.push('/onboarding/step3-mission');
+      router.push('/onboarding/step2-mission');
     } catch (err: any) {
       console.error('[Onboarding Basics] Update failed:', err);
       setError(err.message || 'Failed to save basic information.');
@@ -296,7 +296,7 @@ export default function OnboardingBasics() {
   }
 
   return (
-    <OnboardingLayout title="Quick Basics" currentStep={1} totalSteps={6}>
+    <OnboardingLayout title="Quick Basics" currentStep={1} totalSteps={4}>
         <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
           Tell us a little about you:
         </h2>
@@ -430,7 +430,10 @@ export default function OnboardingBasics() {
             </div>
           </div>
 
-          {/* Updated Daily Habits Section */}
+          {/* Add Divider */}
+          <hr className="border-off-white/30 my-6" />
+
+          {/* Daily Habits Section */}
           <div>
              <label className="block text-lg sm:text-xl font-light text-center mb-4 text-off-white">Best describe your daily routine:</label> 
              <div className="space-y-2 mt-1">
