@@ -29,11 +29,11 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       </Head>
 
       {/* Header Area with optional Back Button and Progress */}
-      <div className="w-full max-w-md relative h-10 mb-2"> {/* Container for positioning */}
+      <div className="w-full max-w-md relative h-10 mb-2 z-10"> {/* Container for positioning */}
         {showBackButton && (
           <button 
             onClick={onBack}
-            className="absolute left-0 top-1/2 -translate-y-1/2 text-off-white p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 text-off-white p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors z-20"
             aria-label="Go back"
           >
             <ChevronLeft size={24} strokeWidth={2.5} />
