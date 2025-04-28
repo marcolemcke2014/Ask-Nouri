@@ -210,7 +210,7 @@ export default function OnboardingHealthCheck() {
       showBackButton={true} 
       onBack={handleBack}
     >
-        <h2 className="text-base sm:text-lg font-light text-center mb-4 text-off-white">
+        <h2 className="text-base sm:text-lg font-light text-center mb-6 text-off-white">
           Any health conditions to consider?
         </h2>
 
@@ -253,10 +253,10 @@ export default function OnboardingHealthCheck() {
         <hr className="border-off-white/30 my-6" />
 
         {/* Reduced h3 font size */}
-        <h3 className="text-sm sm:text-base font-light text-center mb-4 text-off-white">
+        <h3 className="text-sm sm:text-base font-light text-center mb-6 text-off-white">
           Should we avoid any of these foods?
         </h3>
-        <div className="flex flex-wrap gap-2 mb-4 justify-center">
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {FOOD_AVOIDANCES.map((avoidance) => (
              <div key={avoidance} className="flex items-center space-x-2">
                 <PillButton

@@ -189,7 +189,7 @@ export default function OnboardingEatingStyle() {
       showBackButton={true}
       onBack={handleBack}
     >
-        <h2 className="text-base sm:text-lg font-light text-center mb-4 text-off-white">
+        <h2 className="text-base sm:text-lg font-light text-center mb-6 text-off-white">
           Any diet you're aiming for?
         </h2>
         
@@ -205,7 +205,7 @@ export default function OnboardingEatingStyle() {
             </div>
         )}
 
-        <div className={`flex flex-wrap gap-2 mb-4 justify-center ${showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className={`flex flex-wrap gap-2 mb-6 justify-center ${showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}`}>
           {EATING_STYLES.map((style) => (
              <div key={style} className="flex items-center space-x-2">
                 <PillButton
@@ -229,7 +229,7 @@ export default function OnboardingEatingStyle() {
         <hr className={`border-off-white/30 my-6 ${showSuccessMessage ? 'opacity-50' : ''}`} />
         
         <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
-            <label htmlFor="dislikes" className="block text-base sm:text-lg font-light text-center mb-4 text-off-white">Any foods or ingredients you dislike?</label>
+            <label htmlFor="dislikes" className="block text-base sm:text-lg font-light text-center mb-6 text-off-white">Any foods or ingredients you dislike?</label>
             <textarea
               id="dislikes"
               rows={1}
