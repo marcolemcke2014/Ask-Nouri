@@ -24,12 +24,12 @@ const activeUnitStyle = "bg-green-200 text-green-800 font-medium";
 const inactiveUnitStyle = "bg-gray-500 text-gray-100 hover:bg-gray-600";
 // ---
 
-// New combined list
-const DAILY_HABITS = [
-    'Mostly Sitting', 'Moderately Active', 'Very Sporty', 'Busy & Rushed',
-    'Flexible Schedule', 'Irregular Eating', 'Structured Routine', 'Often Stressed',
-    'Frequently Eating Out', 'Low Energy / Fatigue', 'Night Owl / Shift Worker'
-];
+// Updated and grouped DAILY_HABITS
+const HABITS_ROW_1 = ['Mostly Sitting', 'Moderately Active', 'Very Sporty'];
+const HABITS_ROW_2 = ['Busy & Rushed', 'Flexible Schedule', 'Structured Routine'];
+const HABITS_ROW_3 = ['Irregular Eating', 'Often Stressed', 'Low Energy'];
+const HABITS_ROW_4 = ['Eat Out Often', 'Night Owl / Shift Worker'];
+const ALL_HABITS = [...HABITS_ROW_1, ...HABITS_ROW_2, ...HABITS_ROW_3, ...HABITS_ROW_4]; // Keep for validation/reference if needed
 
 // Helper to format date parts
 const formatTwoDigits = (num: number | '') => num === '' ? '' : String(num).padStart(2, '0');
@@ -55,7 +55,7 @@ export default function OnboardingBasics() {
   // General state
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [selectedHabits, setSelectedHabits] = useState<string[]>([]); // New state for multi-select
+  const [selectedHabits, setSelectedHabits] = useState<string[]>([]);
 
   // Focus input when editing starts for Height/Weight
   useEffect(() => {
@@ -416,18 +416,54 @@ export default function OnboardingBasics() {
             </div>
           </div>
 
-          {/* NEW Daily Habits Section */}
+          {/* Updated Daily Habits Section with Rows */}
           <div>
              <label className={labelStyle}>Which best describes your daily habits? (Select all that apply)</label>
-             <div className="flex flex-wrap gap-2 mt-1 justify-center">
-                {DAILY_HABITS.map((habit) => (
-                    <PillButton
-                        key={habit}
-                        text={habit}
-                        isSelected={selectedHabits.includes(habit)}
-                        onClick={() => handleHabitToggle(habit)}
-                    />
-                ))}
+             <div className="space-y-2 mt-1"> {/* Vertical space between rows */} 
+                {/* Row 1 */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                    {HABITS_ROW_1.map((habit) => (
+                        <PillButton
+                            key={habit}
+                            text={habit}
+                            isSelected={selectedHabits.includes(habit)}
+                            onClick={() => handleHabitToggle(habit)}
+                        />
+                    ))}
+                </div>
+                 {/* Row 2 */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                    {HABITS_ROW_2.map((habit) => (
+                        <PillButton
+                            key={habit}
+                            text={habit}
+                            isSelected={selectedHabits.includes(habit)}
+                            onClick={() => handleHabitToggle(habit)}
+                        />
+                    ))}
+                </div>
+                 {/* Row 3 */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                    {HABITS_ROW_3.map((habit) => (
+                        <PillButton
+                            key={habit}
+                            text={habit}
+                            isSelected={selectedHabits.includes(habit)}
+                            onClick={() => handleHabitToggle(habit)}
+                        />
+                    ))}
+                </div>
+                 {/* Row 4 */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                    {HABITS_ROW_4.map((habit) => (
+                        <PillButton
+                            key={habit}
+                            text={habit}
+                            isSelected={selectedHabits.includes(habit)}
+                            onClick={() => handleHabitToggle(habit)}
+                        />
+                    ))}
+                </div>
             </div>
           </div>
           
