@@ -435,7 +435,7 @@ export default function OnboardingBasics() {
 
           {/* Daily Habits Section */}
           <div>
-             <label className={labelStyle}>Best describe your daily routine:</label> 
+             <label className="block text-base sm:text-lg font-light text-center mb-6 text-off-white">Best describe your daily routine:</label> 
              <div className="space-y-2 mt-1.5">
                  {/* Row 1 */}
                  <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>

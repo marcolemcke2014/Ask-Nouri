@@ -228,8 +228,8 @@ export default function OnboardingEatingStyle() {
         
         <hr className="border-off-white/30 my-6" />
         
-        <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
-            <label htmlFor="dislikes" className={labelStyle}>Any foods or ingredients you dislike?</label>
+        <div>
+            <label htmlFor="dislikes" className="block text-base sm:text-lg font-light text-center mb-4 text-off-white">Any foods or ingredients you dislike?</label>
             <textarea
               id="dislikes"
               rows={1}
