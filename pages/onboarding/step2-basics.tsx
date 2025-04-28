@@ -18,8 +18,8 @@ const smallInputStyle = `${inputStyle} w-16 text-center px-1`; // For DOB fields
 const numberDisplayContainerStyle = "flex items-center justify-between w-full h-12 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm";
 const numberDisplayText = "text-sm text-gray-900 font-['Poppins',sans-serif] cursor-pointer";
 const plusMinusButton = "p-1 rounded-full text-gray-600 hover:bg-black/10 active:bg-black/20 transition-colors";
-const unitToggleContainerStyle = "flex space-x-1 bg-white/10 p-1 rounded-full ml-2"; // Added margin
-const unitToggleStyle = "px-3 py-1 text-xs rounded-full cursor-pointer transition-colors";
+const unitToggleContainerStyle = "flex space-x-1 bg-white/10 p-0.5 rounded-full ml-2";
+const unitToggleStyle = "px-2.5 py-0.5 text-xs rounded-full cursor-pointer transition-colors";
 const activeUnitStyle = "bg-green-200 text-green-800 font-medium";
 const inactiveUnitStyle = "bg-gray-500 text-gray-100 hover:bg-gray-600";
 // ---
