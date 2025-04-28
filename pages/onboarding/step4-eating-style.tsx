@@ -97,7 +97,7 @@ export default function OnboardingEatingStyle() {
     setSelectedStyles(prev => {
       let newState = [...prev];
       if (style === 'No strict rules') {
-        return prev.includes(style) ? [] : ['No strict rules'];
+        newState = prev.includes(style) ? [] : ['No strict rules'];
       } else {
         newState = newState.filter(item => item !== 'No strict rules');
         if (newState.includes(style)) {
@@ -106,8 +106,13 @@ export default function OnboardingEatingStyle() {
         } else {
           newState.push(style);
         }
-        return newState;
       }
+      if (newState.length > 0) { 
+          setShowSuccessMessage(true);
+      } else {
+          setShowSuccessMessage(false);
+      }
+      return newState;
     });
   };
 
@@ -132,7 +137,6 @@ export default function OnboardingEatingStyle() {
     
     setError('');
     setIsLoading(true);
-    setShowSuccessMessage(false);
     
     const stylesToSave = selectedStyles.map(s => s === 'Other' ? `Other: ${otherStyleText.trim()}` : s);
     const goalsUpdateData = {
@@ -146,35 +150,24 @@ export default function OnboardingEatingStyle() {
     };
 
     try {
-      console.log('[Onboarding Eating Style] Final update for user:', user.id);
+      console.log('[Onboarding Eating Style] Final update and navigate for user:', user.id);
       const [goalsUpsertResult, profileUpdateResult] = await Promise.all([
           supabase.from('user_goals_and_diets').upsert({ user_id: user.id, ...goalsUpdateData }, { onConflict: 'user_id' }),
           supabase.from('user_profile').update(profileUpdateData).eq('id', user.id)
       ]);
 
-      if (goalsUpsertResult.error) {
-          console.error('[Onboarding Eating Style] Supabase goals upsert error:', goalsUpsertResult.error);
-          throw goalsUpsertResult.error; 
-      }
-      if (profileUpdateResult.error) {
-           console.error('[Onboarding Eating Style] Supabase profile update error:', profileUpdateResult.error);
-          throw profileUpdateResult.error; 
-      }
+      if (goalsUpsertResult.error) throw goalsUpsertResult.error; 
+      if (profileUpdateResult.error) throw profileUpdateResult.error; 
 
-      console.log('[Onboarding Eating Style] Data updated successfully, showing success message.');
-      setShowSuccessMessage(true);
+      console.log('[Onboarding Eating Style] Onboarding complete. Navigating to app...');
+      router.push('/scan/index'); 
 
     } catch (err: any) {
-      console.error('[Onboarding Eating Style] Update failed:', err);
+      console.error('[Onboarding Eating Style] Final update failed:', err);
       setError(err.message || 'Failed to save preferences.');
-    } finally {
+      setShowSuccessMessage(false);
       setIsLoading(false);
     }
-  };
-
-  const handleNavigateToApp = () => {
-      console.log('[Onboarding] Navigating to app...');
-      router.push('/scan/index');
   };
 
   if (isLoading && !user) {
@@ -193,7 +186,7 @@ export default function OnboardingEatingStyle() {
           Any diet you're aiming for?
         </h2>
         
-        {error && !showSuccessMessage && (
+        {error && (
             <div className={errorBoxStyle}>
               {error}
             </div>
@@ -205,7 +198,7 @@ export default function OnboardingEatingStyle() {
             </div>
         )}
 
-        <div className={`flex flex-wrap gap-2 mb-6 justify-center ${showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {EATING_STYLES.map((style) => (
              <div key={style} className="flex items-center space-x-2">
                 <PillButton
@@ -226,9 +219,9 @@ export default function OnboardingEatingStyle() {
           ))}
         </div>
         
-        <hr className={`border-off-white/30 my-6 ${showSuccessMessage ? 'opacity-50' : ''}`} />
+        <hr className="border-off-white/30 my-6" />
         
-        <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
+        <div>
             <label htmlFor="dislikes" className="block text-base sm:text-lg font-light text-center mb-6 text-off-white">Any foods or ingredients you dislike?</label>
             <textarea
               id="dislikes"
@@ -243,11 +236,11 @@ export default function OnboardingEatingStyle() {
         <div className="pt-6">
           <button 
             type="button" 
-            onClick={showSuccessMessage ? handleNavigateToApp : handleFinishSetup}
-            disabled={isLoading}
+            onClick={handleFinishSetup}
+            disabled={isLoading || selectedStyles.length === 0 || (selectedStyles.includes('Other') && !otherStyleText.trim())}
             className={buttonStyle}
           >
-            {isLoading ? 'Saving...' : (showSuccessMessage ? 'Start Scanning Menus' : 'Finish Setup')}
+            {isLoading ? 'Saving...' : 'Finish Setup'}
           </button>
         </div>
     </OnboardingLayout>
