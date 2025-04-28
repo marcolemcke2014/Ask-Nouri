@@ -24,12 +24,11 @@ const activeUnitStyle = "bg-green-200 text-green-800 font-medium";
 const inactiveUnitStyle = "bg-gray-500 text-gray-100 hover:bg-gray-600";
 // ---
 
-// Constants moved from step 6
-const EATING_HABITS = [
-    'Busy & Rushed', 'Flexible Schedule', 'Structured Routine', 'Irregular / Shift Work'
-];
-const ACTIVITY_LEVELS = [
-    'Mostly Sitting', 'Lightly Active', 'Moderately Active', 'Very Active'
+// New combined list
+const DAILY_HABITS = [
+    'Mostly Sitting', 'Moderately Active', 'Very Sporty', 'Busy & Rushed',
+    'Flexible Schedule', 'Irregular Eating', 'Structured Routine', 'Often Stressed',
+    'Frequently Eating Out', 'Low Energy / Fatigue', 'Night Owl / Shift Worker'
 ];
 
 // Helper to format date parts
@@ -56,8 +55,7 @@ export default function OnboardingBasics() {
   // General state
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [eatingHabits, setEatingHabits] = useState<string | null>(null);
-  const [activityLevel, setActivityLevel] = useState<string | null>(null);
+  const [selectedHabits, setSelectedHabits] = useState<string[]>([]); // New state for multi-select
 
   // Focus input when editing starts for Height/Weight
   useEffect(() => {
@@ -88,7 +86,7 @@ export default function OnboardingBasics() {
 
             const { data: profile, error: profileError } = await supabase
                 .from('user_profile')
-                .select('date_of_birth, height_cm, weight_kg, gender, eating_habits, activity_level')
+                .select('date_of_birth, height_cm, weight_kg, gender, daily_habits')
                 .eq('id', session.user.id)
                 .maybeSingle();
 
@@ -104,8 +102,9 @@ export default function OnboardingBasics() {
                 if (profile.height_cm) { setHeight(profile.height_cm); setHeightUnit('cm'); }
                 if (profile.weight_kg) { setWeight(profile.weight_kg); setWeightUnit('kg'); }
                 if (profile.gender) setGender(profile.gender);
-                if (profile.eating_habits) setEatingHabits(profile.eating_habits);
-                if (profile.activity_level) setActivityLevel(profile.activity_level);
+                if (profile.daily_habits && Array.isArray(profile.daily_habits)) {
+                    setSelectedHabits(profile.daily_habits);
+                }
             }
         } catch (fetchError) {
             console.error('[Onboarding Basics] Fetch error:', fetchError);
@@ -192,13 +191,14 @@ export default function OnboardingBasics() {
       setGender(e.target.value);
       setError('');
   };
-  const handleHabitsSelect = (habit: string) => {
+  // New handler for multi-select habits
+  const handleHabitToggle = (habit: string) => {
     setError('');
-    setEatingHabits(habit);
-  };
-  const handleActivitySelect = (level: string) => {
-    setError('');
-    setActivityLevel(level);
+    setSelectedHabits(prev => 
+        prev.includes(habit) 
+            ? prev.filter(h => h !== habit) 
+            : [...prev, habit]
+    );
   };
   // --- End Input Handlers ---
 
@@ -240,14 +240,10 @@ export default function OnboardingBasics() {
       setError('Please select a gender.');
       return;
     }
-    if (!eatingHabits) {
-      setError('Please select your eating habits.');
-      return;
-    }
-    if (!activityLevel) {
-      setError('Please select your activity level.');
-      return;
-    }
+    if (selectedHabits.length === 0) {
+         setError('Please select at least one daily habit that describes you.');
+         return;
+     }
     
     setError('');
     setIsLoading(true);
@@ -261,8 +257,7 @@ export default function OnboardingBasics() {
       height_cm: heightInCm,
       weight_kg: weightInKg,
       gender: gender,
-      eating_habits: eatingHabits,
-      activity_level: activityLevel,
+      daily_habits: selectedHabits.length > 0 ? selectedHabits : null,
       updated_at: new Date().toISOString(),
     };
     try {
@@ -421,31 +416,16 @@ export default function OnboardingBasics() {
             </div>
           </div>
 
-          {/* Eating Habits - Moved from step 6 */}
+          {/* NEW Daily Habits Section */}
           <div>
-             <label className={labelStyle}>Which best describes your eating habits?</label>
+             <label className={labelStyle}>Which best describes your daily habits? (Select all that apply)</label>
              <div className="flex flex-wrap gap-2 mt-1 justify-center">
-                {EATING_HABITS.map((habit) => (
+                {DAILY_HABITS.map((habit) => (
                     <PillButton
                         key={habit}
                         text={habit}
-                        isSelected={eatingHabits === habit}
-                        onClick={() => handleHabitsSelect(habit)}
-                    />
-                ))}
-            </div>
-          </div>
-
-          {/* Activity Level - Moved from step 6 */}
-          <div>
-             <label className={labelStyle}>How active are you most days?</label>
-             <div className="flex flex-wrap gap-2 mt-1 justify-center">
-                {ACTIVITY_LEVELS.map((level) => (
-                    <PillButton
-                        key={level}
-                        text={level}
-                        isSelected={activityLevel === level}
-                        onClick={() => handleActivitySelect(level)}
+                        isSelected={selectedHabits.includes(habit)}
+                        onClick={() => handleHabitToggle(habit)}
                     />
                 ))}
             </div>
