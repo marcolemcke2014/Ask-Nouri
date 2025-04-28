@@ -437,14 +437,14 @@ export default function OnboardingBasics() {
           <div>
              <label className="block text-base sm:text-lg font-light text-center mb-6 text-off-white">Best describe your daily routine:</label> 
              <div className="space-y-2">
-                 {/* Row 1 */}
-                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-                 {/* Row 2 */}
-                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_2.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-                 {/* Row 3 */}
-                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_3.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-                 {/* Row 4 */}
-                 <div className="flex flex-wrap gap-2 justify-center">{HABITS_ROW_4.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 1 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 2 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_2.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 3 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_3.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 4 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_4.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
             </div>
           </div>
           
