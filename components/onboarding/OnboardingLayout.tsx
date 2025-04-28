@@ -60,8 +60,8 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           </div>
         </div>
 
-        {/* Main Content Card - Reduced padding further to p-3 */}
-        <main className="w-full max-w-sm bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-3 mt-4">
+        {/* Main Content Card - Removed padding (p-0) */}
+        <main className="w-full max-w-sm bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-0 mt-4">
           {children}
         </main>
       </div>
