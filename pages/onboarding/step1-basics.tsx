@@ -433,23 +433,19 @@ export default function OnboardingBasics() {
           {/* Add Divider */}
           <hr className="border-off-white/30 my-6" />
 
-          {/* Daily Habits Section - Updated to use CSS Grid */}
+          {/* Daily Habits Section */}
           <div>
              <label className="block text-base sm:text-lg font-light text-center mb-6 text-off-white">Best describe your daily routine:</label> 
-             {/* Removed space-y-2, grid handles rows */}
-             {/* Apply grid classes: 2 cols default, 3 cols on sm screens up. Added gap. */}
-             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2 justify-items-center">
-               {/* Map ALL habits now, grid handles layout */}
-               {ALL_HABITS.map((habit) => (
-                   <PillButton
-                       key={habit}
-                       text={habit}
-                       isSelected={selectedHabits.includes(habit)}
-                       onClick={() => handleHabitToggle(habit)}
-                       className="w-full" // Let grid control width, button fills cell
-                   />
-               ))}
-             </div>
+             <div className="space-y-2">
+                 {/* Row 1 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 2 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_2.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 3 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_3.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+                 {/* Row 4 - Added justify-center, adjusted gap */}
+                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_4.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
+            </div>
           </div>
           
           {/* Error Message Box */}
