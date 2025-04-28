@@ -229,15 +229,14 @@ export default function OnboardingEatingStyle() {
         <hr className="border-off-white/30 my-6" />
         
         <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
-            <h2 id="dislikes-label" className="text-base sm:text-lg font-light text-center mb-4 text-off-white">Any foods or ingredients you dislike?</h2>
+            <label htmlFor="dislikes" className={labelStyle}>Any foods or ingredients you dislike?</label>
             <textarea
               id="dislikes"
-              aria-labelledby="dislikes-label"
-              rows={3}
+              rows={1}
               value={foodDislikes}
               onChange={(e) => setFoodDislikes(e.target.value)}
               placeholder="e.g., cilantro, mushrooms, very spicy food..."
-              className={`${textareaStyle} ${textareaPlaceholderStyle}`}
+              className={`${textareaStyle} ${textareaPlaceholderStyle} mt-1.5`}
             />
         </div>
 
