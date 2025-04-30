@@ -16,7 +16,7 @@ const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-nor
 const inputStyle = "w-full h-10 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]";
 const inputPlaceholderStyle = "placeholder-gray-400/80";
 const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center";
-const successBoxStyle = "mb-4 p-3 bg-green-800/30 border border-green-500/30 text-green-200 rounded-lg text-sm text-center flex items-center justify-center space-x-2";
+const successBoxStyle = "mt-6 mb-4 p-3 bg-green-800/30 border border-green-500/30 text-green-200 rounded-lg text-sm text-center flex items-center justify-center space-x-2";
 // ---
 
 // Updated EATING_STYLES order
@@ -231,11 +231,11 @@ export default function OnboardingEatingStyle() {
         <hr className={`border-off-white/30 my-6 ${showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}`} />
         
         <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
-            <h2 id="dislikes-label" className="text-lg sm:text-xl font-light text-center mb-4 text-off-white">Any foods or ingredients you strongly dislike?</h2>
+            <h2 id="dislikes-label" className="text-lg sm:text-xl font-light text-center mb-4 text-off-white">Foods or ingredients you strongly dislike?</h2>
             <textarea
               id="dislikes"
               aria-labelledby="dislikes-label"
-              rows={3}
+              rows={1}
               value={foodDislikes}
               onChange={(e) => setFoodDislikes(e.target.value)}
               placeholder="e.g., cilantro, mushrooms, very spicy food..."
@@ -250,12 +250,10 @@ export default function OnboardingEatingStyle() {
             </div>
         )}
 
-        <div className="pt-6">
+        <div className="pt-8">
           <button 
             type="button" 
-            // Change onClick based on success state
             onClick={showSuccessMessage ? handleNavigateToApp : handleFinishSetup}
-            // Disable based on loading OR form invalid (when NOT showing success message)
             disabled={isLoading || (!showSuccessMessage && !isStyleValid)} 
             className={buttonStyle}
           >
