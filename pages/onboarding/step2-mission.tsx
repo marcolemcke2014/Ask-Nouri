@@ -188,7 +188,7 @@ export default function OnboardingMission() {
       showBackButton={true}
       onBack={handleBack}
     >
-        <h2 className="text-base sm:text-lg font-light text-center mb-6 text-off-white">
+        <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
           What's your priority right now?
         </h2>
 
