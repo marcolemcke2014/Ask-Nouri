@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import AppShell from '../layout/AppShell';
-import Button from '../ui/Button';
+import { Button } from '../ui/Button';
 
 /**
  * Home screen with app intro and scan button

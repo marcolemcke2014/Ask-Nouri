@@ -3,12 +3,14 @@ import { useRouter } from 'next/router';
 import AppShell from '../layout/AppShell';
 import ScannerButton from '../ui/ScannerButton';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import Button from '../ui/Button';
+import { Button } from '../ui/Button';
 import { useCameraFeed } from '../../hooks/useCameraFeed';
 import { extractTextFromImage } from '../../lib/ocr';
 import { parseMenu } from '../../lib/parseMenu';
 import { OCRProvider } from '../../types/ocr';
 import { ParsedMenuItem } from '../../types/menu';
+import { supabase } from '../../lib/supabase';
+import { Upload, Camera, RefreshCw, AlertCircle } from 'lucide-react';
 
 /**
  * Screen showing live camera feed for menu scanning
@@ -193,7 +195,7 @@ export default function ScanScreen() {
           <div className="text-center p-4 bg-black bg-opacity-75 rounded-lg max-w-md">
             <p className="text-white mb-4">{displayError}</p>
             <div className="flex flex-col gap-3">
-              <Button onClick={handleRetry} variant="primary">Retry Camera</Button>
+              <Button onClick={handleRetry} variant="default">Retry Camera</Button>
               <Button onClick={handleUploadClick} variant="secondary">Upload Image</Button>
             </div>
           </div>
