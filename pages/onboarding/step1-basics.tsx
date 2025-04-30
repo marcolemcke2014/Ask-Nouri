@@ -5,9 +5,17 @@ import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, CalendarIcon } from 'lucide-react';
 import PillButton from '../../components/onboarding/PillButton';
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -52,7 +60,7 @@ const ALL_HABITS = [
 export default function OnboardingBasics() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [dob, setDob] = useState<string>('');
+  const [dob, setDob] = useState<Date | undefined>(undefined);
   const [height, setHeight] = useState<number | ''>('');
   const [heightUnit, setHeightUnit] = useState<'cm' | 'inches'>('cm');
   const [weight, setWeight] = useState<number | ''>('');
@@ -79,7 +87,7 @@ export default function OnboardingBasics() {
 
         if (profileError) { console.error('[OB Basics] Error fetching profile:', profileError); }
         else if (profile) {
-            if (profile.date_of_birth) setDob(profile.date_of_birth);
+            if (profile.date_of_birth) setDob(new Date(profile.date_of_birth));
             if (profile.height_cm) { setHeight(profile.height_cm); setHeightUnit('cm'); }
             if (profile.weight_kg) { setWeight(profile.weight_kg); setWeightUnit('kg'); }
             if (profile.gender) setGender(profile.gender);
@@ -94,9 +102,11 @@ export default function OnboardingBasics() {
   }, [router]);
 
   // --- Input Handlers ---
-  const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDob(e.target.value);
-    setError('');
+  const handleDobChange = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+        setDob(selectedDate);
+        setError('');
+    }
   };
   
   // Restore +/- handlers
@@ -165,8 +175,8 @@ export default function OnboardingBasics() {
       setError('Please complete all fields to continue.');
       return;
     }
-    if (!user) {
-      console.error('[Onboarding Basics] handleNext called without user.');
+    if (!user || !dob) {
+      console.error('[Onboarding Basics] handleNext called without user or dob.');
       setError('User session not found. Please log in again.');
       return;
     }
@@ -174,11 +184,12 @@ export default function OnboardingBasics() {
     setError('');
     setIsLoading(true);
     
+    const formattedDob = format(dob, "yyyy-MM-dd");
     const heightInCm = heightUnit === 'inches' && height ? Math.round(Number(height) * 2.54) : height;
     const weightInKg = weightUnit === 'lbs' && weight ? Math.round(Number(weight) * 0.453592 * 10) / 10 : weight;
 
     const updateData = {
-      date_of_birth: dob,
+      date_of_birth: formattedDob,
       height_cm: heightInCm,
       weight_kg: weightInKg,
       gender: gender,
@@ -213,18 +224,36 @@ export default function OnboardingBasics() {
         </h2>
         
         <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
-          {/* Date of Birth - Reverted to native input */}
+          {/* Date of Birth - Shadcn DatePicker */}
           <div>
-            <label htmlFor="dob" className={labelStyle}>Date of Birth</label>
-            <input
-              type="date"
-              id="dob"
-              value={dob}
-              onChange={handleDobChange}
-              className={`${inputStyle} ${inputPlaceholderStyle}`}
-              max={new Date().toISOString().split("T")[0]}
-              required
-            />
+            <label className={labelStyle}>Date of Birth</label>
+             <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      inputStyle,
+                      "w-full justify-start text-left font-normal",
+                      !dob && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
+                    {dob ? format(dob, "PPP") : <span className={inputPlaceholderStyle}>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dob}
+                    onSelect={handleDobChange}
+                    disabled={(date: Date) => date > new Date() || date < new Date("1900-01-01")}
+                    initialFocus
+                    captionLayout="dropdown-buttons"
+                    fromYear={1900}
+                    toYear={new Date().getFullYear()}
+                  />
+                </PopoverContent>
+              </Popover>
           </div>
 
           {/* Height - Reverted to +/- Controls */}
@@ -318,13 +347,14 @@ export default function OnboardingBasics() {
 
           {/* CTA Button - Use Shadcn Button */}
           <div className="pt-4">
-            <button 
+            <Button 
               type="submit"
               disabled={isLoading || !isFormValid}
               className={buttonStyle}
+              variant="default"
             >
               {isLoading ? 'Saving...' : 'Next'}
-            </button>
+            </Button>
           </div>
         </form>
     </OnboardingLayout>
