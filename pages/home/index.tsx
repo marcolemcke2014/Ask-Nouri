@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '@/lib/supabase';
-import { User, History, Home, ScanLine, FileText, Settings } from 'lucide-react';
+import { User, History, Home, ScanLine, ChevronLeft } from 'lucide-react';
+import ScanScreen from '@/components/screens/ScanScreen';
 
 // Define user type
 interface User {
@@ -26,6 +27,7 @@ export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
 
   // Check for authenticated user
   useEffect(() => {
@@ -53,9 +55,14 @@ export default function HomePage() {
     checkUser();
   }, [router]);
 
-  // Navigate to scan page
+  // Toggle scanner view
   const handleStartScan = () => {
-    router.push('/home/scan');
+    setShowScanner(true);
+  };
+
+  // Return to home view
+  const handleBackToHome = () => {
+    setShowScanner(false);
   };
 
   // Loading state
@@ -70,6 +77,63 @@ export default function HomePage() {
     );
   }
 
+  // Show scanner view when activated
+  if (showScanner) {
+    return (
+      <div className="min-h-screen flex flex-col bg-black font-['Poppins',sans-serif] text-off-white">
+        <Head>
+          <title>NutriFlow - Scan</title>
+        </Head>
+
+        {/* Back Button */}
+        <button 
+          onClick={handleBackToHome}
+          className="absolute top-4 left-4 z-50 p-2 rounded-full bg-black/50 text-white"
+          aria-label="Back to home"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        
+        <ScanScreen />
+        
+        {/* Footer stays consistent */}
+        <footer className="sticky bottom-0 left-0 right-0 bg-[#0A4923]/80 backdrop-blur-sm border-t border-off-white/15 py-2 px-2 z-50">
+          <nav className="flex justify-around items-center max-w-md mx-auto">
+            <button
+              onClick={handleBackToHome} 
+              className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
+            >
+              <Home size={20} />
+              <span className="mt-1">Home</span>
+            </button>
+            <button
+              onClick={() => {}} // Already in scan view
+              className="flex flex-col items-center text-xs p-2 rounded-md text-off-white font-medium" // Active state
+            >
+              <ScanLine size={20} />
+              <span className="mt-1">Scan</span>
+            </button>
+            <button
+              onClick={() => router.push('/history/index')}
+              className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
+            >
+              <History size={20} />
+              <span className="mt-1">History</span>
+            </button>
+            <button
+              onClick={() => router.push('/profile/index')}
+              className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
+            >
+              <User size={20} />
+              <span className="mt-1">Profile</span>
+            </button>
+          </nav>
+        </footer>
+      </div>
+    );
+  }
+
+  // Home view (default)
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif] text-off-white">
       <Head>
@@ -138,14 +202,14 @@ export default function HomePage() {
       <footer className="sticky bottom-0 left-0 right-0 bg-[#0A4923]/80 backdrop-blur-sm border-t border-off-white/15 py-2 px-2 z-50">
         <nav className="flex justify-around items-center max-w-md mx-auto">
           <button
-            onClick={() => router.push('/home')} 
+            onClick={() => {}} // Already on home 
             className="flex flex-col items-center text-xs p-2 rounded-md text-off-white font-medium" // Active for home
           >
             <Home size={20} />
             <span className="mt-1">Home</span>
           </button>
           <button
-            onClick={() => router.push('/home/scan')}
+            onClick={handleStartScan}
             className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
           >
             <ScanLine size={20} />
