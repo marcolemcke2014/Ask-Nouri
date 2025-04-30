@@ -7,14 +7,14 @@ import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import { Minus, Plus } from 'lucide-react';
 import PillButton from '../../components/onboarding/PillButton';
-// Revert import path back to alias
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; 
+} from "@/components/ui/select";
 
 // --- Styles ---
 const labelStyle = "block text-xs font-normal text-off-white/90 mb-1.5";
@@ -32,6 +32,7 @@ const unitToggleStyle = "min-w-[44px] min-h-[44px] flex items-center justify-cen
 const activeUnitStyle = "bg-green-200 text-green-800 font-medium border border-green-400 shadow-sm";
 const inactiveUnitStyle = "bg-gray-500 text-gray-100 hover:bg-gray-600";
 const selectStyle = `${inputStyle} appearance-none`;
+const selectTriggerStyle = `${inputStyle} text-left justify-start [&>span]:text-gray-400/80 data-[placeholder]:font-normal`;
 // ---
 
 // Updated and grouped DAILY_HABITS
@@ -47,9 +48,6 @@ const ALL_HABITS = [
     'Eat Out Often', 'Night Owl / Shift Worker', 
     'None'
 ];
-
-// Helper to format date parts
-const formatTwoDigits = (num: number | '') => num === '' ? '' : String(num).padStart(2, '0');
 
 export default function OnboardingBasics() {
   const router = useRouter();
@@ -215,7 +213,7 @@ export default function OnboardingBasics() {
         </h2>
         
         <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
-          {/* Date of Birth - Single Native Input */}
+          {/* Date of Birth - Reverted to native input */}
           <div>
             <label htmlFor="dob" className={labelStyle}>Date of Birth</label>
             <input
@@ -274,19 +272,16 @@ export default function OnboardingBasics() {
             <label htmlFor="gender-trigger" className={labelStyle}>Gender</label> 
             <Select 
                 value={gender} 
-                onValueChange={handleGenderChange} // Use onValueChange
+                onValueChange={handleGenderChange}
                 required
             >
               <SelectTrigger 
                   id="gender-trigger"
-                  // Apply input styles to the trigger button
-                  className={`${inputStyle} text-left justify-start [&>span]:text-gray-400/80 data-[placeholder]:font-normal`}
+                  className={selectTriggerStyle}
                   aria-label="Select gender"
               >
-                {/* Use SelectValue for placeholder and selected value display */}
                 <SelectValue placeholder="Select your gender" />
               </SelectTrigger>
-              {/* Dropdown Content - can be further styled if needed */}
               <SelectContent>
                 <SelectItem value="Male">Male</SelectItem>
                 <SelectItem value="Female">Female</SelectItem>
@@ -321,9 +316,9 @@ export default function OnboardingBasics() {
             </div>
           )}
 
-          {/* CTA Button */}
+          {/* CTA Button - Use Shadcn Button */}
           <div className="pt-4">
-            <button
+            <button 
               type="submit"
               disabled={isLoading || !isFormValid}
               className={buttonStyle}
