@@ -5,20 +5,25 @@ import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
+import { Minus, Plus } from 'lucide-react';
 import PillButton from '../../components/onboarding/PillButton';
 
-// --- Updated Styles ---
-const labelStyle = "block text-sm font-normal text-off-white/90 mb-2";
+// --- Styles ---
+const labelStyle = "block text-xs font-normal text-off-white/90 mb-1.5";
+const buttonStyle = "w-full min-h-[48px] h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-base disabled:opacity-50 disabled:cursor-not-allowed";
+const errorBoxStyle = "mt-4 p-3 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-sm text-center";
 const inputStyle = "w-full h-12 px-4 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-base font-['Poppins',sans-serif]";
 const inputPlaceholderStyle = "placeholder-gray-400/80";
-const selectStyle = `${inputStyle} appearance-none`;
-const buttonStyle = "w-full min-h-[48px] h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-base disabled:opacity-50 disabled:cursor-not-allowed";
-const unitToggleContainerStyle = "flex space-x-1 bg-white/10 p-1 rounded-full ml-2";
+const smallInputStyle = `${inputStyle} w-16 text-center px-1`;
+// Styles for +/- stepper
+const numberDisplayContainerStyle = "flex items-center justify-between w-full h-12 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm";
+const numberDisplayText = "text-base text-gray-900 font-['Poppins',sans-serif]";
+const plusMinusButton = "p-1 rounded-full text-gray-600 hover:bg-black/10 active:bg-black/20 transition-colors";
+const unitToggleContainerStyle = "flex space-x-1 bg-white/10 p-0.5 rounded-full ml-2";
 const unitToggleStyle = "min-w-[44px] min-h-[44px] flex items-center justify-center px-3 py-1 text-base rounded-full cursor-pointer transition-colors";
 const activeUnitStyle = "bg-green-200 text-green-800 font-medium border border-green-400 shadow-sm";
 const inactiveUnitStyle = "bg-gray-500 text-gray-100 hover:bg-gray-600";
-const errorBoxStyle = "mt-4 p-3 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-sm text-center";
-const helperTextStyle = "text-sm text-off-white/70 mb-2 text-center";
+const selectStyle = `${inputStyle} appearance-none`;
 // ---
 
 // Updated and grouped DAILY_HABITS
@@ -88,19 +93,25 @@ export default function OnboardingBasics() {
     setError('');
   };
   
-  // Height/Weight direct input handlers
-  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setHeight(val === '' ? '' : Number(val));
+  // Restore +/- handlers
+  const handleHeightChange = (increment: number) => {
     setError('');
+    setHeight(prev => {
+        const current = Number(prev) || (heightUnit === 'cm' ? 150 : 60); 
+        const newValue = current + increment;
+        return Math.max(1, newValue); 
+    });
   };
-  const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setWeight(val === '' ? '' : Number(val));
+  const handleWeightChange = (increment: number) => {
     setError('');
+    setWeight(prev => {
+        const current = Number(prev) || (weightUnit === 'kg' ? 60 : 130);
+        const newValue = current + (increment > 0 ? 0.5 : -0.5); 
+        return Math.max(1, parseFloat(newValue.toFixed(1)));
+    });
   };
   
-  // Unit change handlers (keep conversion logic)
+  // Unit change handlers
   const handleHeightUnitChange = (unit: 'cm' | 'inches') => {
     if (height !== '' && heightUnit !== unit) {
       const currentHeight = Number(height);
@@ -111,7 +122,7 @@ export default function OnboardingBasics() {
   const handleWeightUnitChange = (unit: 'kg' | 'lbs') => {
      if (weight !== '' && weightUnit !== unit) {
       const currentWeight = Number(weight);
-      setWeight(unit === 'kg' ? Math.round(currentWeight * 0.453592 * 10)/10 : Math.round(currentWeight / 0.453592 * 10)/10);
+      setWeight(unit === 'kg' ? parseFloat((currentWeight * 0.453592).toFixed(1)) : parseFloat((currentWeight / 0.453592).toFixed(1)));
     }
     setWeightUnit(unit);
   };
@@ -191,7 +202,7 @@ export default function OnboardingBasics() {
 
   return (
     <OnboardingLayout title="Quick Basics" currentStep={1} totalSteps={4}>
-        <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
+        <h2 className="text-xl sm:text-2xl font-light text-center mb-6 text-off-white">
           Tell us a little about you:
         </h2>
         
@@ -210,21 +221,19 @@ export default function OnboardingBasics() {
             />
           </div>
 
-          {/* Height - Direct Input + Styled Toggles */}
+          {/* Height - Reverted to +/- Controls */}
           <div>
-             <label htmlFor="height" className={labelStyle}>Height</label>
-             <div className="flex items-center space-x-2">
-                <input
-                    type="number"
-                    id="height"
-                    value={height}
-                    onChange={handleHeightChange}
-                    className={`${inputStyle} ${inputPlaceholderStyle} flex-grow`}
-                    placeholder={heightUnit === 'cm' ? 'e.g., 175' : 'e.g., 69'}
-                    step={heightUnit === 'cm' ? 1 : 0.1}
-                    min="1"
-                    required
-                />
+             <label className={labelStyle}>Height</label>
+             <div className={numberDisplayContainerStyle}>
+                <button type="button" onClick={() => handleHeightChange(-1)} className={plusMinusButton} aria-label="Decrease height">
+                    <Minus size={18}/>
+                </button>
+                <span className={numberDisplayText}>
+                    {height || '--'} {heightUnit}
+                </span>
+                <button type="button" onClick={() => handleHeightChange(1)} className={plusMinusButton} aria-label="Increase height">
+                    <Plus size={18}/>
+                </button>
                 <div className={`${unitToggleContainerStyle} flex-shrink-0`}>
                    <button type="button" onClick={() => handleHeightUnitChange('cm')} className={`${unitToggleStyle} ${heightUnit === 'cm' ? activeUnitStyle : inactiveUnitStyle}`}>cm</button>
                    <button type="button" onClick={() => handleHeightUnitChange('inches')} className={`${unitToggleStyle} ${heightUnit === 'inches' ? activeUnitStyle : inactiveUnitStyle}`}>in</button>
@@ -232,21 +241,19 @@ export default function OnboardingBasics() {
              </div>
           </div>
 
-          {/* Weight - Direct Input + Styled Toggles */}
+          {/* Weight - Reverted to +/- Controls */}
            <div>
-             <label htmlFor="weight" className={labelStyle}>Weight</label>
-             <div className="flex items-center space-x-2">
-                 <input
-                    type="number"
-                    id="weight"
-                    value={weight}
-                    onChange={handleWeightChange}
-                    className={`${inputStyle} ${inputPlaceholderStyle} flex-grow`}
-                    placeholder={weightUnit === 'kg' ? 'e.g., 70' : 'e.g., 154'}
-                    step={0.1}
-                    min="1"
-                    required
-                 />
+             <label className={labelStyle}>Weight</label>
+             <div className={numberDisplayContainerStyle}>
+                 <button type="button" onClick={() => handleWeightChange(-1)} className={plusMinusButton} aria-label="Decrease weight">
+                     <Minus size={18}/>
+                 </button>
+                 <span className={numberDisplayText}>
+                    {weight || '--'} {weightUnit}
+                 </span>
+                 <button type="button" onClick={() => handleWeightChange(1)} className={plusMinusButton} aria-label="Increase weight">
+                     <Plus size={18}/>
+                 </button>
                  <div className={`${unitToggleContainerStyle} flex-shrink-0`}>
                    <button type="button" onClick={() => handleWeightUnitChange('kg')} className={`${unitToggleStyle} ${weightUnit === 'kg' ? activeUnitStyle : inactiveUnitStyle}`}>kg</button>
                    <button type="button" onClick={() => handleWeightUnitChange('lbs')} className={`${unitToggleStyle} ${weightUnit === 'lbs' ? activeUnitStyle : inactiveUnitStyle}`}>lbs</button>
@@ -280,7 +287,7 @@ export default function OnboardingBasics() {
 
           {/* Daily Habits Section */}
           <div>
-             <label className="block text-lg sm:text-xl font-light text-center mb-6 text-off-white">Best describe your daily routine:</label> 
+             <label className="block text-xl sm:text-2xl font-light text-center mb-6 text-off-white">Best describe your daily routine:</label> 
              <div className="space-y-2">
                  {ALL_HABITS.map((habit) => (
                      <PillButton 
