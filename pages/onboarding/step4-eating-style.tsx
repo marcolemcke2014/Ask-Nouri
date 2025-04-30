@@ -45,6 +45,11 @@ export default function OnboardingEatingStyle() {
   const [error, setError] = useState<string>('');
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
 
+  // --- Validation --- 
+  const isStyleValid = selectedStyles.length > 0 && 
+                       (!selectedStyles.includes('Other') || otherStyleText.trim() !== '');
+  // ---
+
   // Fetch user session and pre-fill
   useEffect(() => {
     const fetchUserAndData = async () => {
@@ -97,21 +102,19 @@ export default function OnboardingEatingStyle() {
     setSelectedStyles(prev => {
       let newState = [...prev];
       if (style === 'No strict rules') {
+        // Toggle 'No strict rules', clears others if selected
         newState = prev.includes(style) ? [] : ['No strict rules'];
       } else {
+        // Handle other styles
         newState = newState.filter(item => item !== 'No strict rules');
         if (newState.includes(style)) {
           newState = newState.filter(item => item !== style);
-          if (style === 'Other') setOtherStyleText('');
+          if (style === 'Other') setOtherStyleText(''); // Clear other text if deselected
         } else {
           newState.push(style);
         }
       }
-      if (newState.length > 0) { 
-          setShowSuccessMessage(true);
-      } else {
-          setShowSuccessMessage(false);
-      }
+      // REMOVED setShowSuccessMessage logic from here
       return newState;
     });
   };
@@ -122,21 +125,21 @@ export default function OnboardingEatingStyle() {
 
   const handleFinishSetup = async () => {
     if (!user) {
-        console.error('[Onboarding Eating Style] handleFinishSetup called without user.');
         setError('User session not found.');
         return;
     }
-    if (selectedStyles.includes('Other') && !otherStyleText.trim()) {
-        setError('Please specify other eating style.');
-        return;
-    }
-    if (selectedStyles.length === 0) {
+    // Use validation state for checks
+    if (!isStyleValid) {
         setError('Please select an eating style or choose \'No strict rules\'.');
+        if (selectedStyles.includes('Other') && !otherStyleText.trim()) {
+            setError('Please specify other eating style.');
+        }
         return;
     }
     
     setError('');
     setIsLoading(true);
+    setShowSuccessMessage(false); // Ensure success message is hidden during save attempt
     
     const stylesToSave = selectedStyles.map(s => s === 'Other' ? `Other: ${otherStyleText.trim()}` : s);
     const goalsUpdateData = {
@@ -150,24 +153,36 @@ export default function OnboardingEatingStyle() {
     };
 
     try {
-      console.log('[Onboarding Eating Style] Final update and navigate for user:', user.id);
+      console.log('[Onboarding Eating Style] Final update for user:', user.id);
       const [goalsUpsertResult, profileUpdateResult] = await Promise.all([
           supabase.from('user_goals_and_diets').upsert({ user_id: user.id, ...goalsUpdateData }, { onConflict: 'user_id' }),
           supabase.from('user_profile').update(profileUpdateData).eq('id', user.id)
       ]);
 
-      if (goalsUpsertResult.error) throw goalsUpsertResult.error; 
-      if (profileUpdateResult.error) throw profileUpdateResult.error; 
+      if (goalsUpsertResult.error) {
+          console.error('[Onboarding Eating Style] Supabase goals upsert error:', goalsUpsertResult.error);
+          throw goalsUpsertResult.error; 
+      }
+      if (profileUpdateResult.error) {
+           console.error('[Onboarding Eating Style] Supabase profile update error:', profileUpdateResult.error);
+          throw profileUpdateResult.error; 
+      }
 
-      console.log('[Onboarding Eating Style] Onboarding complete. Navigating to app...');
-      router.push('/scan/index'); 
+      console.log('[Onboarding Eating Style] Data updated successfully, showing success message.');
+      setShowSuccessMessage(true); // SET SUCCESS MESSAGE HERE
 
     } catch (err: any) {
-      console.error('[Onboarding Eating Style] Final update failed:', err);
+      console.error('[Onboarding Eating Style] Update failed:', err);
       setError(err.message || 'Failed to save preferences.');
-      setShowSuccessMessage(false);
+    } finally {
       setIsLoading(false);
     }
+  };
+
+  // Separate function to navigate after success
+  const handleNavigateToApp = () => {
+      console.log('[Onboarding] Navigating to app...');
+      router.push('/scan/index');
   };
 
   if (isLoading && !user) {
@@ -213,7 +228,7 @@ export default function OnboardingEatingStyle() {
           ))}
         </div>
         
-        <hr className={`border-off-white/30 my-6 ${showSuccessMessage ? 'opacity-50' : ''}`} />
+        <hr className={`border-off-white/30 my-6 ${showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}`} />
         
         <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
             <h2 id="dislikes-label" className="text-lg sm:text-xl font-light text-center mb-4 text-off-white">Any foods or ingredients you strongly dislike?</h2>
@@ -238,8 +253,10 @@ export default function OnboardingEatingStyle() {
         <div className="pt-6">
           <button 
             type="button" 
-            onClick={showSuccessMessage ? handleFinishSetup : handleFinishSetup}
-            disabled={isLoading}
+            // Change onClick based on success state
+            onClick={showSuccessMessage ? handleNavigateToApp : handleFinishSetup}
+            // Disable based on loading OR form invalid (when NOT showing success message)
+            disabled={isLoading || (!showSuccessMessage && !isStyleValid)} 
             className={buttonStyle}
           >
             {isLoading ? 'Saving...' : (showSuccessMessage ? 'Start Scanning Menus' : 'Finish Setup')}
