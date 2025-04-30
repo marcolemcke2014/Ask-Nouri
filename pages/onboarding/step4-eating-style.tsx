@@ -140,35 +140,77 @@ export default function OnboardingEatingStyle() {
     setIsLoading(true);
     
     const stylesToSave = selectedStyles.map(s => s === 'Other' ? `Other: ${otherStyleText.trim()}` : s);
-    const goalsUpdateData = {
-      eating_styles: stylesToSave.length > 0 ? stylesToSave : null,
-      updated_at: new Date().toISOString(),
-    };
     
-    // Update profile data with both flag names for compatibility
-    const profileUpdateData = {
-        id: user.id, // Include ID for upsert
-        food_dislikes: foodDislikes.trim() || null,
-        onboarding_complete: true,
-        onboarded: true, // Add this to match your database column
-        updated_at: new Date().toISOString(),
-    };
-
     try {
       console.log('[Onboarding Eating Style] Saving and navigating for user:', user.id);
-      const [goalsUpsertResult, profileUpsertResult] = await Promise.all([
-          supabase.from('user_goals_and_diets').upsert({ user_id: user.id, ...goalsUpdateData }, { onConflict: 'user_id' }),
-          // Use upsert instead of update to ensure the record exists
-          supabase.from('user_profile').upsert(profileUpdateData, { onConflict: 'id' })
+      
+      // First fetch any existing avoid_ingredients data so we can append to it
+      const { data: existingHealthData } = await supabase
+        .from('user_health_data')
+        .select('avoid_ingredients')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      // Prepare the food dislikes
+      let avoidIngredientsValue = null;
+      
+      if (foodDislikes.trim()) {
+        const dislikesArray = foodDislikes.trim().split(',').map(item => item.trim());
+        
+        // If we already have avoid_ingredients data, we need to combine them
+        if (existingHealthData?.avoid_ingredients) {
+          try {
+            // Try to parse as JSON first
+            const existingAvoidances = JSON.parse(existingHealthData.avoid_ingredients);
+            if (Array.isArray(existingAvoidances)) {
+              // Merge arrays and remove duplicates
+              const combinedArray = [...existingAvoidances, ...dislikesArray];
+              const uniqueArray = Array.from(new Set(combinedArray));
+              avoidIngredientsValue = JSON.stringify(uniqueArray);
+            } else {
+              // If not an array, just use the new dislikes
+              avoidIngredientsValue = JSON.stringify(dislikesArray);
+            }
+          } catch (e) {
+            // If not valid JSON, treat as string
+            const combinedString = existingHealthData.avoid_ingredients + ', ' + dislikesArray.join(', ');
+            avoidIngredientsValue = combinedString;
+          }
+        } else {
+          // No existing data, just set the new dislikes
+          avoidIngredientsValue = JSON.stringify(dislikesArray);
+        }
+      }
+      
+      // Prepare health data update
+      const healthDataUpdate = {
+        user_id: user.id,
+        eating_styles: stylesToSave.length > 0 ? stylesToSave : null,
+        avoid_ingredients: avoidIngredientsValue,
+        updated_at: new Date().toISOString(),
+      };
+      
+      // Update user_profile to mark onboarding as complete
+      const profileUpdate = {
+        id: user.id,
+        onboarding_complete: true,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Execute both updates in parallel
+      const [healthUpsertResult, profileUpsertResult] = await Promise.all([
+        supabase.from('user_health_data').upsert(healthDataUpdate, { onConflict: 'user_id' }),
+        supabase.from('user_profile').upsert(profileUpdate, { onConflict: 'id' })
       ]);
 
-      if (goalsUpsertResult.error) {
-          console.error('[Onboarding Eating Style] Supabase goals upsert error:', goalsUpsertResult.error);
-          throw goalsUpsertResult.error; 
+      if (healthUpsertResult.error) {
+        console.error('[Onboarding Eating Style] Supabase health data upsert error:', healthUpsertResult.error);
+        throw healthUpsertResult.error; 
       }
+      
       if (profileUpsertResult.error) {
-           console.error('[Onboarding Eating Style] Supabase profile upsert error:', profileUpsertResult.error);
-          throw profileUpsertResult.error; 
+        console.error('[Onboarding Eating Style] Supabase profile upsert error:', profileUpsertResult.error);
+        throw profileUpsertResult.error; 
       }
 
       console.log('[Onboarding Eating Style] Data saved successfully, navigating...');

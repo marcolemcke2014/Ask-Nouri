@@ -146,6 +146,55 @@ export default function SignupPage() {
         console.log('User email confirmation status:', data.user.email_confirmed_at ? 'Confirmed' : 'Not confirmed');
         console.log('User metadata:', data.user.user_metadata);
         
+        // Create initial entries in user_profile, user_preferences, and user_health_data
+        try {
+          // Update user_profile with first_name and last_name
+          const { error: profileError } = await supabase
+            .from('user_profile')
+            .upsert({
+              id: data.user.id,
+              email: email,
+              first_name: firstName,
+              last_name: lastName,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            });
+            
+          if (profileError) {
+            console.error('Error creating user profile:', profileError);
+          }
+          
+          // Create default user_preferences entry
+          const { error: preferencesError } = await supabase
+            .from('user_preferences')
+            .insert({
+              user_id: data.user.id,
+              language: 'en',
+              unit_system: 'metric',
+              show_health_scores: true,
+              dark_mode: false,
+            });
+            
+          if (preferencesError) {
+            console.error('Error creating user preferences:', preferencesError);
+          }
+          
+          // Create empty user_health_data entry
+          const { error: healthDataError } = await supabase
+            .from('user_health_data')
+            .insert({
+              user_id: data.user.id,
+              updated_at: new Date().toISOString(),
+            });
+            
+          if (healthDataError) {
+            console.error('Error creating user health data:', healthDataError);
+          }
+          
+        } catch (dbError) {
+          console.error('Error setting up user database records:', dbError);
+        }
+        
         // Explicitly log that we're about to redirect
         console.log('Redirecting to choose-plan page with user ID...');
         

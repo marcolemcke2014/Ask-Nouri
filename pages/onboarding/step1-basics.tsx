@@ -79,19 +79,19 @@ export default function OnboardingBasics() {
         if (!session?.user) { router.replace('/auth/login'); return; }
         setUser(session.user);
 
-        const { data: profile, error: profileError } = await supabase
-            .from('user_profile')
-            .select('date_of_birth, height_cm, weight_kg, gender, daily_habits')
-            .eq('id', session.user.id)
+        const { data: healthData, error: healthDataError } = await supabase
+            .from('user_health_data')
+            .select('date_of_birth, height_cm, weight_kg, gender, lifestyle_tags')
+            .eq('user_id', session.user.id)
             .maybeSingle();
 
-        if (profileError) { console.error('[OB Basics] Error fetching profile:', profileError); }
-        else if (profile) {
-            if (profile.date_of_birth) setDob(new Date(profile.date_of_birth));
-            if (profile.height_cm) { setHeight(profile.height_cm); setHeightUnit('cm'); }
-            if (profile.weight_kg) { setWeight(profile.weight_kg); setWeightUnit('kg'); }
-            if (profile.gender) setGender(profile.gender);
-            if (profile.daily_habits) setSelectedHabits(profile.daily_habits);
+        if (healthDataError) { console.error('[OB Basics] Error fetching health data:', healthDataError); }
+        else if (healthData) {
+            if (healthData.date_of_birth) setDob(new Date(healthData.date_of_birth));
+            if (healthData.height_cm) { setHeight(healthData.height_cm); setHeightUnit('cm'); }
+            if (healthData.weight_kg) { setWeight(healthData.weight_kg); setWeightUnit('kg'); }
+            if (healthData.gender) setGender(healthData.gender);
+            if (healthData.lifestyle_tags) setSelectedHabits(healthData.lifestyle_tags);
         }
       } catch (fetchError) {
         console.error('[OB Basics] Fetch error:', fetchError);
@@ -188,26 +188,30 @@ export default function OnboardingBasics() {
     const heightInCm = heightUnit === 'inches' && height ? Math.round(Number(height) * 2.54) : height;
     const weightInKg = weightUnit === 'lbs' && weight ? Math.round(Number(weight) * 0.453592 * 10) / 10 : weight;
 
-    const updateData = {
+    const healthData = {
+      user_id: user.id,
       date_of_birth: formattedDob,
       height_cm: heightInCm,
       weight_kg: weightInKg,
       gender: gender,
-      daily_habits: selectedHabits.length > 0 ? selectedHabits : null,
+      lifestyle_tags: selectedHabits.length > 0 ? selectedHabits : null,
       updated_at: new Date().toISOString(),
     };
     try {
-      console.log('[Onboarding Basics] Updating profile for user:', user.id);
-      const { error: updateError } = await supabase.from('user_profile').update(updateData).eq('id', user.id);
-      if (updateError) {
-        console.error('[Onboarding Basics] Supabase update error:', updateError);
-        throw updateError;
+      console.log('[Onboarding Basics] Upserting health data for user:', user.id);
+      const { error: upsertError } = await supabase
+        .from('user_health_data')
+        .upsert(healthData, { onConflict: 'user_id' });
+        
+      if (upsertError) {
+        console.error('[Onboarding Basics] Supabase upsert error:', upsertError);
+        throw upsertError;
       }
-      console.log('[Onboarding Basics] Profile updated successfully.');
+      console.log('[Onboarding Basics] Health data saved successfully.');
       router.push('/onboarding/step2-mission');
     } catch (err: any) {
       console.error('[Onboarding Basics] Update failed:', err);
-      setError(err.message || 'Failed to save basic information.');
+      setError(err.message || 'Failed to save health information.');
     } finally {
       setIsLoading(false);
     }

@@ -66,18 +66,18 @@ export default function OnboardingHealthCheck() {
         if (session?.user) {
           setUser(session.user);
           // Fetch existing profile data
-          const { data: profile, error: profileError } = await supabase
-              .from('user_profile')
-              .select('health_conditions, food_avoidances')
-              .eq('id', session.user.id)
+          const { data: healthData, error: healthError } = await supabase
+              .from('user_health_data')
+              .select('conditions, avoid_ingredients')
+              .eq('user_id', session.user.id)
               .maybeSingle();
 
-          if (profileError) {
-              console.error('[Onboarding Health Check] Error fetching profile:', profileError);
-          } else if (profile) {
+          if (healthError) {
+              console.error('[Onboarding Health Check] Error fetching health data:', healthError);
+          } else if (healthData) {
               // Pre-fill health conditions
-              if (profile.health_conditions && Array.isArray(profile.health_conditions)) {
-                  const conditions = profile.health_conditions;
+              if (healthData.conditions && Array.isArray(healthData.conditions)) {
+                  const conditions = healthData.conditions;
                   setSelectedConditions(conditions.filter(c => !c.startsWith('Other: ')));
                   const otherCond = conditions.find(c => c.startsWith('Other: '));
                   if (otherCond) {
@@ -85,14 +85,28 @@ export default function OnboardingHealthCheck() {
                       setOtherConditionText(parseOtherText(otherCond));
                   }
               }
-              // Pre-fill food avoidances
-              if (profile.food_avoidances && Array.isArray(profile.food_avoidances)) {
-                   const avoidances = profile.food_avoidances;
-                   setSelectedAvoidances(avoidances.filter(a => !a.startsWith('Other: ')));
-                   const otherAvoid = avoidances.find(a => a.startsWith('Other: '));
-                   if (otherAvoid) {
-                       setSelectedAvoidances(prev => [...prev, 'Other']);
-                       setOtherAvoidanceText(parseOtherText(otherAvoid));
+              // Pre-fill food avoidances from avoid_ingredients string field
+              if (healthData.avoid_ingredients) {
+                   try {
+                       // Try to parse as JSON first in case it's stored as a serialized array
+                       const avoidances = JSON.parse(healthData.avoid_ingredients);
+                       if (Array.isArray(avoidances)) {
+                           setSelectedAvoidances(avoidances.filter((a: string) => !a.startsWith('Other: ')));
+                           const otherAvoid = avoidances.find((a: string) => a.startsWith('Other: '));
+                           if (otherAvoid) {
+                               setSelectedAvoidances(prev => [...prev, 'Other']);
+                               setOtherAvoidanceText(parseOtherText(otherAvoid));
+                           }
+                       }
+                   } catch (e) {
+                       // If not JSON, split by commas
+                       const avoidances = healthData.avoid_ingredients.split(', ');
+                       setSelectedAvoidances(avoidances.filter((a: string) => !a.startsWith('Other: ')));
+                       const otherAvoid = avoidances.find((a: string) => a.startsWith('Other: '));
+                       if (otherAvoid) {
+                           setSelectedAvoidances(prev => [...prev, 'Other']);
+                           setOtherAvoidanceText(parseOtherText(otherAvoid));
+                       }
                    }
               }
           }
@@ -184,22 +198,28 @@ export default function OnboardingHealthCheck() {
     const conditionsToSave = selectedConditions.map(c => c === 'Other' ? `Other: ${otherConditionText.trim()}` : c);
     const avoidancesToSave = selectedAvoidances.map(a => a === 'Other' ? `Other: ${otherAvoidanceText.trim()}` : a);
 
+    // Serialize the avoidances to a string for storage
+    const avoidancesString = JSON.stringify(avoidancesToSave);
+
     const updateData = {
-      health_conditions: conditionsToSave.length > 0 ? conditionsToSave : null,
-      food_avoidances: avoidancesToSave.length > 0 ? avoidancesToSave : null,
+      user_id: user.id,
+      conditions: conditionsToSave.length > 0 ? conditionsToSave : null,
+      avoid_ingredients: avoidancesToSave.length > 0 ? avoidancesString : null,
       updated_at: new Date().toISOString(),
     };
 
     try {
-      console.log('[Onboarding Health Check] Updating profile for user:', user.id);
-      const { error: updateError } = await supabase.from('user_profile').update(updateData).eq('id', user.id);
+      console.log('[Onboarding Health Check] Updating health data for user:', user.id);
+      const { error: upsertError } = await supabase
+        .from('user_health_data')
+        .upsert(updateData, { onConflict: 'user_id' });
 
-      if (updateError) {
-        console.error('[Onboarding Health Check] Supabase update error:', updateError);
-        throw updateError;
+      if (upsertError) {
+        console.error('[Onboarding Health Check] Supabase upsert error:', upsertError);
+        throw upsertError;
       }
 
-      console.log('[Onboarding Health Check] Profile updated successfully.');
+      console.log('[Onboarding Health Check] Health data updated successfully.');
       router.push('/onboarding/step4-eating-style');
 
     } catch (err: any) {

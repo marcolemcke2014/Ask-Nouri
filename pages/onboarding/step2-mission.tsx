@@ -53,16 +53,16 @@ export default function OnboardingMission() {
         if (session?.user) {
           setUser(session.user);
           // Fetch existing goal
-          const { data: goalData, error: goalError } = await supabase
-              .from('user_goals_and_diets')
+          const { data: healthData, error: healthError } = await supabase
+              .from('user_health_data')
               .select('primary_goal')
               .eq('user_id', session.user.id)
               .maybeSingle();
               
-          if (goalError) {
-              console.error('[Onboarding Mission] Error fetching primary goal:', goalError);
-          } else if (goalData?.primary_goal) {
-              const existingGoal = goalData.primary_goal;
+          if (healthError) {
+              console.error('[Onboarding Mission] Error fetching primary goal:', healthError);
+          } else if (healthData?.primary_goal && Array.isArray(healthData.primary_goal) && healthData.primary_goal.length > 0) {
+              const existingGoal = healthData.primary_goal[0]; // Get first item from array
               // Check if it's one of the predefined IDs or custom text
               const isPredefined = GOAL_OPTIONS.some(opt => opt.id === existingGoal);
               if (isPredefined) {
@@ -131,36 +131,16 @@ export default function OnboardingMission() {
     const goalToSave = selectedGoal === 'other' ? otherGoalText.trim() : selectedGoal;
 
     try {
-        console.log('[Onboarding Mission] Saving goal for user:', user.id, { primary_goal: goalToSave });
+        console.log('[Onboarding Mission] Saving goal for user:', user.id, { primary_goal: [goalToSave] });
 
-        // Check if a record exists for this user in user_goals_and_diets
-        const { data: existingData, error: fetchError } = await supabase
-            .from('user_goals_and_diets')
-            .select('user_id')
-            .eq('user_id', user.id)
-            .maybeSingle(); // Use maybeSingle to not error if no row exists
-
-        if (fetchError) {
-            throw fetchError;
-        }
-
-        let upsertError;
-        if (existingData) {
-            // Update existing record
-            console.log('[Onboarding Mission] Updating existing goal record.');
-            const { error } = await supabase
-                .from('user_goals_and_diets')
-                .update({ primary_goal: goalToSave, updated_at: new Date().toISOString() })
-                .eq('user_id', user.id);
-            upsertError = error;
-        } else {
-            // Insert new record
-            console.log('[Onboarding Mission] Inserting new goal record.');
-            const { error } = await supabase
-                .from('user_goals_and_diets')
-                .insert({ user_id: user.id, primary_goal: goalToSave, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
-            upsertError = error;
-        }
+        // Use upsert to ensure the record exists
+        const { error: upsertError } = await supabase
+            .from('user_health_data')
+            .upsert({ 
+                user_id: user.id, 
+                primary_goal: [goalToSave], // Save as array with a single item
+                updated_at: new Date().toISOString() 
+            }, { onConflict: 'user_id' });
 
         if (upsertError) {
             console.error('[Onboarding Mission] Supabase upsert error:', upsertError);
