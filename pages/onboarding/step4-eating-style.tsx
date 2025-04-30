@@ -167,7 +167,7 @@ export default function OnboardingEatingStyle() {
       }
 
       console.log('[Onboarding Eating Style] Data saved successfully, navigating...');
-      router.push('/scan/index');
+      router.push('/scan');
 
     } catch (err: any) {
       console.error('[Onboarding Eating Style] Save and navigate failed:', err);
