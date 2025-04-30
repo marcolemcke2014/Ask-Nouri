@@ -16,7 +16,7 @@ const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-nor
 const inputStyle = "w-full h-10 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]";
 const inputPlaceholderStyle = "placeholder-gray-400/80";
 const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center";
-const successBoxStyle = "mt-6 mb-4 p-3 bg-green-800/30 border border-green-500/30 text-green-200 rounded-lg text-sm text-center flex items-center justify-center space-x-2";
+const successBoxStyle = "mb-4 p-3 bg-green-800/30 border border-green-500/30 text-green-200 rounded-lg text-sm text-center flex items-center justify-center space-x-2";
 // ---
 
 // Updated EATING_STYLES order
@@ -243,22 +243,24 @@ export default function OnboardingEatingStyle() {
             />
         </div>
 
-        {showSuccessMessage && (
-             <div className={successBoxStyle}>
-                <CheckCircle size={18} className="mr-2 flex-shrink-0"/>
-                <span>{firstName ? `${firstName}, everything` : 'Everything'} is set up! Let's start scanning.</span>
-            </div>
-        )}
-
-        <div className="pt-8">
-          <button 
-            type="button" 
-            onClick={showSuccessMessage ? handleNavigateToApp : handleFinishSetup}
-            disabled={isLoading || (!showSuccessMessage && !isStyleValid)} 
-            className={buttonStyle}
-          >
-            {isLoading ? 'Saving...' : (showSuccessMessage ? 'Start Scanning Menus' : 'Finish Setup')}
-          </button>
+        {/* Container for success message AND button, managing space between them */}
+        <div className="pt-6"> {/* Reduced padding here, success box margin will handle space */} 
+            {/* Success Message appears here now */}
+            {showSuccessMessage && (
+                 <div className={successBoxStyle}>
+                    <CheckCircle size={18} className="mr-2 flex-shrink-0"/>
+                    <span>{firstName ? `${firstName}, everything` : 'Everything'} is set up! Let's start scanning.</span>
+                </div>
+            )}
+            {/* Button always rendered, but state controls action/text */}
+            <button 
+              type="button" 
+              onClick={showSuccessMessage ? handleNavigateToApp : handleFinishSetup}
+              disabled={isLoading || (!showSuccessMessage && !isStyleValid)} 
+              className={buttonStyle}
+            >
+              {isLoading ? 'Saving...' : (showSuccessMessage ? 'Start Scanning Menus' : 'Finish Setup')}
+            </button>
         </div>
     </OnboardingLayout>
   );
