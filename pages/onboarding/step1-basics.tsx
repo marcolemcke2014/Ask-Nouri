@@ -195,7 +195,7 @@ export default function OnboardingBasics() {
           Tell us a little about you:
         </h2>
         
-        <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
           {/* Date of Birth - Single Native Input */}
           <div>
             <label htmlFor="dob" className={labelStyle}>Date of Birth</label>
@@ -282,40 +282,16 @@ export default function OnboardingBasics() {
           <div>
              <label className="block text-base sm:text-lg font-light text-center mb-4 text-off-white">Best describe your daily routine:</label> 
              <p className={helperTextStyle}>Select all that apply.</p>
-             <div className="space-y-2">
-                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_1.map((habit) => (
+             <div className="flex flex-wrap gap-2 sm:gap-x-3 justify-center">
+                 {ALL_HABITS.map((habit) => (
                      <PillButton 
                          key={habit} 
                          text={habit} 
                          isSelected={selectedHabits.includes(habit)} 
                          onClick={() => handleHabitToggle(habit)}
                      />
-                 ))}</div>
-                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_2.map((habit) => (
-                     <PillButton 
-                         key={habit} 
-                         text={habit} 
-                         isSelected={selectedHabits.includes(habit)} 
-                         onClick={() => handleHabitToggle(habit)}
-                     />
-                 ))}</div>
-                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_3.map((habit) => (
-                     <PillButton 
-                         key={habit} 
-                         text={habit} 
-                         isSelected={selectedHabits.includes(habit)} 
-                         onClick={() => handleHabitToggle(habit)}
-                     />
-                 ))}</div>
-                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_4.map((habit) => (
-                     <PillButton 
-                         key={habit} 
-                         text={habit} 
-                         isSelected={selectedHabits.includes(habit)} 
-                         onClick={() => handleHabitToggle(habit)}
-                     />
-                 ))}</div>
-            </div>
+                 ))}
+             </div>
           </div>
           
           {/* Error Message Box */}
