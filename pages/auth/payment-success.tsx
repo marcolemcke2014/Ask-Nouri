@@ -141,9 +141,9 @@ export default function PaymentSuccessPage() {
           Your <span className="font-semibold">{planName}</span> is now active.
         </p>
 
-        {/* Benefit Reinforcement */}
+        {/* Benefit Reinforcement - Updated Copy */}
         <p className="text-off-white/80 text-xs mb-6">
-          You've just unlocked the first step to a healthier, stronger you. Tell Nouri what to watch for — your goals, your needs, your path to better health.
+          You've just unlocked the first step to a healthier, stronger you. Tell us what to watch for — your goals, your needs, your path to better health.
         </p>
 
         {/* Error Message Display (if fetching profile failed) */}
@@ -156,13 +156,19 @@ export default function PaymentSuccessPage() {
         {/* Next Step Button */}
         <button
           onClick={handleContinue}
-          disabled={!user?.id} // Disable if user ID isn't confirmed
+          disabled={!user?.id} 
+          // Use standard button style
           className={`w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm ${
              !user?.id ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
-          Begin Your Journey
+          Begin Setting Up Nouri {/* Updated Text */}
         </button>
+
+        {/* Updated Subtext Color */}
+        <p className="text-xs text-[#84F7AC] mt-2 italic">
+          Takes less than a minute.
+        </p>
 
       </main>
     </div>
