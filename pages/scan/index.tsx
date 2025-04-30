@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import ScanScreen from '../../components/screens/ScanScreen';
-import { supabase } from '../../lib/supabase';
+import ScanScreen from '@/components/screens/ScanScreen';
+import { supabase } from '@/lib/supabase';
 import { User, History, Home, ScanLine, FileText, Settings } from 'lucide-react'; // Added more icons
 
 // Define user type
