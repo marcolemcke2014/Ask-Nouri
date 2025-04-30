@@ -310,7 +310,7 @@ export default function Results() {
         <Button 
           variant="secondary"
           size="lg"
-          onClick={() => router.push('/scan')}
+          onClick={() => router.push('/home')}
         >
           Try Again
         </Button>
@@ -356,14 +356,14 @@ export default function Results() {
           {/* Using secondary style for Analyze Another - adjust if needed */}
           <button 
             className={buttonSecondaryStyle} 
-            onClick={() => router.push('/scan/index')}
+            onClick={() => router.push('/home')}
           >
             Analyze Another Menu
           </button>
           {/* Using primary style for Scan Another */}
           <button 
             className={buttonPrimaryStyle}
-            onClick={() => router.push('/scan/index')}
+            onClick={() => router.push('/home')}
           >
             Scan Another Menu
           </button>

@@ -14,63 +14,77 @@ const textColor = "text-off-white/90";
 export default function AuthCallback() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
-    // This effect runs once when the page loads
-    const handleCallback = async () => {
+    const { code } = router.query;
+
+    async function processOAuthCode() {
+      setIsProcessing(true);
+      
       try {
-        // Check if we have a session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        // Get hash from URL
+        const hash = window.location.hash;
+        const urlParams = new URLSearchParams(hash.slice(1)); // Remove leading # 
+        const accessToken = urlParams.get('access_token');
+        const refreshToken = urlParams.get('refresh_token');
+        const expiresIn = urlParams.get('expires_in');
         
-        if (sessionError) {
-          throw sessionError;
-        }
-
-        // If we have a session, the user is authenticated
-        if (session) {
-          console.log('User authenticated successfully:', session.user.id);
+        // If we have an access token, we have a successful OAuth login - persist it
+        if (accessToken) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || '',
+          });
           
-          const { data: profile, error: profileError } = await supabase
+          if (sessionError) throw sessionError;
+          
+          // Check if user exists and has onboarding flag
+          const { data: userData, error: userError } = await supabase.auth.getUser();
+          
+          if (userError) throw userError;
+          
+          // Check if user has completed onboarding
+          const { data: profileData, error: profileError } = await supabase
             .from('user_profile')
-            .select('onboarding_complete')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profileError && profileError.code !== 'PGRST116') { // Ignore 'no rows found'
-            throw profileError;
-          }
-
-          if (profile?.onboarding_complete) {
-            router.push('/scan/index'); // Update scan path
-          } else {
-            // Redirect to onboarding if profile exists but onboarding isn't complete, or if profile doesn't exist yet
-            console.warn('Profile exists but onboarding is not complete. Redirecting to onboarding.');
-            router.push('/onboarding');
-          }
-        } else {
-          // Handle case where there's no session (might be an error or the auth process was canceled)
-          console.warn('No session found in callback. Auth might have been canceled by the user.');
-          setError('Authentication was canceled or failed. Please try again.');
+            .select('onboarding_complete, id')
+            .eq('id', userData.user.id)
+            .maybeSingle();
+            
+          if (profileError) throw profileError;
           
-          // After a delay, redirect back to login
-          setTimeout(() => {
-            router.push('/auth/login'); // Update login path
-          }, 3000);
+          // If no profile, or onboarding not complete, redirect to onboarding
+          if (!profileData || !profileData.onboarding_complete) {
+            router.push('/onboarding/step1-basics');
+          } else {
+            // Otherwise go to the scan page
+            router.push('/home'); // Updated path to home
+          }
+        } else if (code) {
+          // Process OAuth code flow (optional based on your provider)
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code as string);
+          if (exchangeError) throw exchangeError;
+          
+          // Redirect to scan page after successful code exchange
+          router.push('/home'); // Updated path to home
+        } else {
+          // No token or code found
+          throw new Error('No access token or authorization code found in URL');
         }
-      } catch (error: any) {
-        console.error('Auth callback error:', error.message);
-        setError(`Authentication error: ${error.message}`);
-        
-        // After a delay, redirect back to login
+      } catch (err: any) {
+        console.error('Error processing OAuth callback:', err);
+        setError(err.message);
+        // Wait 3 seconds, then redirect to login page
         setTimeout(() => {
-          router.push('/auth/login'); // Update login path
+          router.push('/auth/login');
         }, 3000);
+      } finally {
+        setIsProcessing(false);
       }
-    };
+    }
 
-    // Only run the callback handling if we're in the browser
-    if (typeof window !== 'undefined') {
-      handleCallback();
+    if (router.isReady) {
+      processOAuthCode();
     }
   }, [router]);
 
@@ -81,7 +95,18 @@ export default function AuthCallback() {
       </Head>
       
       <div className={cardStyle}>
-        {error ? (
+        {isProcessing ? (
+          <>
+            <div className="flex justify-center mb-4">
+              <svg className={`animate-spin h-10 w-10 ${successColor}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+            <h1 className={`text-xl font-light mb-2 ${textColor}`}>Processing Sign In</h1>
+            <p className={`text-sm ${textColor}`}>Please wait, this shouldn't take long...</p>
+          </>
+        ) : error ? (
           <div className={`${errorColor}`}>
             <AlertTriangle className="w-12 h-12 mx-auto mb-4" />
             <h1 className="text-xl font-light mb-2">Authentication Error</h1>

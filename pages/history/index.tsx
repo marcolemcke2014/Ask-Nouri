@@ -23,6 +23,7 @@ interface Scan {
 // --- Styles from STYLE_GUIDE.md ---
 const historyItemCardStyle = "block w-full p-4 border rounded-lg text-left transition-colors duration-150 bg-off-white/10 border-off-white/20 text-off-white/80 hover:bg-off-white/20";
 const buttonPrimaryStyle = "w-16 h-16 rounded-full bg-[#34A853] text-off-white hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-lg fixed bottom-6 right-1/2 transform translate-x-1/2 z-20";
+const buttonSecondaryStyle = "w-16 h-16 rounded-full bg-[#34A853] text-off-white hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-lg fixed bottom-6 right-1/2 transform translate-x-1/2 z-20";
 const linkStyle = "text-sm font-medium text-[#84F7AC] hover:underline";
 const emptyStateCardStyle = "bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-8 text-center";
 const errorBoxStyle = "mt-4 p-4 bg-red-700/20 border border-red-500/30 text-red-200 rounded-lg text-sm";
@@ -189,7 +190,7 @@ export default function ScanHistoryPage() {
                 <h3 className="text-lg font-medium text-off-white mb-2">No scans yet</h3>
                 <p className="text-sm text-off-white/80 mb-6">Start scanning restaurant menus to get nutritional insights.</p>
                 <button
-                  onClick={() => router.push('/scan/index')}
+                  onClick={() => router.push('/home')}
                   className="px-5 py-2 bg-[#34A853] text-off-white rounded-full font-normal text-sm hover:bg-[#2c9247] transition-colors"
                 >
                   Scan Your First Menu
@@ -235,8 +236,8 @@ export default function ScanHistoryPage() {
       </main>
 
       <button 
-        className={buttonPrimaryStyle} 
-        onClick={() => router.push('/scan/index')}
+        className={buttonPrimaryStyle}
+        onClick={() => router.push('/home')}
         aria-label="New Scan"
       >
         <PlusCircle size={24} />

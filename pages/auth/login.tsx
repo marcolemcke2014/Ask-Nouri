@@ -70,7 +70,23 @@ export default function LoginPage() {
         console.log('User logged in successfully:', data.user.id);
         // Redirect to scan page after successful login
         // Make sure the target route exists and is correct
-        router.push('/scan/index'); 
+        if (data.session) {
+          console.log('Login successful');
+          
+          // Check if onboarding is complete
+          const { data: profileData } = await supabase
+            .from('user_profile')
+            .select('onboarding_complete, id')
+            .eq('id', data.session.user.id)
+            .maybeSingle();
+          
+          if (profileData?.onboarding_complete) {
+            router.push('/home');
+          } else {
+            // Redirect to onboarding if not completed or profile doesn't exist
+            router.push('/onboarding/step1-basics');
+          }
+        } // Updated scan path
       } // Updated scan path
     } catch (error: any) {
       console.error('Login failed:', error.message);
