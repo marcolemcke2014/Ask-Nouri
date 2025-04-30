@@ -12,8 +12,8 @@ export default function AuthLanding() {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
-          // User is logged in, redirect to the scan page
-          router.replace('/scan/index')
+          // User is logged in, redirect to the home page
+          router.replace('/home')
         } else {
           // User is not logged in, show login page
           setLoading(false)
