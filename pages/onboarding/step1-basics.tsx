@@ -30,7 +30,14 @@ const HABITS_ROW_1 = ['Mostly Sitting', 'Moderately Active', 'Very Sporty'];
 const HABITS_ROW_2 = ['Often Rushed', 'Flexible Schedule'];
 const HABITS_ROW_3 = ['Irregular Eating', 'Often Stressed', 'Low Energy'];
 const HABITS_ROW_4 = ['Eat Out Often', 'Night Owl / Shift Worker', 'None'];
-const ALL_HABITS = [...HABITS_ROW_1, ...HABITS_ROW_2, ...HABITS_ROW_3, ...HABITS_ROW_4];
+// Consolidated list for rendering
+const ALL_HABITS = [
+    'Mostly Sitting', 'Moderately Active', 'Very Sporty', 
+    'Often Rushed', 'Flexible Schedule', 
+    'Irregular Eating', 'Often Stressed', 'Low Energy', 
+    'Eat Out Often', 'Night Owl / Shift Worker', 
+    'None'
+];
 
 // Helper to format date parts
 const formatTwoDigits = (num: number | '') => num === '' ? '' : String(num).padStart(2, '0');
@@ -433,19 +440,20 @@ export default function OnboardingBasics() {
           {/* Add Divider */}
           <hr className="border-off-white/30 my-6" />
 
-          {/* Daily Habits Section */}
+          {/* Daily Habits Section - Single container */}
           <div>
              <label className="block text-base sm:text-lg font-light text-center mb-6 text-off-white">Best describe your daily routine:</label> 
-             <div className="space-y-2">
-                 {/* Row 1 - Added justify-center, adjusted gap */}
-                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_1.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-                 {/* Row 2 - Added justify-center, adjusted gap */}
-                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_2.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-                 {/* Row 3 - Added justify-center, adjusted gap */}
-                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_3.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-                 {/* Row 4 - Added justify-center, adjusted gap */}
-                 <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">{HABITS_ROW_4.map((habit) => (<PillButton key={habit} text={habit} isSelected={selectedHabits.includes(habit)} onClick={() => handleHabitToggle(habit)}/>))}</div>
-            </div>
+             {/* Render all pills in one centered, wrapping container */}
+             <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center">
+                 {ALL_HABITS.map((habit) => (
+                     <PillButton 
+                         key={habit} 
+                         text={habit} 
+                         isSelected={selectedHabits.includes(habit)} 
+                         onClick={() => handleHabitToggle(habit)}
+                     />
+                 ))}
+             </div>
           </div>
           
           {/* Error Message Box */}
