@@ -326,7 +326,7 @@ export default function OnboardingBasics() {
           {/* Daily Habits Section */}
           <div>
              <label className="block text-xl sm:text-2xl font-light text-center mb-6 text-off-white">Describe your daily routine:</label> 
-             <div className="flex flex-wrap gap-2">
+             <div className="flex flex-wrap gap-2 justify-center">
                  {ALL_HABITS.map((habit) => (
                      <PillButton 
                          key={habit} 
