@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout'; // Import layout
 // Assuming SelectionCard can be adapted or use similar styling
@@ -16,6 +16,8 @@ const otherInputPlaceholderStyle = "placeholder-green-700/60"; // Adjusted place
 const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
 const skipButtonStyle = "text-sm text-green-200 hover:text-green-100 text-center w-full";
 const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center";
+// Style for the "Other" input - attempt to match SelectionCard active state or general inputStyle
+const inputStyle = "w-full h-12 px-4 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-base font-['Poppins',sans-serif]"; // Added base input style
 // ---
 
 interface GoalOption {
@@ -238,7 +240,7 @@ export default function OnboardingMission() {
             <button 
               type="button" 
               onClick={handleNext}
-              disabled={isLoading || !selectedGoal || (selectedGoal === 'other' && !otherGoalText.trim())} // Update disabled state
+              disabled={isLoading || !selectedGoal || (selectedGoal === 'other' && !otherGoalText.trim())}
               className={buttonStyle}
             >
               {isLoading ? 'Saving...' : 'Next'}

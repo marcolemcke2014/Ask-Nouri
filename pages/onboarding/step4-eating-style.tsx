@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import PillButton from '../../components/onboarding/PillButton';
@@ -13,10 +13,10 @@ const labelStyle = "block text-xs font-normal text-off-white/90 mb-1.5";
 const textareaStyle = "w-full p-3.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]"; 
 const textareaPlaceholderStyle = "placeholder-gray-400/80";
 const buttonStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed";
-const inputStyle = "h-10 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]";
+const inputStyle = "w-full h-10 px-3.5 py-1.5 rounded-lg border border-off-white/15 bg-off-white/80 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-all text-sm font-['Poppins',sans-serif]";
 const inputPlaceholderStyle = "placeholder-gray-400/80";
 const errorBoxStyle = "mb-3 p-2.5 bg-red-700/20 border border-red-500/30 text-red-200 rounded-md text-xs text-center";
-const successBoxStyle = "p-3 bg-green-800/30 border border-green-500/30 text-green-200 rounded-lg text-sm text-center flex items-center justify-center space-x-2";
+const successBoxStyle = "mb-4 p-3 bg-green-800/30 border border-green-500/30 text-green-200 rounded-lg text-sm text-center flex items-center justify-center space-x-2";
 // ---
 
 // Updated EATING_STYLES order
@@ -177,16 +177,16 @@ export default function OnboardingEatingStyle() {
   return (
     <OnboardingLayout 
       title="Eating Style" 
-      currentStep={5} 
-      totalSteps={5}
+      currentStep={4} 
+      totalSteps={4}
       showBackButton={true}
       onBack={handleBack}
     >
-        <h2 className="text-base sm:text-lg font-light text-center mb-6 text-off-white">
+        <h2 className="text-lg sm:text-xl font-light text-center mb-6 text-off-white">
           Any diet you're aiming for?
         </h2>
         
-        {error && (
+        {error && !showSuccessMessage && (
             <div className={errorBoxStyle}>
               {error}
             </div>
@@ -194,7 +194,7 @@ export default function OnboardingEatingStyle() {
        
         <div className={`flex flex-wrap gap-2 mb-6 justify-center ${showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}`}>
           {EATING_STYLES.map((style) => (
-             <div key={style} className="flex flex-wrap items-center gap-2">
+             <div key={style} className="flex items-center space-x-2">
                 <PillButton
                     text={style}
                     isSelected={selectedStyles.includes(style)}
@@ -206,7 +206,7 @@ export default function OnboardingEatingStyle() {
                         value={otherStyleText}
                         onChange={(e) => setOtherStyleText(e.target.value)}
                         placeholder="Please specify..."
-                        className={`${inputStyle} ${inputPlaceholderStyle} flex-shrink min-w-[100px] max-w-xs`}
+                        className={`${inputStyle} ${inputPlaceholderStyle} w-48`}
                     />
                 )}
             </div>
@@ -216,10 +216,11 @@ export default function OnboardingEatingStyle() {
         <hr className={`border-off-white/30 my-6 ${showSuccessMessage ? 'opacity-50' : ''}`} />
         
         <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
-            <label htmlFor="dislikes" className="block text-base sm:text-lg font-light text-center mb-6 text-off-white">Any foods or ingredients you dislike?</label>
+            <h2 id="dislikes-label" className="text-lg sm:text-xl font-light text-center mb-4 text-off-white">Any foods or ingredients you strongly dislike?</h2>
             <textarea
               id="dislikes"
-              rows={1}
+              aria-labelledby="dislikes-label"
+              rows={3}
               value={foodDislikes}
               onChange={(e) => setFoodDislikes(e.target.value)}
               placeholder="e.g., cilantro, mushrooms, very spicy food..."
@@ -228,22 +229,20 @@ export default function OnboardingEatingStyle() {
         </div>
 
         {showSuccessMessage && (
-             <div className={`${successBoxStyle} mt-6`}>
+             <div className={successBoxStyle}>
                 <CheckCircle size={18} className="mr-2 flex-shrink-0"/>
-                <span>
-                    Setup's complete{firstName ? `, ${firstName}` : ''}! <br />Ready to scan your first menu?
-                </span>
+                <span>{firstName ? `${firstName}, everything` : 'Everything'} is set up! Let's start scanning.</span>
             </div>
         )}
 
         <div className="pt-6">
           <button 
             type="button" 
-            onClick={handleFinishSetup}
-            disabled={isLoading || !showSuccessMessage}
+            onClick={showSuccessMessage ? handleFinishSetup : handleFinishSetup}
+            disabled={isLoading}
             className={buttonStyle}
           >
-            {isLoading ? 'Saving...' : (showSuccessMessage ? 'Start Scanning' : 'Finish Setup')}
+            {isLoading ? 'Saving...' : (showSuccessMessage ? 'Start Scanning Menus' : 'Finish Setup')}
           </button>
         </div>
     </OnboardingLayout>
