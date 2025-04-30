@@ -50,6 +50,14 @@ export default function OnboardingHealthCheck() {
   const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading
   const [error, setError] = useState<string>('');
 
+  // --- Validation Logic ---
+  const isConditionsValid = selectedConditions.length > 0 && 
+                            (!selectedConditions.includes('Other') || otherConditionText.trim() !== '');
+  const isAvoidancesValid = selectedAvoidances.length > 0 &&
+                            (!selectedAvoidances.includes('Other') || otherAvoidanceText.trim() !== '');
+  const isStepValid = isConditionsValid && isAvoidancesValid;
+  // ---
+
   // Fetch user session and pre-fill
   useEffect(() => {
     const fetchUserAndData = async () => {
@@ -155,20 +163,18 @@ export default function OnboardingHealthCheck() {
       setError('User session not found.');
       return;
     }
-    if (selectedConditions.length === 0) {
+    if (!isConditionsValid) {
         setError('Please select applicable health conditions or \'None of these\'.');
+        if (selectedConditions.includes('Other') && !otherConditionText.trim()) {
+           setError('Please specify other health condition.');
+        }
         return;
     }
-    if (selectedAvoidances.length === 0) {
+    if (!isAvoidancesValid) {
         setError('Please select foods to avoid or \'None\'.');
-        return;
-    }
-    if (selectedConditions.includes('Other') && !otherConditionText.trim()) {
-        setError('Please specify other health condition.');
-        return;
-    }
-    if (selectedAvoidances.includes('Other') && !otherAvoidanceText.trim()) {
-        setError('Please specify other food to avoid.');
+         if (selectedAvoidances.includes('Other') && !otherAvoidanceText.trim()) {
+           setError('Please specify other food to avoid.');
+        }
         return;
     }
 
@@ -283,12 +289,12 @@ export default function OnboardingHealthCheck() {
             </p>
         )}
 
-        {/* CTA Button */}
+        {/* CTA Button - Apply validation to disabled prop */}
         <div className="pt-4">
           <button 
             type="button" 
             onClick={handleNext}
-            disabled={isLoading}
+            disabled={isLoading || !isStepValid} // Use the combined validation state
             className={buttonStyle}
           >
             {isLoading ? 'Saving...' : 'Next'}
