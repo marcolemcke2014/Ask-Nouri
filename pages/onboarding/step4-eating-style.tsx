@@ -167,7 +167,11 @@ export default function OnboardingEatingStyle() {
       }
 
       console.log('[Onboarding Eating Style] Data saved successfully, navigating...');
-      router.push('/home');
+      
+      // Use window.location for a full page navigation to ensure clean routing
+      window.location.href = '/home';
+      // As a fallback in case there's an issue with the above
+      // router.push('/home');
 
     } catch (err: any) {
       console.error('[Onboarding Eating Style] Save and navigate failed:', err);

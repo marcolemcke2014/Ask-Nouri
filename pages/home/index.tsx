@@ -25,20 +25,26 @@ export default function HomePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Check for authenticated user
   useEffect(() => {
     const checkUser = async () => {
       setIsLoading(true);
       try {
+        console.log('Home page: Checking authentication status');
         const { data } = await supabase.auth.getSession();
         if (!data.session?.user) {
+          console.log('Home page: No authenticated user, redirecting to login');
           router.push('/auth/login');
           return;
         }
+        console.log('Home page: User authenticated, setting user state');
         setUser(data.session.user as User);
       } catch (error) {
-        console.error("Auth error:", error);
+        console.error("Home page: Auth error:", error);
+        // Add a fallback UI for authentication errors
+        setError('Authentication error. Please try logging in again.');
       } finally {
         setIsLoading(false);
       }
@@ -119,6 +125,13 @@ export default function HomePage() {
               </div>
             </div>
         </div>
+
+        {/* Error message if any */}
+        {error && (
+          <div className="max-w-md mx-auto mt-6 p-4 bg-red-800/30 border border-red-500/30 rounded-lg text-red-200 text-sm text-center">
+            {error}
+          </div>
+        )}
       </main>
 
       {/* Footer menu */}
