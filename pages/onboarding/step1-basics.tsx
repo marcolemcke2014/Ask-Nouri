@@ -7,6 +7,14 @@ import { User } from '@supabase/supabase-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import { Minus, Plus } from 'lucide-react';
 import PillButton from '../../components/onboarding/PillButton';
+// Revert import path back to alias
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"; 
 
 // --- Styles ---
 const labelStyle = "block text-xs font-normal text-off-white/90 mb-1.5";
@@ -127,8 +135,8 @@ export default function OnboardingBasics() {
     setWeightUnit(unit);
   };
   
-  const handleGenderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setGender(e.target.value);
+  const handleGenderChange = (value: string) => {
+      setGender(value);
       setError('');
   };
   const handleHabitToggle = (habit: string) => {
@@ -261,25 +269,31 @@ export default function OnboardingBasics() {
             </div>
           </div>
 
-          {/* Gender */}
-          <div className="relative">
-            <label htmlFor="gender" className={labelStyle}>Gender</label>
-            <select
-              id="gender"
-              value={gender}
-              onChange={handleGenderChange}
-              className={selectStyle}
-              required
+          {/* Gender - Using Shadcn Select */}
+          <div>
+            <label htmlFor="gender-trigger" className={labelStyle}>Gender</label> 
+            <Select 
+                value={gender} 
+                onValueChange={handleGenderChange} // Use onValueChange
+                required
             >
-              <option value="" disabled>Select your gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Non-binary">Non-binary</option>
-              <option value="Prefer not to say">Prefer not to say</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 z-10">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-            </div>
+              <SelectTrigger 
+                  id="gender-trigger"
+                  // Apply input styles to the trigger button
+                  className={`${inputStyle} text-left justify-start [&>span]:text-gray-400/80 data-[placeholder]:font-normal`}
+                  aria-label="Select gender"
+              >
+                {/* Use SelectValue for placeholder and selected value display */}
+                <SelectValue placeholder="Select your gender" />
+              </SelectTrigger>
+              {/* Dropdown Content - can be further styled if needed */}
+              <SelectContent>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+                <SelectItem value="Non-binary">Non-binary</SelectItem>
+                <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Add Divider */}
