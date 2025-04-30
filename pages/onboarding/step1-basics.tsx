@@ -53,7 +53,7 @@ const ALL_HABITS = [
     'Mostly Sitting', 'Moderately Active', 'Very Sporty', 
     'Often Rushed', 'Flexible Schedule', 
     'Irregular Eating', 'Often Stressed', 'Low Energy', 
-    'Eat Out Often', 'Night Owl / Shift Worker', 
+    'Eat Out Often', 'Night Owl',
     'None'
 ];
 
