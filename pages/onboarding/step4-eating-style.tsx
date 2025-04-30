@@ -43,11 +43,12 @@ export default function OnboardingEatingStyle() {
   const [foodDislikes, setFoodDislikes] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
 
   // --- Validation --- 
   const isStyleValid = selectedStyles.length > 0 && 
                        (!selectedStyles.includes('Other') || otherStyleText.trim() !== '');
+  // Show success message as soon as valid selections are made
+  const shouldShowSuccess = isStyleValid;
   // ---
 
   // Fetch user session and pre-fill
@@ -114,7 +115,6 @@ export default function OnboardingEatingStyle() {
           newState.push(style);
         }
       }
-      // REMOVED setShowSuccessMessage logic from here
       return newState;
     });
   };
@@ -123,23 +123,21 @@ export default function OnboardingEatingStyle() {
     router.push('/onboarding/step3-health-check');
   };
 
-  const handleFinishSetup = async () => {
+  // Combined function that saves data first, then navigates
+  const handleSaveAndNavigate = async () => {
     if (!user) {
         setError('User session not found.');
         return;
     }
-    // Use validation state for checks
-    if (!isStyleValid) {
-        setError('Please select an eating style or choose \'No strict rules\'.');
-        if (selectedStyles.includes('Other') && !otherStyleText.trim()) {
-            setError('Please specify other eating style.');
-        }
+    
+    // Check for "Other" without text
+    if (selectedStyles.includes('Other') && !otherStyleText.trim()) {
+        setError('Please specify other eating style.');
         return;
     }
     
     setError('');
     setIsLoading(true);
-    setShowSuccessMessage(false); // Ensure success message is hidden during save attempt
     
     const stylesToSave = selectedStyles.map(s => s === 'Other' ? `Other: ${otherStyleText.trim()}` : s);
     const goalsUpdateData = {
@@ -153,7 +151,7 @@ export default function OnboardingEatingStyle() {
     };
 
     try {
-      console.log('[Onboarding Eating Style] Final update for user:', user.id);
+      console.log('[Onboarding Eating Style] Saving and navigating for user:', user.id);
       const [goalsUpsertResult, profileUpdateResult] = await Promise.all([
           supabase.from('user_goals_and_diets').upsert({ user_id: user.id, ...goalsUpdateData }, { onConflict: 'user_id' }),
           supabase.from('user_profile').update(profileUpdateData).eq('id', user.id)
@@ -168,21 +166,15 @@ export default function OnboardingEatingStyle() {
           throw profileUpdateResult.error; 
       }
 
-      console.log('[Onboarding Eating Style] Data updated successfully, showing success message.');
-      setShowSuccessMessage(true); // SET SUCCESS MESSAGE HERE
+      console.log('[Onboarding Eating Style] Data saved successfully, navigating...');
+      router.push('/scan/index');
 
     } catch (err: any) {
-      console.error('[Onboarding Eating Style] Update failed:', err);
+      console.error('[Onboarding Eating Style] Save and navigate failed:', err);
       setError(err.message || 'Failed to save preferences.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Separate function to navigate after success
-  const handleNavigateToApp = () => {
-      console.log('[Onboarding] Navigating to app...');
-      router.push('/scan/index');
   };
 
   if (isLoading && !user) {
@@ -201,13 +193,13 @@ export default function OnboardingEatingStyle() {
           Any diet you're aiming for?
         </h2>
         
-        {error && !showSuccessMessage && (
+        {error && (
             <div className={errorBoxStyle}>
               {error}
             </div>
         )}
        
-        <div className={`flex flex-wrap gap-2 mb-6 justify-center ${showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {EATING_STYLES.map((style) => (
              <div key={style} className="flex items-center space-x-2">
                 <PillButton
@@ -228,9 +220,9 @@ export default function OnboardingEatingStyle() {
           ))}
         </div>
         
-        <hr className={`border-off-white/30 my-6 ${showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}`} />
+        <hr className="border-off-white/30 my-6" />
         
-        <div className={showSuccessMessage ? 'opacity-50 pointer-events-none' : ''}>
+        <div>
             <h2 id="dislikes-label" className="text-lg sm:text-xl font-light text-center mb-4 text-off-white">Foods or ingredients you strongly dislike?</h2>
             <textarea
               id="dislikes"
@@ -244,22 +236,23 @@ export default function OnboardingEatingStyle() {
         </div>
 
         {/* Container for success message AND button, managing space between them */}
-        <div className="pt-6"> {/* Reduced padding here, success box margin will handle space */} 
-            {/* Success Message appears here now */}
-            {showSuccessMessage && (
+        <div className="pt-6">
+            {/* Success Message appears based on validity not previous save */}
+            {shouldShowSuccess && (
                  <div className={successBoxStyle}>
                     <CheckCircle size={18} className="mr-2 flex-shrink-0"/>
                     <span>{firstName ? `${firstName}, everything` : 'Everything'} is set up! Let's start scanning.</span>
                 </div>
             )}
-            {/* Button always rendered, but state controls action/text */}
+            
+            {/* Button always calls combined save and navigate function */}
             <button 
               type="button" 
-              onClick={showSuccessMessage ? handleNavigateToApp : handleFinishSetup}
-              disabled={isLoading || (!showSuccessMessage && !isStyleValid)} 
+              onClick={handleSaveAndNavigate}
+              disabled={isLoading || !isStyleValid}
               className={buttonStyle}
             >
-              {isLoading ? 'Saving...' : (showSuccessMessage ? 'Start Scanning Menus' : 'Finish Setup')}
+              {isLoading ? 'Saving...' : (shouldShowSuccess ? 'Start Scanning Menus' : 'Finish Setup')}
             </button>
         </div>
     </OnboardingLayout>

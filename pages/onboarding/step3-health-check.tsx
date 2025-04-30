@@ -285,7 +285,7 @@ export default function OnboardingHealthCheck() {
         {/* Safety Note Moved Here - Above Button */}
         {showSafetyNote && (
             <p className="text-sm text-green-200 text-center bg-green-800/30 rounded p-2 mb-4">
-                We'll make sure your meals are safe and supportive for your condition.
+                Thanks! We'll aim to tailor meal suggestions that align with your conditions
             </p>
         )}
 
