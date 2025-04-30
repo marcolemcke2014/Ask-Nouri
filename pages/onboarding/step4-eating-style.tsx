@@ -144,26 +144,31 @@ export default function OnboardingEatingStyle() {
       eating_styles: stylesToSave.length > 0 ? stylesToSave : null,
       updated_at: new Date().toISOString(),
     };
+    
+    // Update profile data with both flag names for compatibility
     const profileUpdateData = {
+        id: user.id, // Include ID for upsert
         food_dislikes: foodDislikes.trim() || null,
         onboarding_complete: true,
+        onboarded: true, // Add this to match your database column
         updated_at: new Date().toISOString(),
     };
 
     try {
       console.log('[Onboarding Eating Style] Saving and navigating for user:', user.id);
-      const [goalsUpsertResult, profileUpdateResult] = await Promise.all([
+      const [goalsUpsertResult, profileUpsertResult] = await Promise.all([
           supabase.from('user_goals_and_diets').upsert({ user_id: user.id, ...goalsUpdateData }, { onConflict: 'user_id' }),
-          supabase.from('user_profile').update(profileUpdateData).eq('id', user.id)
+          // Use upsert instead of update to ensure the record exists
+          supabase.from('user_profile').upsert(profileUpdateData, { onConflict: 'id' })
       ]);
 
       if (goalsUpsertResult.error) {
           console.error('[Onboarding Eating Style] Supabase goals upsert error:', goalsUpsertResult.error);
           throw goalsUpsertResult.error; 
       }
-      if (profileUpdateResult.error) {
-           console.error('[Onboarding Eating Style] Supabase profile update error:', profileUpdateResult.error);
-          throw profileUpdateResult.error; 
+      if (profileUpsertResult.error) {
+           console.error('[Onboarding Eating Style] Supabase profile upsert error:', profileUpsertResult.error);
+          throw profileUpsertResult.error; 
       }
 
       console.log('[Onboarding Eating Style] Data saved successfully, navigating...');
