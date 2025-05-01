@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '@/lib/supabase';
-import { User, History, Home, ScanLine, ChevronLeft } from 'lucide-react';
+import { User, History, Home, ScanLine, ChevronLeft, HelpCircle } from 'lucide-react';
 import ScanScreen from '@/components/screens/ScanScreen';
 
 // Define user type
@@ -80,25 +80,36 @@ export default function HomePage() {
   // Show scanner view when activated
   if (showScanner) {
     return (
-      <div className="min-h-screen flex flex-col bg-black font-['Poppins',sans-serif] text-off-white">
+      <div className="min-h-screen flex flex-col bg-black font-['Poppins',sans-serif] text-off-white relative">
         <Head>
           <title>NutriFlow - Scan</title>
         </Head>
 
-        {/* Back Button */}
+        {/* Back Button Overlay */}
         <button 
           onClick={handleBackToHome}
-          className="absolute top-4 left-4 z-50 p-2 rounded-full bg-black/50 text-white"
+          className="absolute top-4 left-4 z-30 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
           aria-label="Back to home"
         >
           <ChevronLeft size={24} />
         </button>
         
-        <ScanScreen />
+        {/* Help Button Overlay */}
+        <button 
+          onClick={() => {/* Add help modal logic here */}}
+          className="absolute top-4 right-4 z-30 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+          aria-label="Help"
+        >
+          <HelpCircle size={20} /> 
+        </button>
         
-        {/* Footer stays consistent */}
+        {/* Render ScanScreen component with user name */}
+        <ScanScreen userName={user?.user_metadata?.full_name}/>
+        
+        {/* Footer stays persistent */} 
         <footer className="sticky bottom-0 left-0 right-0 bg-[#0A4923]/80 backdrop-blur-sm border-t border-off-white/15 py-2 px-2 z-50">
           <nav className="flex justify-around items-center max-w-md mx-auto">
+            {/* Home button */}
             <button
               onClick={handleBackToHome} 
               className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
@@ -106,6 +117,7 @@ export default function HomePage() {
               <Home size={20} />
               <span className="mt-1">Home</span>
             </button>
+            {/* Scan button (active) */}
             <button
               onClick={() => {}} // Already in scan view
               className="flex flex-col items-center text-xs p-2 rounded-md text-off-white font-medium" // Active state
@@ -113,6 +125,7 @@ export default function HomePage() {
               <ScanLine size={20} />
               <span className="mt-1">Scan</span>
             </button>
+            {/* History button */}
             <button
               onClick={() => router.push('/history/index')}
               className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
@@ -120,6 +133,7 @@ export default function HomePage() {
               <History size={20} />
               <span className="mt-1">History</span>
             </button>
+            {/* Profile button */}
             <button
               onClick={() => router.push('/profile/index')}
               className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
