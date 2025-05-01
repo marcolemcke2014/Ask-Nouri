@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '@/lib/supabase';
-import { User, History, Home, ScanLine, ChevronLeft, HelpCircle } from 'lucide-react';
+import { User, History, Home, ScanLine, HelpCircle } from 'lucide-react';
 import ScanScreen from '@/components/screens/ScanScreen';
 
 // Define user type
@@ -20,14 +20,17 @@ interface User {
 const buttonPrimaryStyle = "w-full h-12 rounded-lg bg-[#34A853] text-off-white font-normal hover:bg-[#2c9247] transition-colors flex items-center justify-center shadow-md text-sm";
 const buttonSecondaryStyle = "w-full h-12 rounded-lg bg-off-white/20 border border-off-white/30 hover:bg-off-white/30 text-off-white font-normal flex items-center justify-center shadow-md text-sm transition-colors";
 const cardStyle = "bg-off-white/20 backdrop-blur-xl rounded-2xl border border-off-white/15 shadow-xl p-5";
+const footerStyle = "sticky bottom-0 left-0 right-0 bg-[#0A4923]/80 backdrop-blur-sm border-t border-off-white/15 py-2 px-2 z-50";
+const footerNavItemStyle = "flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors";
+const footerNavItemActiveStyle = "flex flex-col items-center text-xs p-2 rounded-md text-off-white font-medium";
+const iconButtonStyle = "absolute top-4 right-4 z-30 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors";
 // ---
 
 export default function HomePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showScanner, setShowScanner] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Check for authenticated user
   useEffect(() => {
@@ -45,8 +48,7 @@ export default function HomePage() {
         setUser(data.session.user as User);
       } catch (error) {
         console.error("Home page: Auth error:", error);
-        // Add a fallback UI for authentication errors
-        setError('Authentication error. Please try logging in again.');
+        setAuthError('Authentication error. Please try logging in again.');
       } finally {
         setIsLoading(false);
       }
@@ -54,16 +56,6 @@ export default function HomePage() {
     
     checkUser();
   }, [router]);
-
-  // Toggle scanner view
-  const handleStartScan = () => {
-    setShowScanner(true);
-  };
-
-  // Return to home view
-  const handleBackToHome = () => {
-    setShowScanner(false);
-  };
 
   // Loading state
   if (isLoading) {
@@ -77,168 +69,66 @@ export default function HomePage() {
     );
   }
 
-  // Show scanner view when activated
-  if (showScanner) {
-    return (
-      <div className="min-h-screen flex flex-col bg-black font-['Poppins',sans-serif] text-off-white relative">
-        <Head>
-          <title>NutriFlow - Scan</title>
-        </Head>
-
-        {/* Back Button Overlay */}
-        <button 
-          onClick={handleBackToHome}
-          className="absolute top-4 left-4 z-30 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
-          aria-label="Back to home"
-        >
-          <ChevronLeft size={24} />
-        </button>
-        
-        {/* Help Button Overlay */}
-        <button 
-          onClick={() => {/* Add help modal logic here */}}
-          className="absolute top-4 right-4 z-30 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
-          aria-label="Help"
-        >
-          <HelpCircle size={20} /> 
-        </button>
-        
-        {/* Render ScanScreen component with user name */}
-        <ScanScreen userName={user?.user_metadata?.full_name}/>
-        
-        {/* Footer stays persistent */} 
-        <footer className="sticky bottom-0 left-0 right-0 bg-[#0A4923]/80 backdrop-blur-sm border-t border-off-white/15 py-2 px-2 z-50">
-          <nav className="flex justify-around items-center max-w-md mx-auto">
-            {/* Home button */}
-            <button
-              onClick={handleBackToHome} 
-              className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
-            >
-              <Home size={20} />
-              <span className="mt-1">Home</span>
-            </button>
-            {/* Scan button (active) */}
-            <button
-              onClick={() => {}} // Already in scan view
-              className="flex flex-col items-center text-xs p-2 rounded-md text-off-white font-medium" // Active state
-            >
-              <ScanLine size={20} />
-              <span className="mt-1">Scan</span>
-            </button>
-            {/* History button */}
-            <button
-              onClick={() => router.push('/history/index')}
-              className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
-            >
-              <History size={20} />
-              <span className="mt-1">History</span>
-            </button>
-            {/* Profile button */}
-            <button
-              onClick={() => router.push('/profile/index')}
-              className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
-            >
-              <User size={20} />
-              <span className="mt-1">Profile</span>
-            </button>
-          </nav>
-        </footer>
+  // Authentication Error State
+  if (authError) {
+     return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#14532D] to-[#0A4923] p-4">
+        <div className="max-w-md mx-auto p-6 bg-red-800/30 border border-red-500/30 rounded-lg text-red-200 text-center shadow-lg">
+          <h2 className="text-xl font-medium mb-3">Authentication Error</h2>
+          <p className="text-sm mb-4">{authError}</p>
+          <button 
+            onClick={() => router.push('/auth/login')}
+            className="px-4 py-2 bg-[#34A853] text-white rounded-lg text-sm hover:bg-[#2c9247] transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
       </div>
     );
   }
-
-  // Home view (default)
+  
+  // Render Scanner Interface Directly
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#14532D] to-[#0A4923] font-['Poppins',sans-serif] text-off-white">
+    <div className="min-h-screen flex flex-col bg-black font-['Poppins',sans-serif] text-off-white relative">
       <Head>
-        <title>NutriFlow - Home</title>
+        <title>NutriFlow - Scan Menu</title>
       </Head>
 
-      <main className="flex-grow flex flex-col px-4 py-6 sm:py-10"> 
-        {/* Header */}
-        <header className="flex justify-between items-center mb-8 w-full max-w-md mx-auto">
-          <h1 className="text-2xl font-light">NutriFlow</h1>
-          <button
-            onClick={() => router.push('/profile/index')}
-            className="p-2 rounded-full text-off-white hover:bg-white/10 transition-colors"
-            aria-label="Profile"
-          >
-            <User size={24} />
-          </button>
-        </header>
-
-        {/* Content Area */} 
-        <div className="flex-grow flex flex-col justify-center items-center w-full max-w-md mx-auto">
-            {/* Personal message card */}
-            <div className={`${cardStyle} w-full mb-8`}>
-              <h2 className="text-xl font-medium mb-2">Hello{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ''}!</h2>
-              <p className="text-off-white/80 text-sm">
-                Ready to find the healthiest menu options? Scan a restaurant menu to get personalized nutritional insights.
-              </p>
-            </div>
-
-            {/* Main Scan Action */}
-            <div className="text-center mb-10">
-              <div className="mb-6 text-6xl">📷</div>
-              <h2 className="text-2xl font-light mb-4">Scan a Menu</h2>
-              <p className="text-off-white/80 text-sm mb-10">
-                Point your camera at a restaurant menu to get instant nutritional insights.
-              </p>
-              
-              {/* Buttons */}
-              <div className="w-full space-y-4 max-w-xs mx-auto">
-                <button
-                  onClick={handleStartScan}
-                  className={buttonPrimaryStyle}
-                >
-                  Start Camera
-                </button>
-                
-                <button
-                  onClick={() => router.push('/history/index')}
-                  className={buttonSecondaryStyle}
-                >
-                  View Scan History
-                </button>
-              </div>
-            </div>
-        </div>
-
-        {/* Error message if any */}
-        {error && (
-          <div className="max-w-md mx-auto mt-6 p-4 bg-red-800/30 border border-red-500/30 rounded-lg text-red-200 text-sm text-center">
-            {error}
-          </div>
-        )}
-      </main>
-
-      {/* Footer menu */}
-      <footer className="sticky bottom-0 left-0 right-0 bg-[#0A4923]/80 backdrop-blur-sm border-t border-off-white/15 py-2 px-2 z-50">
+      {/* Help Button Overlay */}
+      <button 
+        onClick={() => {/* Add help modal logic here */}}
+        className={iconButtonStyle}
+        aria-label="Help"
+      >
+        <HelpCircle size={20} /> 
+      </button>
+      
+      {/* Render ScanScreen component with user name */}
+      <ScanScreen userName={user?.user_metadata?.full_name}/>
+      
+      {/* Footer stays persistent */} 
+      <footer className={footerStyle}>
         <nav className="flex justify-around items-center max-w-md mx-auto">
+          {/* Home/Scan button (active) */}
           <button
-            onClick={() => {}} // Already on home 
-            className="flex flex-col items-center text-xs p-2 rounded-md text-off-white font-medium" // Active for home
-          >
-            <Home size={20} />
-            <span className="mt-1">Home</span>
-          </button>
-          <button
-            onClick={handleStartScan}
-            className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
+            onClick={() => {}} // Already on scan page
+            className={footerNavItemActiveStyle} 
           >
             <ScanLine size={20} />
             <span className="mt-1">Scan</span>
           </button>
+          {/* History button */}
           <button
             onClick={() => router.push('/history/index')}
-            className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
+            className={footerNavItemStyle}
           >
             <History size={20} />
             <span className="mt-1">History</span>
           </button>
+          {/* Profile button */}
           <button
             onClick={() => router.push('/profile/index')}
-            className="flex flex-col items-center text-xs p-2 rounded-md text-off-white/70 hover:bg-white/10 transition-colors"
+            className={footerNavItemStyle}
           >
             <User size={20} />
             <span className="mt-1">Profile</span>
